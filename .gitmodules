@@ -1,0 +1,9 @@
+[submodule "ext/tinygltf"]
+	path = ext/tinygltf
+	url = https://github.com/phoohow/tinygltf.git
+[submodule "ext/stb"]
+	path = ext/stb
+	url = https://github.com/phoohow/stb.git
+[submodule "ext/acre"]
+	path = ext/acre
+	url = https://github.com/phoohow/acre.git
