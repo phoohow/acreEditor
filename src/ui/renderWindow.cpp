@@ -256,7 +256,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
 void RenderWindow::createRenderer()
 {
     m_swapchain = rdr::createSwapchain(m_deviceMgr, (void*)(winId()), g_ratio * width(), g_ratio * height());
-    m_renderer  = rdr::createRenderer(m_renderScene, rdr::RenderPath::rPathGLTF);
+    m_renderer  = rdr::createRenderer(m_renderScene, rdr::RenderPath::rRasterGLTF);
 }
 
 void RenderWindow::initScene()
