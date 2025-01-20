@@ -11,6 +11,7 @@ class MenuBar : QMenuBar
     BaseScene* m_scene = nullptr;
 
     std::function<void()>                            m_flushFrame;
+    std::function<void()>                            m_flushState;
     std::function<void(const std::string& fileName)> m_saveFrame;
 
     QMenu*   m_menu_file;
@@ -47,6 +48,8 @@ public:
     auto getMenuBar() { return static_cast<QMenuBar*>(this); }
 
     void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
+
+    void setFlushStateCallBack(std::function<void()> func) { m_flushState = func; }
 
     void setSaveFrameCallBack(std::function<void(const std::string& fileName)> func) { m_saveFrame = func; }
 

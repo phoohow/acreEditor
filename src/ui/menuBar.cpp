@@ -99,6 +99,7 @@ void MenuBar::onOpenScene()
     {
         m_scene->loadGLTF(fileName);
         m_scene->createScene();
+        m_flushState();
         m_flushFrame();
     }
 }

@@ -50,6 +50,10 @@ int runEditor(int argc, char* argv[])
     // BottomBar
     auto bottomBar = new BottomBar(window->getScene());
     bottomBar->setFlushFrameCallBack(flushFrameFunc);
+    auto flushStateFunc = [bottomBar]() {
+        bottomBar->onStateTabChanged();
+    };
+    menuBar->setFlushStateCallBack(flushStateFunc);
 
     auto hSplitter = new QSplitter(Qt::Horizontal);
     hSplitter->addWidget(container);

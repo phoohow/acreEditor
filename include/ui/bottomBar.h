@@ -35,6 +35,8 @@ public:
 
     void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
 
+    void onStateTabChanged();
+
 private:
     void initState();
     void initCmd();
@@ -42,7 +44,6 @@ private:
 
     void onUpdateTab();
 
-    void onStateTabChanged();
     void onCmdTabChanged();
     void onLogTabChanged();
     void updateStateInfo();
