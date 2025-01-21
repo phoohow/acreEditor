@@ -242,6 +242,7 @@ void MaterialWidget::updateProperties()
 
 void MaterialWidget::onUpdateAlpha()
 {
+    if (!m_material) return;
     auto value        = m_lineEdit_alpha->text();
     m_material->alpha = value.toFloat();
 
@@ -253,6 +254,7 @@ void MaterialWidget::onUpdateAlpha()
 
 void MaterialWidget::onUpdateEmissive()
 {
+    if (!m_material) return;
     auto r = m_lineEdit_emissive_r->text();
     auto g = m_lineEdit_emissive_g->text();
     auto b = m_lineEdit_emissive_b->text();
@@ -267,6 +269,7 @@ void MaterialWidget::onUpdateEmissive()
 
 void MaterialWidget::onUpdateNormalMap()
 {
+    if (!m_material) return;
     auto value              = m_lineEdit_normalMap->text();
     m_material->normalIndex = value.toFloat();
 
@@ -276,6 +279,7 @@ void MaterialWidget::onUpdateNormalMap()
 
 void MaterialWidget::onUpdateEmissiveMap()
 {
+    if (!m_material) return;
     auto value                = m_lineEdit_emissiveMap->text();
     m_material->emissionIndex = value.toFloat();
 
@@ -355,6 +359,7 @@ void MaterialWidget::onUpdateBaseColor()
 
 void MaterialWidget::onUpdateRoughness()
 {
+    if (!m_material) return;
     auto value = m_lineEdit_roughness->text();
     switch (m_material->surfaceModel)
     {
@@ -386,6 +391,7 @@ void MaterialWidget::onUpdateRoughness()
 
 void MaterialWidget::onUpdateMetallic()
 {
+    if (!m_material) return;
     auto value = m_lineEdit_metal->text();
     switch (m_material->surfaceModel)
     {
@@ -417,6 +423,7 @@ void MaterialWidget::onUpdateMetallic()
 
 void MaterialWidget::onUpdateBaseColorMap()
 {
+    if (!m_material) return;
     auto value = m_lineEdit_baseColorMap->text();
     switch (m_material->surfaceModel)
     {
@@ -448,6 +455,7 @@ void MaterialWidget::onUpdateBaseColorMap()
 
 void MaterialWidget::onUpdateMetalRoughMap()
 {
+    if (!m_material) return;
     auto value = m_lineEdit_metalRoughMap->text();
     switch (m_material->surfaceModel)
     {

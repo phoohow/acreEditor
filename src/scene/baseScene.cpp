@@ -92,8 +92,4 @@ void BaseScene::clearHDR()
     for (auto index : m_textureExts)
         m_scene->removeTexture(index);
     m_textureExts.resize(0);
-
-    for (auto index : m_lightExts)
-        m_scene->removeLight(index);
-    m_lightExts.resize(0);
 }

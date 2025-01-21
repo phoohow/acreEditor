@@ -170,15 +170,13 @@ void GLTFScene::loadGLTF(const std::string& fileName)
 
 void GLTFScene::loadHDR(const std::string& fileName)
 {
-    clearHDR();
-
     int  width;
     int  height;
     int  channels;
     int  desired = 4;
     auto hdrData = stbi_loadf(fileName.c_str(), &width, &height, &channels, desired);
 
-    auto image     = std::make_shared<acre::Image>();
+    auto image     = acre::createImage();
     image->name    = "hdrTexture";
     image->data    = (hdrData);
     image->width   = width;
@@ -186,17 +184,19 @@ void GLTFScene::loadHDR(const std::string& fileName)
     image->format  = desired == 3 ? acre::ImageFormat::RGB32 : acre::ImageFormat::RGBA32;
     image->mipmaps = log2(width >= height ? width : height);
     auto imageID   = m_scene->create(image);
-    m_imageExts.emplace_back(imageID);
 
-    auto texture   = std::make_shared<acre::Texture>();
+    auto texture   = acre::createTexture();
     texture->image = imageID;
     auto textureID = m_scene->create(texture);
-    m_textureExts.emplace_back(textureID);
 
     auto light = std::make_shared<acre::HDRLight>();
     light->id  = textureID;
     m_scene->setHDRLight(light);
     m_scene->enableHDR();
+
+    clearHDR();
+    m_imageExts.emplace_back(imageID);
+    m_textureExts.emplace_back(textureID);
 }
 
 void GLTFScene::saveFrame(const std::string& fileName, acre::Pixels* pixels)

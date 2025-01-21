@@ -25,7 +25,6 @@ protected:
 
     std::vector<acre::TextureID> m_textureExts;
     std::vector<acre::ImageID>   m_imageExts;
-    std::vector<acre::LightID>   m_lightExts;
 
     uint32_t m_width  = 1;
     uint32_t m_height = 1;
