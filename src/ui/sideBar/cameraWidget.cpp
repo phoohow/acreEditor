@@ -36,6 +36,25 @@ void CameraWidget::initUI()
     connect(m_lineEdit_eye_y, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateEye);
     connect(m_lineEdit_eye_z, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateEye);
 
+    QHBoxLayout* hbox_target = new QHBoxLayout();
+    m_label_target           = new QLabel("target:");
+    m_label_target->setFixedWidth(90);
+    m_lineEdit_target_x = new QLineEdit("0.0");
+    m_lineEdit_target_x->setValidator(new QDoubleValidator());
+    m_lineEdit_target_y = new QLineEdit("0.0");
+    m_lineEdit_target_y->setValidator(new QDoubleValidator());
+    m_lineEdit_target_z = new QLineEdit("0.0");
+    m_lineEdit_target_z->setValidator(new QDoubleValidator());
+    hbox_target->addWidget(m_label_target);
+    hbox_target->addWidget(m_lineEdit_target_x);
+    hbox_target->addWidget(m_lineEdit_target_y);
+    hbox_target->addWidget(m_lineEdit_target_z);
+    hbox_target->setSpacing(5);
+    m_layout->addLayout(hbox_target);
+    connect(m_lineEdit_target_x, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateTarget);
+    connect(m_lineEdit_target_y, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateTarget);
+    connect(m_lineEdit_target_z, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateTarget);
+
     QHBoxLayout* hbox_fov = new QHBoxLayout();
     m_label_fov           = new QLabel("fov:");
     m_label_fov->setFixedWidth(90);
@@ -97,6 +116,17 @@ void CameraWidget::onUpdateEye()
     auto z = m_lineEdit_eye_z->text();
 
     m_camera->setPosition(acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat()));
+    m_flushFrame();
+}
+
+void CameraWidget::onUpdateTarget()
+{
+    auto x = m_lineEdit_target_x->text();
+    auto y = m_lineEdit_target_y->text();
+    auto z = m_lineEdit_target_z->text();
+
+    auto target = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
+    m_camera->lookAt(m_camera->getPosition(), target);
     m_flushFrame();
 }
 

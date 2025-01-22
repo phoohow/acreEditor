@@ -6,7 +6,8 @@
 #include <tinygltf/tiny_gltf.h>
 #include <acre/render/renderer.h>
 
-static constexpr double M_PI = 3.14159265358979;
+static constexpr double M_PI  = 3.14159265358979;
+static constexpr float  g_fov = 90;
 
 template <typename T>
 static auto vec3ToFloat3(T& vec)
@@ -74,7 +75,7 @@ static auto toImageFormat(int component, int bits)
 template <typename Camera, typename Box, typename Direction>
 static void setCameraView(Camera camera, Box box, Direction dir)
 {
-    auto fov      = 45.0f;
+    auto fov      = g_fov;
     auto radius   = acre::math::length(box.diagonal()) * 0.5f;
     auto distance = radius / sinf(acre::math::radians(fov * 0.5f));
     camera->lookAt(box.center() + dir * distance, box.center());
@@ -497,10 +498,20 @@ void GLTFScene::createTransform()
             affine *= acre::math::translation(vec3ToFloat3(node.translation));
         }
 
-        auto transform    = acre::createTransform();
-        transform->affine = affine;
-        transform->matrix = acre::math::affineToHomogeneous(affine);
-        m_transforms.emplace_back(m_scene->create(transform));
+        if (!node.matrix.empty())
+        {
+            auto transform    = acre::createTransform();
+            transform->matrix = vec16ToFloat4x4(node.matrix);
+            transform->affine = acre::math::homogeneousToAffine(transform->matrix);
+            m_transforms.emplace_back(m_scene->create(transform));
+        }
+        else
+        {
+            auto transform    = acre::createTransform();
+            transform->affine = affine;
+            transform->matrix = acre::math::affineToHomogeneous(affine);
+            m_transforms.emplace_back(m_scene->create(transform));
+        }
     }
 
     for (int nodeIndex = 0; nodeIndex < m_model->nodes.size(); ++nodeIndex)
@@ -519,7 +530,7 @@ void GLTFScene::createTransform()
 void GLTFScene::setCamera()
 {
     auto camera = m_scene->getMainCamera();
-    auto fov    = 45.0f;
+    auto fov    = g_fov;
     auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
     camera->perspective(fov, float(m_width) / float(m_height), radius * 0.1, 100000.0f);
 
@@ -564,7 +575,7 @@ void GLTFScene::resize(uint32_t width, uint32_t height)
     m_width  = width;
     m_height = height;
 
-    auto fov        = 45.0f;
+    auto fov        = g_fov;
     auto mainCamera = m_scene->getMainCamera();
     if (!mainCamera)
         return;

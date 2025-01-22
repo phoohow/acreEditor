@@ -19,6 +19,10 @@ class CameraWidget : public QWidget
     QLineEdit*   m_lineEdit_eye_x;
     QLineEdit*   m_lineEdit_eye_y;
     QLineEdit*   m_lineEdit_eye_z;
+    QLabel*      m_label_target;
+    QLineEdit*   m_lineEdit_target_x;
+    QLineEdit*   m_lineEdit_target_y;
+    QLineEdit*   m_lineEdit_target_z;
     QLabel*      m_label_fov;
     QLineEdit*   m_lineEdit_fov;
     QLabel*      m_label_near;
@@ -41,6 +45,7 @@ private:
     void initUI();
 
     void onUpdateEye();
+    void onUpdateTarget();
     void onUpdateFov();
     void onUpdateNear();
     void onUpdateFar();
