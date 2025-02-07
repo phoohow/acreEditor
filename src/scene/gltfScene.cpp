@@ -7,7 +7,7 @@
 #include <acre/render/renderer.h>
 
 static constexpr double M_PI  = 3.14159265358979;
-static constexpr float  g_fov = 90;
+static constexpr float  g_fov = 60;
 
 template <typename T>
 static auto vec3ToFloat3(T& vec)

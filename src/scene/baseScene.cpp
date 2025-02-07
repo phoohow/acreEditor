@@ -7,7 +7,7 @@ BaseScene::BaseScene(acre::Scene* scene) :
 {
     createCamera();
     createDirectionLight();
-    createPointLight();
+    // createPointLight();
 }
 
 BaseScene::~BaseScene()
