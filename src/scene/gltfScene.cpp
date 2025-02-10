@@ -236,6 +236,13 @@ void GLTFScene::createMaterial()
         material->emissionIndex = mat.emissiveTexture.index != -1 ? m_textures[mat.emissiveTexture.index] : -1;
 
         const auto& exts = mat.extensions;
+
+        if (exts.find("KHR_materials_ior") != exts.end())
+        {
+            const auto& ior = exts.find("KHR_materials_ior");
+            material->ior   = ior->second.Get("ior").GetNumberAsDouble();
+        }
+
         if (exts.find("KHR_materials_anisotropy") != exts.end())
         {
             material->surfaceModel = acre::MaterialSurfaceModel::Anisotropy;
@@ -343,6 +350,44 @@ void GLTFScene::createMaterial()
             material->alpha                = value;
             // TODO: test code, complete it later
             material->alphaIndex = mat.pbrMetallicRoughness.baseColorTexture.index;
+
+            acre::VolumeStandard volume;
+            volume.transmission = transmissionFactor.GetNumberAsDouble();
+            if (transmission->second.Has("transmissionTexture"))
+            {
+                const auto& transmissionTexture = transmission->second.Get("transmissionTexture");
+                volume.transmissionIndex        = transmissionTexture.GetNumberAsInt();
+            }
+
+            const auto& volumeExt = exts.find("KHR_materials_volume");
+            if (volumeExt != exts.end())
+            {
+                const auto& thicknessFactor = volumeExt->second.Get("thicknessFactor");
+                volume.thickness            = thicknessFactor.GetNumberAsDouble();
+
+                if (volumeExt->second.Has("thicknessTexture"))
+                {
+                    const auto& thicknessTexture = volumeExt->second.Get("thicknessTexture");
+                    volume.thicknessIndex        = thicknessTexture.GetNumberAsInt();
+                }
+
+                if (volumeExt->second.Has("attenuationDistance"))
+                {
+                    const auto& attenuationDistance = volumeExt->second.Get("attenuationDistance");
+                    volume.attenuationDistance      = attenuationDistance.GetNumberAsDouble();
+                }
+
+                if (volumeExt->second.Has("attenuationColor"))
+                {
+                    const auto& attenuationColor = volumeExt->second.Get("attenuationColor");
+                    volume.attenuationColor      = acre::math::float3(attenuationColor.Get(0).GetNumberAsDouble(),
+                                                                      attenuationColor.Get(1).GetNumberAsDouble(),
+                                                                      attenuationColor.Get(2).GetNumberAsDouble());
+                }
+            }
+
+            material->volume    = volume;
+            material->useVolume = true;
         }
 
         if (mat.alphaMode == "OPAQUE" || mat.alphaMode == "MASK")
