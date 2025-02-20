@@ -244,7 +244,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
     pixels.format = acre::ImageFormat::SRGBA8;
 
     m_scene->resize(pixels.width, pixels.height);
-    m_renderer->render(&pixels, 4096);
+    m_renderer->render(&pixels, 2048);
     m_scene->saveFrame(fileName, &pixels);
 
     delete[] pixels.data;
