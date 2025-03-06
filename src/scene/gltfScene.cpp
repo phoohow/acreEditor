@@ -243,6 +243,53 @@ void GLTFScene::createMaterial()
             material->ior   = ior->second.Get("ior").GetNumberAsDouble();
         }
 
+        if (exts.find("KHR_materials_clearcoat") != exts.end())
+        {
+            material->useClearcoat               = true;
+            const auto& clearcoat                = exts.find("KHR_materials_clearcoat");
+            const auto& clearcoatFactor          = clearcoat->second.Get("clearcoatFactor");
+            material->clearcoat                  = clearcoatFactor.GetNumberAsDouble();
+            const auto& clearcoatRoughnessFactor = clearcoat->second.Get("clearcoatRoughnessFactor");
+            material->clearcoatRoughness         = clearcoatRoughnessFactor.GetNumberAsDouble();
+            if (clearcoat->second.Has("clearcoatTexture"))
+            {
+                const auto& clearcoatTexture = clearcoat->second.Get("clearcoatTexture");
+                material->clearcoatIndex     = clearcoatTexture.Get("index").GetNumberAsInt();
+            }
+            if (clearcoat->second.Has("clearcoatRoughnessTexture"))
+            {
+                const auto& clearcoatRoughnessTexture = clearcoat->second.Get("clearcoatRoughnessTexture");
+                material->clearcoatRoughnessIndex     = clearcoatRoughnessTexture.Get("index").GetNumberAsInt();
+            }
+            if (clearcoat->second.Has("clearcoatNormalTexture"))
+            {
+                const auto& clearcoatNormalTexture = clearcoat->second.Get("clearcoatNormalTexture");
+                material->clearcoatNormalIndex     = clearcoatNormalTexture.Get("index").GetNumberAsInt();
+            }
+        }
+
+        if (exts.find("KHR_materials_sheen") != exts.end())
+        {
+            material->useSheen               = true;
+            const auto& sheen                = exts.find("KHR_materials_sheen");
+            const auto& sheenColorFactor     = sheen->second.Get("sheenColorFactor");
+            material->sheenColor             = acre::math::float3(sheenColorFactor.Get(0).GetNumberAsDouble(),
+                                                                  sheenColorFactor.Get(1).GetNumberAsDouble(),
+                                                                  sheenColorFactor.Get(2).GetNumberAsDouble());
+            const auto& sheenRoughnessFactor = sheen->second.Get("sheenRoughnessFactor");
+            material->sheenRoughness         = sheenRoughnessFactor.GetNumberAsDouble();
+            if (sheen->second.Has("sheenColorTexture"))
+            {
+                const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
+                material->sheenColorIndex     = sheenColorTexture.Get("index").GetNumberAsInt();
+            }
+            if (sheen->second.Has("sheenRoughnessTexture"))
+            {
+                const auto& sheenRoughnessTexture = sheen->second.Get("sheenRoughnessTexture");
+                material->sheenRoughnessIndex     = sheenRoughnessTexture.Get("index").GetNumberAsInt();
+            }
+        }
+
         if (exts.find("KHR_materials_anisotropy") != exts.end())
         {
             material->surfaceModel = acre::MaterialSurfaceModel::Anisotropy;
@@ -271,7 +318,7 @@ void GLTFScene::createMaterial()
             if (anisotropy->second.Has("anisotropyTexture"))
             {
                 const auto& anisotropyTexture = anisotropy->second.Get("anisotropyTexture");
-                surface.anisotropyIndex       = anisotropyTexture.GetNumberAsInt();
+                surface.anisotropyIndex       = anisotropyTexture.Get("index").GetNumberAsInt();
             }
 
             material->surface = surface;
@@ -298,7 +345,7 @@ void GLTFScene::createMaterial()
             if (iridescence->second.Has("iridescenceTexture"))
             {
                 const auto& iridescenceTexture = iridescence->second.Get("iridescenceTexture");
-                surface.iridescenceIndex       = iridescenceTexture.GetNumberAsInt();
+                surface.iridescenceIndex       = iridescenceTexture.Get("index").GetNumberAsInt();
             }
             if (iridescence->second.Has("iridescenceIor"))
             {
@@ -318,7 +365,7 @@ void GLTFScene::createMaterial()
             if (iridescence->second.Has("iridescenceThicknessTexture"))
             {
                 const auto& iridescenceThicknessTexture = iridescence->second.Get("iridescenceThicknessTexture");
-                surface.iridescenceThicknessIndex       = iridescenceThicknessTexture.GetNumberAsInt();
+                surface.iridescenceThicknessIndex       = iridescenceThicknessTexture.Get("index").GetNumberAsInt();
             }
 
             material->surface = surface;
@@ -356,7 +403,7 @@ void GLTFScene::createMaterial()
             if (transmission->second.Has("transmissionTexture"))
             {
                 const auto& transmissionTexture = transmission->second.Get("transmissionTexture");
-                volume.transmissionIndex        = transmissionTexture.GetNumberAsInt();
+                volume.transmissionIndex        = transmissionTexture.Get("index").GetNumberAsInt();
             }
 
             const auto& volumeExt = exts.find("KHR_materials_volume");
@@ -368,7 +415,7 @@ void GLTFScene::createMaterial()
                 if (volumeExt->second.Has("thicknessTexture"))
                 {
                     const auto& thicknessTexture = volumeExt->second.Get("thicknessTexture");
-                    volume.thicknessIndex        = thicknessTexture.GetNumberAsInt();
+                    volume.thicknessIndex        = thicknessTexture.Get("index").GetNumberAsInt();
                 }
 
                 if (volumeExt->second.Has("attenuationDistance"))
