@@ -396,7 +396,9 @@ void GLTFScene::createMaterial()
             const auto& value              = transmissionFactor.GetNumberAsDouble();
             material->alpha                = value;
             // TODO: test code, complete it later
-            material->alphaIndex = mat.pbrMetallicRoughness.baseColorTexture.index;
+            material->alphaIndex = mat.pbrMetallicRoughness.baseColorTexture.index != -1 ?
+                m_textures[mat.pbrMetallicRoughness.baseColorTexture.index] :
+                -1;
 
             acre::VolumeStandard volume;
             volume.transmission = transmissionFactor.GetNumberAsDouble();

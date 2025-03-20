@@ -10,15 +10,18 @@ class Swapchain;
 class DeviceMgr;
 class Renderer;
 class Scene;
+struct RasterConfig;
 } // namespace acre
 
 class BaseScene;
 class RenderWindow : public QWindow
 {
-    acre::DeviceMgr* m_deviceMgr   = nullptr;
-    acre::Swapchain* m_swapchain   = nullptr;
-    acre::Scene*     m_renderScene = nullptr;
-    acre::Renderer*  m_renderer    = nullptr;
+    acre::DeviceMgr*    m_deviceMgr    = nullptr;
+    acre::Swapchain*    m_swapchain    = nullptr;
+    acre::Scene*        m_renderScene  = nullptr;
+    acre::Renderer*     m_renderer     = nullptr;
+    acre::RasterConfig* m_renderConfig = nullptr;
+
 
     QPointF m_mousePosition;
     bool    m_enableRotate = false;

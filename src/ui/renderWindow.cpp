@@ -35,6 +35,8 @@ RenderWindow::RenderWindow() :
     m_renderScene = acre::createScene(m_deviceMgr, srcDir, dstDir);
 #endif
 
+    m_renderConfig = new acre::RasterConfig;
+
     initScene();
 }
 
@@ -222,7 +224,7 @@ void RenderWindow::keyReleaseEvent(QKeyEvent* event)
 void RenderWindow::render()
 {
     if (width() == 0 || height() == 0) return;
-    m_renderer->render(m_swapchain);
+    m_renderer->render(m_swapchain, (void*)m_renderConfig);
 }
 
 void RenderWindow::saveFrame(const std::string& fileName)
@@ -244,7 +246,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
     pixels.format = acre::ImageFormat::RGBA8;
 
     m_scene->resize(pixels.width, pixels.height);
-    m_renderer->render(&pixels, 2048);
+    m_renderer->render(&pixels, (void*)m_renderConfig, 2048);
     m_scene->saveFrame(fileName, &pixels);
 
     delete[] pixels.data;
