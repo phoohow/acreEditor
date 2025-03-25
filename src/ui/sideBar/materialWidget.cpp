@@ -164,18 +164,20 @@ void MaterialWidget::updateProperties()
     if (!m_material) return;
     updateType();
 
+    auto& model = std::get<acre::StandardModel>(m_material->model);
+
     // Common
-    if (m_material->normalIndex != -1)
-        m_lineEdit_normalMap->setText(QString::number(m_material->normalIndex));
+    if (model.normalIndex != -1)
+        m_lineEdit_normalMap->setText(QString::number(model.normalIndex));
     else
         m_lineEdit_normalMap->setText("-1");
 
-    auto emission = m_material->emission;
+    auto emission = model.emission;
     m_lineEdit_emissive_r->setText(QString::number(emission.x));
     m_lineEdit_emissive_g->setText(QString::number(emission.y));
     m_lineEdit_emissive_b->setText(QString::number(emission.z));
-    if (m_material->emissionIndex != -1)
-        m_lineEdit_emissiveMap->setText(QString::number(m_material->emissionIndex));
+    if (model.emissionIndex != -1)
+        m_lineEdit_emissiveMap->setText(QString::number(model.emissionIndex));
     else
         m_lineEdit_emissiveMap->setText("-1");
 
@@ -186,38 +188,16 @@ void MaterialWidget::updateProperties()
     float              roughness;
     float              metallic;
     uint32_t           metalRoughIndex;
-    switch (m_material->surfaceModel)
+    switch (m_material->type)
     {
-        case acre::MaterialSurfaceModel::Standard:
+        case acre::MaterialModelType::Standard:
         {
-            auto& surface   = std::get<acre::SurfaceStandard>(m_material->surface);
-            baseColor       = surface.baseColor;
-            baseColorIndex  = surface.baseColorIndex;
-            roughness       = surface.roughness;
-            metallic        = surface.metallic;
-            metalRoughIndex = surface.metalRoughIndex;
-            break;
-        }
-        case acre::MaterialSurfaceModel::Anisotropy:
-        {
-            auto& surface   = std::get<acre::SurfaceAnisotropy>(m_material->surface);
-            baseColor       = surface.baseColor;
-            baseColorIndex  = surface.baseColorIndex;
-            roughness       = surface.roughness;
-            metallic        = surface.metallic;
-            metalRoughIndex = surface.metalRoughIndex;
-            // TODO: anisotropy
-            break;
-        }
-        case acre::MaterialSurfaceModel::Iridescence:
-        {
-            auto& surface   = std::get<acre::SurfaceIrridescence>(m_material->surface);
-            baseColor       = surface.baseColor;
-            baseColorIndex  = surface.baseColorIndex;
-            roughness       = surface.roughness;
-            metallic        = surface.metallic;
-            metalRoughIndex = surface.metalRoughIndex;
-            // TODO: iridescence
+            auto& model     = std::get<acre::StandardModel>(m_material->model);
+            baseColor       = model.baseColor;
+            baseColorIndex  = model.baseColorIndex;
+            roughness       = model.roughness;
+            metallic        = model.metallic;
+            metalRoughIndex = model.metalRoughIndex;
             break;
         }
     }
@@ -255,13 +235,16 @@ void MaterialWidget::onUpdateAlpha()
 void MaterialWidget::onUpdateEmissive()
 {
     if (!m_material) return;
+
     auto r = m_lineEdit_emissive_r->text();
     auto g = m_lineEdit_emissive_g->text();
     auto b = m_lineEdit_emissive_b->text();
 
-    m_material->emission.x = r.toFloat();
-    m_material->emission.y = g.toFloat();
-    m_material->emission.z = b.toFloat();
+    auto& model       = std::get<acre::StandardModel>(m_material->model);
+    model.useEmission = true;
+    model.emission.x  = r.toFloat();
+    model.emission.y  = g.toFloat();
+    model.emission.z  = b.toFloat();
 
     m_scene->updateMaterial(m_materialID);
     m_flushFrame();
@@ -270,8 +253,10 @@ void MaterialWidget::onUpdateEmissive()
 void MaterialWidget::onUpdateNormalMap()
 {
     if (!m_material) return;
-    auto value              = m_lineEdit_normalMap->text();
-    m_material->normalIndex = value.toFloat();
+    auto  value = m_lineEdit_normalMap->text();
+    auto& model = std::get<acre::StandardModel>(m_material->model);
+    // model.normalMapScale    = 1.0f;
+    model.normalIndex = value.toFloat();
 
     m_scene->updateMaterial(m_materialID);
     m_flushFrame();
@@ -280,8 +265,9 @@ void MaterialWidget::onUpdateNormalMap()
 void MaterialWidget::onUpdateEmissiveMap()
 {
     if (!m_material) return;
-    auto value                = m_lineEdit_emissiveMap->text();
-    m_material->emissionIndex = value.toFloat();
+    auto  value         = m_lineEdit_emissiveMap->text();
+    auto& model         = std::get<acre::StandardModel>(m_material->model);
+    model.emissionIndex = value.toFloat();
 
     m_scene->updateMaterial(m_materialID);
     m_flushFrame();
@@ -289,29 +275,13 @@ void MaterialWidget::onUpdateEmissiveMap()
 
 void MaterialWidget::updateType()
 {
-    switch (m_material->surfaceModel)
+    switch (m_material->type)
     {
-        case acre::MaterialSurfaceModel::Standard:
+        case acre::MaterialModelType::Standard:
             if (m_material->useAlpha())
                 m_comboBox_type->setCurrentIndex(3);
             else
                 m_comboBox_type->setCurrentIndex(0);
-            break;
-
-        case acre::MaterialSurfaceModel::Anisotropy:
-            if (m_material->useAlpha())
-                m_comboBox_type->setCurrentIndex(4);
-            else
-                m_comboBox_type->setCurrentIndex(1);
-            break;
-
-        case acre::MaterialSurfaceModel::Iridescence:
-            if (m_material->useAlpha())
-                m_comboBox_type->setCurrentIndex(5);
-            else
-                m_comboBox_type->setCurrentIndex(2);
-            break;
-        default:
             break;
     }
 }
@@ -323,32 +293,14 @@ void MaterialWidget::onUpdateBaseColor()
     auto g = m_lineEdit_baseColor_g->text();
     auto b = m_lineEdit_baseColor_b->text();
 
-    switch (m_material->surfaceModel)
+    switch (m_material->type)
     {
-        case acre::MaterialSurfaceModel::Standard:
+        case acre::MaterialModelType::Standard:
         {
-            auto& surface       = std::get<acre::SurfaceStandard>(m_material->surface);
-            surface.baseColor.x = r.toFloat();
-            surface.baseColor.y = g.toFloat();
-            surface.baseColor.z = b.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Anisotropy:
-        {
-            auto& surface       = std::get<acre::SurfaceAnisotropy>(m_material->surface);
-            surface.baseColor.x = r.toFloat();
-            surface.baseColor.y = g.toFloat();
-            surface.baseColor.z = b.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Iridescence:
-        {
-            auto& surface       = std::get<acre::SurfaceIrridescence>(m_material->surface);
-            surface.baseColor.x = r.toFloat();
-            surface.baseColor.y = g.toFloat();
-            surface.baseColor.z = b.toFloat();
+            auto& model       = std::get<acre::StandardModel>(m_material->model);
+            model.baseColor.x = r.toFloat();
+            model.baseColor.y = g.toFloat();
+            model.baseColor.z = b.toFloat();
             break;
         }
     }
@@ -361,26 +313,12 @@ void MaterialWidget::onUpdateRoughness()
 {
     if (!m_material) return;
     auto value = m_lineEdit_roughness->text();
-    switch (m_material->surfaceModel)
+    switch (m_material->type)
     {
-        case acre::MaterialSurfaceModel::Standard:
+        case acre::MaterialModelType::Standard:
         {
-            auto& surface     = std::get<acre::SurfaceStandard>(m_material->surface);
-            surface.roughness = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Anisotropy:
-        {
-            auto& surface     = std::get<acre::SurfaceAnisotropy>(m_material->surface);
-            surface.roughness = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Iridescence:
-        {
-            auto& surface     = std::get<acre::SurfaceIrridescence>(m_material->surface);
-            surface.roughness = value.toFloat();
+            auto& model     = std::get<acre::StandardModel>(m_material->model);
+            model.roughness = value.toFloat();
             break;
         }
     }
@@ -393,26 +331,12 @@ void MaterialWidget::onUpdateMetallic()
 {
     if (!m_material) return;
     auto value = m_lineEdit_metal->text();
-    switch (m_material->surfaceModel)
+    switch (m_material->type)
     {
-        case acre::MaterialSurfaceModel::Standard:
+        case acre::MaterialModelType::Standard:
         {
-            auto& surface    = std::get<acre::SurfaceStandard>(m_material->surface);
-            surface.metallic = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Anisotropy:
-        {
-            auto& surface    = std::get<acre::SurfaceAnisotropy>(m_material->surface);
-            surface.metallic = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Iridescence:
-        {
-            auto& surface    = std::get<acre::SurfaceIrridescence>(m_material->surface);
-            surface.metallic = value.toFloat();
+            auto& model    = std::get<acre::StandardModel>(m_material->model);
+            model.metallic = value.toFloat();
             break;
         }
     }
@@ -425,26 +349,12 @@ void MaterialWidget::onUpdateBaseColorMap()
 {
     if (!m_material) return;
     auto value = m_lineEdit_baseColorMap->text();
-    switch (m_material->surfaceModel)
+    switch (m_material->type)
     {
-        case acre::MaterialSurfaceModel::Standard:
+        case acre::MaterialModelType::Standard:
         {
-            auto& surface          = std::get<acre::SurfaceStandard>(m_material->surface);
-            surface.baseColorIndex = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Anisotropy:
-        {
-            auto& surface          = std::get<acre::SurfaceAnisotropy>(m_material->surface);
-            surface.baseColorIndex = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Iridescence:
-        {
-            auto& surface          = std::get<acre::SurfaceIrridescence>(m_material->surface);
-            surface.baseColorIndex = value.toFloat();
+            auto& model          = std::get<acre::StandardModel>(m_material->model);
+            model.baseColorIndex = value.toFloat();
             break;
         }
     }
@@ -457,26 +367,12 @@ void MaterialWidget::onUpdateMetalRoughMap()
 {
     if (!m_material) return;
     auto value = m_lineEdit_metalRoughMap->text();
-    switch (m_material->surfaceModel)
+    switch (m_material->type)
     {
-        case acre::MaterialSurfaceModel::Standard:
+        case acre::MaterialModelType::Standard:
         {
-            auto& surface           = std::get<acre::SurfaceStandard>(m_material->surface);
-            surface.metalRoughIndex = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Anisotropy:
-        {
-            auto& surface           = std::get<acre::SurfaceAnisotropy>(m_material->surface);
-            surface.metalRoughIndex = value.toFloat();
-            break;
-        }
-
-        case acre::MaterialSurfaceModel::Iridescence:
-        {
-            auto& surface           = std::get<acre::SurfaceIrridescence>(m_material->surface);
-            surface.metalRoughIndex = value.toFloat();
+            auto& model           = std::get<acre::StandardModel>(m_material->model);
+            model.metalRoughIndex = value.toFloat();
             break;
         }
     }

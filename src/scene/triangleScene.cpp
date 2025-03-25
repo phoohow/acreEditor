@@ -105,20 +105,20 @@ void TriangleScene::createMaterial()
     m_textures.emplace_back(m_scene->create(texture));
 
     {
-        acre::SurfaceStandard standard;
+        acre::StandardModel standard;
         standard.baseColor      = {1.0f, 0.0f, 0.0f};
         standard.baseColorIndex = m_textures[0];
         auto material           = std::make_shared<acre::Material>();
-        material->surfaceModel  = acre::MaterialSurfaceModel::Standard;
+        material->type  = acre::MaterialModelType::Standard;
         m_materials.emplace_back(m_scene->create(material));
     }
 
     {
-        acre::SurfaceStandard standard;
+        acre::StandardModel standard;
         standard.baseColor      = {0.0f, 1.0f, 0.0f};
         standard.baseColorIndex = m_textures[1];
         auto material           = std::make_shared<acre::Material>();
-        material->surfaceModel  = acre::MaterialSurfaceModel::Standard;
+        material->type  = acre::MaterialModelType::Standard;
         m_materials.emplace_back(m_scene->create(material));
     }
 }
