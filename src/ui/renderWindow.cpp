@@ -7,6 +7,7 @@
 #include <acre/render/swapchain.h>
 #include <acre/render/scene.h>
 #include <acre/render/renderer.h>
+#include <acre/render/config.h>
 
 #include <QKeyEvent>
 #include <QWheelEvent>
@@ -35,7 +36,7 @@ RenderWindow::RenderWindow() :
     m_renderScene = acre::createScene(m_deviceMgr, srcDir, dstDir);
 #endif
 
-    m_renderConfig = new acre::RasterConfig;
+    m_renderConfig = new acre::config::Raster;
 
     initScene();
 }
