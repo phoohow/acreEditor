@@ -20,8 +20,8 @@ void BaseScene::createDirectionLight()
     light->color     = acre::math::float3(1.0, 1.0, 1.0);
     light->direction = acre::math::normalize(acre::math::float3(0, -1, -1));
     light->factor    = 1.0;
+    light->enable    = true;
     m_scene->setSunLight(light);
-    m_scene->enableSunLight();
 }
 
 void BaseScene::createPointLight()
@@ -37,19 +37,48 @@ void BaseScene::createPointLight()
 
 void BaseScene::createCamera()
 {
-    auto camera   = std::make_shared<acre::Camera>();
-    auto cameraID = m_scene->create(camera);
-    m_cameras.emplace_back(cameraID);
+    m_camera = new Camera;
 
-    auto fov = 45.0f;
-    camera->lookAt(acre::math::float3(0.0f, 0.0f, 1.0f), acre::math::float3(0.0f, 0.0f, 0.0f));
-    camera->perspective(fov, 1.0f, 1e-1f, 1e6f);
-    m_scene->setMainCamera(cameraID);
+    auto mainCamera = std::make_shared<acre::Camera>();
+    m_cameraID      = m_scene->create(mainCamera);
+    m_cameras.emplace_back(m_cameraID);
 
-    // auto entity   = std::make_shared<acre::Entity>("camera");
-    // auto entityID = m_scene->create(entity);
-    // m_entities.emplace_back(entityID);
-    // m_scene->create(entityID, cameraID);
+    m_camera->setPosition(acre::math::float3(0.0f, 0.0f, 1.0f));
+    m_camera->setTarget(0.0f);
+    m_camera->setUp(acre::math::float3(0.0f, 1.0f, 0.0f));
+    m_camera->setFOV(45.0f);
+    m_camera->setAspect(1.0f);
+    m_camera->setNear(1e-1f);
+    m_camera->setFar(1e6f);
+
+    swapCamera();
+}
+
+void BaseScene::swapCamera()
+{
+    auto mainCamera      = getMainCamera();
+    mainCamera->position = m_camera->getPosition();
+    mainCamera->target   = m_camera->getTarget();
+    mainCamera->up       = m_camera->getUp();
+
+    if (mainCamera->type == acre::Camera::ProjectType::Perspective)
+    {
+        auto& projection     = std::get<acre::Camera::Perspective>(mainCamera->projection);
+        projection.fov       = m_camera->getFOV();
+        projection.aspect    = m_camera->getAspect();
+        projection.nearPlane = m_camera->getNear();
+        projection.farPlane  = m_camera->getFar();
+    }
+    else
+    {
+        auto& projection     = std::get<acre::Camera::Orthonormal>(mainCamera->projection);
+        projection.nearPlane = m_camera->getNear();
+        projection.farPlane  = m_camera->getFar();
+        // projection.topPlane    = m_camera->getTop();
+        // projection.bottomPlane = m_camera->getBottom();
+        // projection.leftPlane   = m_camera->getLeft();
+        // projection.rightPlane  = m_camera->getRight();
+    }
 }
 
 void BaseScene::clearScene()

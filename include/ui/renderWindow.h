@@ -13,17 +13,21 @@ class Scene;
 namespace config
 {
 struct Raster;
-}
+struct RayTracing;
+struct PathTracing;
+} // namespace config
 } // namespace acre
 
 class BaseScene;
 class RenderWindow : public QWindow
 {
-    acre::DeviceMgr*      m_deviceMgr    = nullptr;
-    acre::Swapchain*      m_swapchain    = nullptr;
-    acre::Scene*          m_renderScene  = nullptr;
-    acre::Renderer*       m_renderer     = nullptr;
-    acre::config::Raster* m_renderConfig = nullptr;
+    acre::DeviceMgr*           m_deviceMgr    = nullptr;
+    acre::Swapchain*           m_swapchain    = nullptr;
+    acre::Scene*               m_renderScene  = nullptr;
+    acre::Renderer*            m_renderer     = nullptr;
+    acre::config::Raster*      m_rasterConfig = nullptr;
+    acre::config::RayTracing*  m_rayConfig    = nullptr;
+    acre::config::PathTracing* m_pathConfig   = nullptr;
 
     QPointF m_mousePosition;
     bool    m_enableRotate = false;

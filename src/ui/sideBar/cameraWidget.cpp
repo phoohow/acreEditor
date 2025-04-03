@@ -94,19 +94,23 @@ void CameraWidget::initUI()
 
 void CameraWidget::updateProperties()
 {
-    auto eye = m_camera->getPosition();
+    const auto& eye = m_camera->position;
     m_lineEdit_eye_x->setText(QString::number(eye.x));
     m_lineEdit_eye_y->setText(QString::number(eye.y));
     m_lineEdit_eye_z->setText(QString::number(eye.z));
 
-    auto fov = m_camera->getFOV();
-    m_lineEdit_fov->setText(QString::number(fov));
+    const auto& target = m_camera->target;
+    m_lineEdit_target_x->setText(QString::number(target.x));
+    m_lineEdit_target_y->setText(QString::number(target.y));
+    m_lineEdit_target_z->setText(QString::number(target.z));
 
-    auto near = m_camera->getNear();
-    m_lineEdit_near->setText(QString::number(near));
-
-    auto far = m_camera->getFar();
-    m_lineEdit_far->setText(QString::number(far));
+    if (m_camera->type == acre::Camera::ProjectType::Perspective)
+    {
+        const auto& projection = std::get<acre::Camera::Perspective>(m_camera->projection);
+        m_lineEdit_fov->setText(QString::number(projection.fov));
+        m_lineEdit_near->setText(QString::number(projection.nearPlane));
+        m_lineEdit_far->setText(QString::number(projection.farPlane));
+    }
 }
 
 void CameraWidget::onUpdateEye()
@@ -115,7 +119,7 @@ void CameraWidget::onUpdateEye()
     auto y = m_lineEdit_eye_y->text();
     auto z = m_lineEdit_eye_z->text();
 
-    m_camera->setPosition(acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat()));
+    m_camera->position = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
     m_flushFrame();
 }
 
@@ -125,8 +129,7 @@ void CameraWidget::onUpdateTarget()
     auto y = m_lineEdit_target_y->text();
     auto z = m_lineEdit_target_z->text();
 
-    auto target = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
-    m_camera->lookAt(m_camera->getPosition(), target);
+    m_camera->target = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
     m_flushFrame();
 }
 
@@ -134,7 +137,12 @@ void CameraWidget::onUpdateFov()
 {
     auto value = m_lineEdit_fov->text();
 
-    m_camera->setFOV(value.toFloat());
+    if (m_camera->type == acre::Camera::ProjectType::Perspective)
+    {
+        auto& projection = std::get<acre::Camera::Perspective>(m_camera->projection);
+        projection.fov   = value.toFloat();
+    }
+
     m_flushFrame();
 }
 
@@ -142,7 +150,12 @@ void CameraWidget::onUpdateNear()
 {
     auto value = m_lineEdit_near->text();
 
-    m_camera->setNear(value.toFloat());
+    if (m_camera->type == acre::Camera::ProjectType::Perspective)
+    {
+        auto& projection     = std::get<acre::Camera::Perspective>(m_camera->projection);
+        projection.nearPlane = value.toFloat();
+    }
+
     m_flushFrame();
 }
 
@@ -150,6 +163,11 @@ void CameraWidget::onUpdateFar()
 {
     auto value = m_lineEdit_far->text();
 
-    m_camera->setFar(value.toFloat());
+    if (m_camera->type == acre::Camera::ProjectType::Perspective)
+    {
+        auto& projection    = std::get<acre::Camera::Perspective>(m_camera->projection);
+        projection.farPlane = value.toFloat();
+    }
+
     m_flushFrame();
 }

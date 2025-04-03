@@ -128,7 +128,7 @@ void SideBar::onUpdateTab()
                 if (findWidgets.empty())
                     m_cameraList->addItem(key);
             }
-            toCameraWidget->setCamera(m_scene->getCamera());
+            toCameraWidget->setCamera(m_scene->getMainCamera());
             toCameraWidget->updateProperties();
 
             break;
@@ -211,7 +211,7 @@ void SideBar::onSelectMainCamera()
         m_scene->setMainCamera(selectedText.toInt());
     }
 
-    toCameraWidget->setCamera(m_scene->getCamera());
+    toCameraWidget->setCamera(m_scene->getMainCamera());
 }
 
 void SideBar::onSelectLight()

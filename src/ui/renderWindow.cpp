@@ -16,8 +16,9 @@
 #include <iostream>
 #include <chrono>
 
-static constexpr float g_ratio       = 1.5f;
-static constexpr float g_rotateSpeed = 100.0f;
+static constexpr float  g_ratio       = 1.5f;
+static constexpr float  g_rotateSpeed = 100.0f;
+static acre::RenderPath g_renderPath  = acre::RenderPath::rRasterGLTF;
 
 RenderWindow::RenderWindow() :
     QWindow()
@@ -36,7 +37,9 @@ RenderWindow::RenderWindow() :
     m_renderScene = acre::createScene(m_deviceMgr, srcDir, dstDir);
 #endif
 
-    m_renderConfig = new acre::config::Raster;
+    m_rasterConfig = new acre::config::Raster;
+    m_rayConfig    = new acre::config::RayTracing;
+    m_pathConfig   = new acre::config::PathTracing;
 
     initScene();
 }
@@ -225,7 +228,12 @@ void RenderWindow::keyReleaseEvent(QKeyEvent* event)
 void RenderWindow::render()
 {
     if (width() == 0 || height() == 0) return;
-    m_renderer->render(m_swapchain, (void*)m_renderConfig);
+    switch (g_renderPath)
+    {
+        case acre::RenderPath::rRasterGLTF: m_renderer->render(m_swapchain, (void*)m_rasterConfig); break;
+        case acre::RenderPath::rRayGLTF: m_renderer->render(m_swapchain, (void*)m_rayConfig); break;
+        case acre::RenderPath::rPathGLTF: m_renderer->render(m_swapchain, (void*)m_pathConfig); break;
+    }
 }
 
 void RenderWindow::saveFrame(const std::string& fileName)
@@ -247,7 +255,12 @@ void RenderWindow::saveFrame(const std::string& fileName)
     pixels.format = acre::ImageFormat::RGBA8;
 
     m_scene->resize(pixels.width, pixels.height);
-    m_renderer->render(&pixels, (void*)m_renderConfig, 2048);
+    switch (g_renderPath)
+    {
+        case acre::RenderPath::rRasterGLTF: m_renderer->render(&pixels, (void*)m_rasterConfig, 2048); break;
+        case acre::RenderPath::rRayGLTF: m_renderer->render(&pixels, (void*)m_rayConfig, 2048); break;
+        case acre::RenderPath::rPathGLTF: m_renderer->render(&pixels, (void*)m_pathConfig, 2048); break;
+    }
     m_scene->saveFrame(fileName, &pixels);
 
     delete[] pixels.data;
@@ -260,11 +273,17 @@ void RenderWindow::saveFrame(const std::string& fileName)
 void RenderWindow::createRenderer()
 {
     m_swapchain = acre::createSwapchain(m_deviceMgr, (void*)(winId()), g_ratio * width(), g_ratio * height());
-    m_renderer  = acre::createRenderer(m_renderScene, acre::RenderPath::rRasterGLTF);
+    m_renderer  = acre::createRenderer(m_renderScene, g_renderPath);
 }
 
 void RenderWindow::initScene()
 {
     // m_scene = new TriangleScene(m_renderScene);
     m_scene = new GLTFScene(m_renderScene);
+    switch (g_renderPath)
+    {
+        case acre::RenderPath::rRasterGLTF: m_rasterConfig->camera = m_scene->getCameraID(); break;
+        case acre::RenderPath::rRayGLTF: m_rayConfig->camera = m_scene->getCameraID(); break;
+        case acre::RenderPath::rPathGLTF: m_pathConfig->camera = m_scene->getCameraID(); break;
+    }
 }

@@ -109,7 +109,7 @@ void TriangleScene::createMaterial()
         standard.baseColor      = {1.0f, 0.0f, 0.0f};
         standard.baseColorIndex = m_textures[0];
         auto material           = std::make_shared<acre::Material>();
-        material->type  = acre::MaterialModelType::Standard;
+        material->type          = acre::MaterialModelType::Standard;
         m_materials.emplace_back(m_scene->create(material));
     }
 
@@ -118,7 +118,7 @@ void TriangleScene::createMaterial()
         standard.baseColor      = {0.0f, 1.0f, 0.0f};
         standard.baseColorIndex = m_textures[1];
         auto material           = std::make_shared<acre::Material>();
-        material->type  = acre::MaterialModelType::Standard;
+        material->type          = acre::MaterialModelType::Standard;
         m_materials.emplace_back(m_scene->create(material));
     }
 }
@@ -132,10 +132,14 @@ void TriangleScene::createTransform()
 
 void TriangleScene::createCamera()
 {
-    auto camera = std::make_shared<acre::Camera>();
-    camera->lookAt(acre::math::float3(0.0, 0.0, 0.5), acre::math::float3(0.0, 0.0, -1.0));
-    camera->perspective(90, 1, 0.01, 1000);
-    m_cameras.emplace_back(m_scene->create(camera));
+    auto camera          = m_scene->findCamera(m_cameraID);
+    camera->position     = acre::math::float3(0.0, 0.0, 0.5);
+    camera->target       = acre::math::float3(0.0, 0.0, -1.0);
+    auto& projection     = std::get<acre::Camera::Perspective>(camera->projection);
+    projection.fov       = 90;
+    projection.aspect    = 1;
+    projection.nearPlane = 0.01;
+    projection.farPlane  = 1000;
 }
 
 void TriangleScene::registerResource()

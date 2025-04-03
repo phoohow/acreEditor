@@ -72,13 +72,13 @@ static auto toImageFormat(int component, int bits)
     return acre::ImageFormat::RGBA32;
 }
 
-template <typename Camera, typename Box, typename Direction>
-static void setCameraView(Camera camera, Box box, Direction dir)
+static void setCameraView(Camera* camera, acre::math::box3 box, acre::math::float3 dir)
 {
     auto fov      = g_fov;
     auto radius   = acre::math::length(box.diagonal()) * 0.5f;
     auto distance = radius / sinf(acre::math::radians(fov * 0.5f));
-    camera->lookAt(box.center() + dir * distance, box.center());
+    camera->setPosition(box.center() + dir * distance);
+    camera->setTarget(box.center());
     camera->resetYaw();
     camera->resetPitch();
 }
@@ -190,10 +190,10 @@ void GLTFScene::loadHDR(const std::string& fileName)
     texture->image = imageID;
     auto textureID = m_scene->create(texture);
 
-    auto light = std::make_shared<acre::HDRLight>();
-    light->id  = textureID;
+    auto light    = std::make_shared<acre::HDRLight>();
+    light->id     = textureID;
+    light->enable = true;
     m_scene->setHDRLight(light);
-    m_scene->enableHDR();
 
     clearHDR();
     m_imageExts.emplace_back(imageID);
@@ -590,10 +590,26 @@ void GLTFScene::createTransform()
 
 void GLTFScene::setCamera()
 {
-    auto camera = m_scene->getMainCamera();
     auto fov    = g_fov;
     auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-    camera->perspective(fov, float(m_width) / float(m_height), radius * 0.1, 100000.0f);
+
+    auto mainCamera = getMainCamera();
+    if (mainCamera->type == acre::Camera::ProjectType::Perspective)
+    {
+        m_camera->setFOV(fov);
+        m_camera->setAspect(float(m_width) / float(m_height));
+        m_camera->setNear(radius * 0.1);
+        m_camera->setFar(100000.0f);
+    }
+    else
+    {
+        m_camera->setNear(radius * 0.1);
+        m_camera->setFar(100000.0f);
+        // m_camera->setLeft(-radius);
+        // m_camera->setRight(radius);
+        // m_camera->setTop(radius);
+        // m_camera->setBottom(-radius);
+    }
 
     forwardView();
 }
@@ -636,80 +652,108 @@ void GLTFScene::resize(uint32_t width, uint32_t height)
     m_width  = width;
     m_height = height;
 
-    auto fov        = g_fov;
-    auto mainCamera = m_scene->getMainCamera();
-    if (!mainCamera)
-        return;
-
+    auto fov    = g_fov;
     auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-    mainCamera->perspective(fov, float(width) / float(height), radius * 0.1, 100000.0f);
+
+    auto mainCamera = getMainCamera();
+    if (mainCamera->type == acre::Camera::ProjectType::Perspective)
+    {
+        m_camera->setFOV(fov);
+        m_camera->setAspect(float(m_width) / float(m_height));
+        m_camera->setNear(radius * 0.1);
+        m_camera->setFar(100000.0f);
+    }
+    else
+    {
+        m_camera->setNear(radius * 0.1);
+        m_camera->setFar(100000.0f);
+        m_camera->setLeft(-radius);
+        m_camera->setRight(radius);
+        m_camera->setTop(radius);
+        m_camera->setBottom(-radius);
+    }
+
+    swapCamera();
 }
 
 void GLTFScene::cameraMove(acre::math::float3 delta)
 {
-    auto mainCamera = m_scene->getMainCamera();
-    auto radius     = acre::math::length(m_box.diagonal()) * 0.5f;
-    mainCamera->translate(delta * radius * 0.02f);
+    auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
+    m_camera->translate(delta * radius * 0.02f);
+
+    swapCamera();
 }
 
 void GLTFScene::cameraForward()
 {
-    auto mainCamera = m_scene->getMainCamera();
-    auto dir        = mainCamera->getDirection();
+    auto dir = m_camera->getFront();
     cameraMove(dir);
 }
 
 void GLTFScene::cameraBack()
 {
-    auto mainCamera = m_scene->getMainCamera();
-    auto dir        = mainCamera->getDirection();
+    auto dir = m_camera->getFront();
     cameraMove(-dir);
 }
 
 void GLTFScene::cameraRotateY(float degree)
 {
-    auto mainCamera = m_scene->getMainCamera();
-    mainCamera->rotate(0, acre::math::radians(degree));
+    m_camera->rotate(0, acre::math::radians(degree));
+
+    swapCamera();
 }
 
 void GLTFScene::cameraRotateX(float degree)
 {
-    auto mainCamera = m_scene->getMainCamera();
-    mainCamera->rotate(acre::math::radians(degree), 0);
+    m_camera->rotate(acre::math::radians(degree), 0);
+
+    swapCamera();
 }
 
 void GLTFScene::leftView()
 {
-    setCameraView(m_scene->getMainCamera(), m_box, acre::math::float3(1, 0, 0));
-    m_scene->getMainCamera()->rotate(0, M_PI * 1.5);
+    setCameraView(m_camera, m_box, acre::math::float3(1, 0, 0));
+    m_camera->rotate(0, M_PI * 1.5);
+
+    swapCamera();
 }
 
 void GLTFScene::rightView()
 {
-    setCameraView(m_scene->getMainCamera(), m_box, acre::math::float3(-1, 0, 0));
-    m_scene->getMainCamera()->rotate(0, M_PI * 0.5);
+    setCameraView(m_camera, m_box, acre::math::float3(-1, 0, 0));
+    m_camera->rotate(0, M_PI * 0.5);
+
+    swapCamera();
 }
 
 void GLTFScene::forwardView()
 {
-    setCameraView(m_scene->getMainCamera(), m_box, acre::math::float3(0, 0, 1));
-    m_scene->getMainCamera()->rotate(0, M_PI);
+    setCameraView(m_camera, m_box, acre::math::float3(0, 0, 1));
+    m_camera->rotate(0, M_PI);
+
+    swapCamera();
 }
 
 void GLTFScene::backView()
 {
-    setCameraView(m_scene->getMainCamera(), m_box, acre::math::float3(0, 0, -1));
-    m_scene->getMainCamera()->rotate(0, 0);
+    setCameraView(m_camera, m_box, acre::math::float3(0, 0, -1));
+    m_camera->rotate(0, 0);
+
+    swapCamera();
 }
 
 void GLTFScene::topView()
 {
-    setCameraView(m_scene->getMainCamera(), m_box, acre::math::float3(0, 1, 0));
-    m_scene->getMainCamera()->rotate(M_PI * 0.5, 0);
+    setCameraView(m_camera, m_box, acre::math::float3(0, 1, 0));
+    m_camera->rotate(M_PI * 0.5, 0);
+
+    swapCamera();
 }
 
 void GLTFScene::bottomView()
 {
-    setCameraView(m_scene->getMainCamera(), m_box, acre::math::float3(0, -1, 0));
-    m_scene->getMainCamera()->rotate(-M_PI * 0.5, 0);
+    setCameraView(m_camera, m_box, acre::math::float3(0, -1, 0));
+    m_camera->rotate(-M_PI * 0.5, 0);
+
+    swapCamera();
 }

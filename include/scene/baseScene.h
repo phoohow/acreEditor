@@ -1,7 +1,7 @@
 #pragma once
 
 #include <acre/render/scene.h>
-
+#include "camera.h"
 #include <vector>
 
 namespace acre
@@ -25,6 +25,9 @@ protected:
 
     std::vector<acre::TextureID> m_textureExts;
     std::vector<acre::ImageID>   m_imageExts;
+
+    acre::CameraID m_cameraID = -1;
+    Camera*        m_camera;
 
     uint32_t m_width  = 1;
     uint32_t m_height = 1;
@@ -60,8 +63,9 @@ public:
     virtual void saveFrame(const std::string& fileName, acre::Pixels* pixels) {}
 
     auto getCameras() { return m_cameras; }
-    auto getCamera() { return m_scene->getMainCamera(); }
-    void setMainCamera(acre::CameraID cameraID) { m_scene->setMainCamera(cameraID); }
+    auto getCameraID() { return m_cameraID; }
+    auto getMainCamera() { return m_scene->findCamera(m_cameraID); }
+    void setMainCamera(acre::CameraID id) { m_cameraID = id; }
 
     auto getEntityCount() { return m_entities.size(); }
 
@@ -93,6 +97,9 @@ public:
 
     auto getTextureCount() { return m_textures.size(); }
     auto getImageCount() { return m_images.size(); }
+
+protected:
+    void swapCamera();
 
 private:
     void init();
