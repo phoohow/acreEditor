@@ -594,7 +594,7 @@ void GLTFScene::setCamera()
     auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
 
     auto mainCamera = getMainCamera();
-    if (mainCamera->type == acre::Camera::ProjectType::Perspective)
+    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
     {
         m_camera->setFOV(fov);
         m_camera->setAspect(float(m_width) / float(m_height));
@@ -656,7 +656,7 @@ void GLTFScene::resize(uint32_t width, uint32_t height)
     auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
 
     auto mainCamera = getMainCamera();
-    if (mainCamera->type == acre::Camera::ProjectType::Perspective)
+    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
     {
         m_camera->setFOV(fov);
         m_camera->setAspect(float(m_width) / float(m_height));

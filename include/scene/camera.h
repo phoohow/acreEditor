@@ -24,17 +24,17 @@ class Camera
     float m_distance = 0.f;
 
 public:
-    enum class ProjectType
+    enum class ProjectType : uint8_t
     {
-        Perspective,
-        Orthonormal,
+        tPerspective,
+        tOrthonormal,
     };
 
     // Near and far plane value
-    enum class ClipMode
+    enum class ClipMode : uint8_t
     {
-        Regulated,
-        Adaptive,
+        tRegulated,
+        tAdaptive,
     };
 
     void setProjectType(ProjectType type) { m_type = type; }
@@ -77,6 +77,6 @@ public:
     void resetPitch() { m_pitch = 0; }
 
 private:
-    ProjectType m_type     = ProjectType::Perspective;
-    ClipMode    m_clipMode = ClipMode::Regulated;
+    ProjectType m_type     = ProjectType::tPerspective;
+    ClipMode    m_clipMode = ClipMode::tRegulated;
 };

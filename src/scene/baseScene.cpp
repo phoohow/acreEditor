@@ -61,7 +61,7 @@ void BaseScene::swapCamera()
     mainCamera->target   = m_camera->getTarget();
     mainCamera->up       = m_camera->getUp();
 
-    if (mainCamera->type == acre::Camera::ProjectType::Perspective)
+    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
     {
         auto& projection     = std::get<acre::Camera::Perspective>(mainCamera->projection);
         projection.fov       = m_camera->getFOV();
