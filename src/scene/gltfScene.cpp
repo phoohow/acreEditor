@@ -6,9 +6,6 @@
 #include <tinygltf/tiny_gltf.h>
 #include <acre/render/renderer.h>
 
-static constexpr double M_PI  = 3.14159265358979;
-static constexpr float  g_fov = 60;
-
 template <typename T>
 static auto vec3ToFloat3(T& vec)
 {
@@ -72,16 +69,6 @@ static auto toImageFormat(int component, int bits)
     return acre::ImageFormat::RGBA32;
 }
 
-static void setCameraView(Camera* camera, acre::math::box3 box, acre::math::float3 dir)
-{
-    auto fov      = g_fov;
-    auto radius   = acre::math::length(box.diagonal()) * 0.5f;
-    auto distance = radius / sinf(acre::math::radians(fov * 0.5f));
-    camera->setPosition(box.center() + dir * distance);
-    camera->setTarget(box.center());
-    camera->resetYaw();
-    camera->resetPitch();
-}
 
 using namespace tinygltf;
 std::vector<std::vector<uint32_t>> g_index;
@@ -127,7 +114,7 @@ void GLTFScene::createScene()
     createTransform();
 
     registerResource();
-    setCamera();
+    setMainCamera();
 }
 
 void GLTFScene::loadGLTF(const std::string& fileName)
@@ -588,32 +575,6 @@ void GLTFScene::createTransform()
     }
 }
 
-void GLTFScene::setCamera()
-{
-    auto fov    = g_fov;
-    auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-
-    auto mainCamera = getMainCamera();
-    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
-    {
-        m_camera->setFOV(fov);
-        m_camera->setAspect(float(m_width) / float(m_height));
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-    }
-    else
-    {
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-        // m_camera->setLeft(-radius);
-        // m_camera->setRight(radius);
-        // m_camera->setTop(radius);
-        // m_camera->setBottom(-radius);
-    }
-
-    forwardView();
-}
-
 void GLTFScene::registerResource()
 {
     for (int nodeIndex = 0; nodeIndex < m_model->nodes.size(); ++nodeIndex)
@@ -645,115 +606,4 @@ void GLTFScene::registerResource()
             m_scene->createComponent(acre::createComponentDraw(entityID, geometryID, materialID, transformID));
         }
     }
-}
-
-void GLTFScene::resize(uint32_t width, uint32_t height)
-{
-    m_width  = width;
-    m_height = height;
-
-    auto fov    = g_fov;
-    auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-
-    auto mainCamera = getMainCamera();
-    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
-    {
-        m_camera->setFOV(fov);
-        m_camera->setAspect(float(m_width) / float(m_height));
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-    }
-    else
-    {
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-        m_camera->setLeft(-radius);
-        m_camera->setRight(radius);
-        m_camera->setTop(radius);
-        m_camera->setBottom(-radius);
-    }
-
-    swapCamera();
-}
-
-void GLTFScene::cameraMove(acre::math::float3 delta)
-{
-    auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-    m_camera->translate(delta * radius * 0.02f);
-
-    swapCamera();
-}
-
-void GLTFScene::cameraForward()
-{
-    auto dir = m_camera->getFront();
-    cameraMove(dir);
-}
-
-void GLTFScene::cameraBack()
-{
-    auto dir = m_camera->getFront();
-    cameraMove(-dir);
-}
-
-void GLTFScene::cameraRotateY(float degree)
-{
-    m_camera->rotate(0, acre::math::radians(degree));
-
-    swapCamera();
-}
-
-void GLTFScene::cameraRotateX(float degree)
-{
-    m_camera->rotate(acre::math::radians(degree), 0);
-
-    swapCamera();
-}
-
-void GLTFScene::leftView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(1, 0, 0));
-    m_camera->rotate(0, M_PI * 1.5);
-
-    swapCamera();
-}
-
-void GLTFScene::rightView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(-1, 0, 0));
-    m_camera->rotate(0, M_PI * 0.5);
-
-    swapCamera();
-}
-
-void GLTFScene::forwardView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, 0, 1));
-    m_camera->rotate(0, M_PI);
-
-    swapCamera();
-}
-
-void GLTFScene::backView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, 0, -1));
-    m_camera->rotate(0, 0);
-
-    swapCamera();
-}
-
-void GLTFScene::topView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, 1, 0));
-    m_camera->rotate(M_PI * 0.5, 0);
-
-    swapCamera();
-}
-
-void GLTFScene::bottomView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, -1, 0));
-    m_camera->rotate(-M_PI * 0.5, 0);
-
-    swapCamera();
 }

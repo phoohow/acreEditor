@@ -18,7 +18,7 @@
 
 static constexpr float  g_ratio       = 1.5f;
 static constexpr float  g_rotateSpeed = 100.0f;
-static acre::RenderPath g_renderPath  = acre::RenderPath::rRayGLTF;
+static acre::RenderPath g_renderPath  = acre::RenderPath::rRasterGLTF;
 
 RenderWindow::RenderWindow() :
     QWindow()

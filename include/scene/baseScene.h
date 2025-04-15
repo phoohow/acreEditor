@@ -26,8 +26,9 @@ protected:
     std::vector<acre::TextureID> m_textureExts;
     std::vector<acre::ImageID>   m_imageExts;
 
-    acre::CameraID m_cameraID = -1;
-    Camera*        m_camera;
+    acre::math::box3 m_box      = acre::math::box3::empty();
+    acre::CameraID   m_cameraID = -1;
+    Camera*          m_camera   = nullptr;
 
     uint32_t m_width  = 1;
     uint32_t m_height = 1;
@@ -41,20 +42,21 @@ public:
 
     virtual void registerResource() = 0;
 
-    virtual void resize(uint32_t width, uint32_t height) {}
+    void resize(uint32_t width, uint32_t height);
 
-    virtual void cameraMove(acre::math::float3) {}
-    virtual void cameraRotateY(float degree) {}
-    virtual void cameraRotateX(float degree) {}
-    virtual void cameraForward() {}
-    virtual void cameraBack() {}
+    void setMainCamera();
+    void cameraMove(acre::math::float3);
+    void cameraRotateY(float degree);
+    void cameraRotateX(float degree);
+    void cameraForward();
+    void cameraBack();
 
-    virtual void leftView() {}
-    virtual void rightView() {}
-    virtual void forwardView() {}
-    virtual void backView() {}
-    virtual void topView() {}
-    virtual void bottomView() {}
+    void leftView();
+    void rightView();
+    void forwardView();
+    void backView();
+    void topView();
+    void bottomView();
 
     virtual void loadGLTF(const std::string& fileName) {}
     void         clearScene();
