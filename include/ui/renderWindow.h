@@ -21,13 +21,13 @@ struct PathTracing;
 class BaseScene;
 class RenderWindow : public QWindow
 {
-    acre::DeviceMgr*           m_deviceMgr    = nullptr;
-    acre::Swapchain*           m_swapchain    = nullptr;
-    acre::Scene*               m_renderScene  = nullptr;
-    acre::Renderer*            m_renderer     = nullptr;
-    acre::config::Raster*      m_rasterConfig = nullptr;
-    acre::config::RayTracing*  m_rayConfig    = nullptr;
-    acre::config::PathTracing* m_pathConfig   = nullptr;
+    std::unique_ptr<acre::DeviceMgr>           m_deviceMgr    = nullptr;
+    std::unique_ptr<acre::Swapchain>           m_swapchain    = nullptr;
+    std::unique_ptr<acre::Scene>               m_renderScene  = nullptr;
+    std::unique_ptr<acre::Renderer>            m_renderer     = nullptr;
+    std::unique_ptr<acre::config::Raster>      m_rasterConfig = nullptr;
+    std::unique_ptr<acre::config::RayTracing>  m_rayConfig    = nullptr;
+    std::unique_ptr<acre::config::PathTracing> m_pathConfig   = nullptr;
 
     QPointF m_mousePosition;
     bool    m_enableRotate = false;

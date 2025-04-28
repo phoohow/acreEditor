@@ -24,33 +24,27 @@ RenderWindow::RenderWindow() :
     QWindow()
 {
 #if USE_VULKAN
-    m_deviceMgr = acre::createDeviceMgr(acre::DeviceType::rVulkan);
+    m_deviceMgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rVulkan);
 #else
-    m_deviceMgr = acre::createDeviceMgr(acre::DeviceType::rDX12);
+    m_deviceMgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rDX12);
 #endif
 
 #ifndef _DEBUG
-    m_renderScene = acre::createScene(m_deviceMgr, QDir::currentPath().toStdString().c_str());
+    m_renderScene = std::make_unique<acre::Scene>(m_deviceMgr.get(), QDir::currentPath().toStdString().c_str());
 #else
     auto srcDir   = SRC_DIR;
     auto dstDir   = DST_DIR;
-    m_renderScene = acre::createScene(m_deviceMgr, srcDir, dstDir);
+    m_renderScene = std::make_unique<acre::Scene>(m_deviceMgr.get(), srcDir, dstDir);
 #endif
 
-    m_rasterConfig = new acre::config::Raster;
-    m_rayConfig    = new acre::config::RayTracing;
-    m_pathConfig   = new acre::config::PathTracing;
+    m_rasterConfig = std::make_unique<acre::config::Raster>();
+    m_rayConfig    = std::make_unique<acre::config::RayTracing>();
+    m_pathConfig   = std::make_unique<acre::config::PathTracing>();
 
     initScene();
 }
 
-RenderWindow::~RenderWindow()
-{
-    acre::destoryRenderer(m_renderer);
-    acre::destoryScene(m_renderScene);
-    acre::destorySwapchain(m_swapchain);
-    acre::destroyDeviceMgr(m_deviceMgr);
-}
+RenderWindow::~RenderWindow() = default;
 
 void RenderWindow::exposeEvent(QExposeEvent* event)
 {
@@ -230,9 +224,9 @@ void RenderWindow::render()
     if (width() == 0 || height() == 0) return;
     switch (g_renderPath)
     {
-        case acre::RenderPath::rRasterGLTF: m_renderer->render(m_swapchain, (void*)m_rasterConfig); break;
-        case acre::RenderPath::rRayGLTF: m_renderer->render(m_swapchain, (void*)m_rayConfig); break;
-        case acre::RenderPath::rPathGLTF: m_renderer->render(m_swapchain, (void*)m_pathConfig); break;
+        case acre::RenderPath::rRasterGLTF: m_renderer->render(m_swapchain.get(), (void*)m_rasterConfig.get()); break;
+        case acre::RenderPath::rRayGLTF: m_renderer->render(m_swapchain.get(), (void*)m_rayConfig.get()); break;
+        case acre::RenderPath::rPathGLTF: m_renderer->render(m_swapchain.get(), (void*)m_pathConfig.get()); break;
     }
 }
 
@@ -257,9 +251,9 @@ void RenderWindow::saveFrame(const std::string& fileName)
     m_scene->resize(pixels.width, pixels.height);
     switch (g_renderPath)
     {
-        case acre::RenderPath::rRasterGLTF: m_renderer->render(&pixels, (void*)m_rasterConfig, 2048); break;
-        case acre::RenderPath::rRayGLTF: m_renderer->render(&pixels, (void*)m_rayConfig, 2048); break;
-        case acre::RenderPath::rPathGLTF: m_renderer->render(&pixels, (void*)m_pathConfig, 2048); break;
+        case acre::RenderPath::rRasterGLTF: m_renderer->render(&pixels, (void*)m_rasterConfig.get(), 2048); break;
+        case acre::RenderPath::rRayGLTF: m_renderer->render(&pixels, (void*)m_rayConfig.get(), 2048); break;
+        case acre::RenderPath::rPathGLTF: m_renderer->render(&pixels, (void*)m_pathConfig.get(), 2048); break;
     }
     m_scene->saveFrame(fileName, &pixels);
 
@@ -272,14 +266,14 @@ void RenderWindow::saveFrame(const std::string& fileName)
 
 void RenderWindow::createRenderer()
 {
-    m_swapchain = acre::createSwapchain(m_deviceMgr, (void*)(winId()), g_ratio * width(), g_ratio * height());
-    m_renderer  = acre::createRenderer(m_renderScene, g_renderPath);
+    m_swapchain = std::make_unique<acre::Swapchain>(m_deviceMgr.get(), (void*)(winId()), g_ratio * width(), g_ratio * height());
+    m_renderer  = std::make_unique<acre::Renderer>(m_renderScene.get(), g_renderPath);
 }
 
 void RenderWindow::initScene()
 {
     // m_scene = new TriangleScene(m_renderScene);
-    m_scene = new GLTFScene(m_renderScene);
+    m_scene = new GLTFScene(m_renderScene.get());
     switch (g_renderPath)
     {
         case acre::RenderPath::rRasterGLTF: m_rasterConfig->camera = m_scene->getCameraID(); break;
