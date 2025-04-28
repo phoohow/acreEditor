@@ -153,8 +153,8 @@ void TriangleScene::registerResource()
     auto t0 = m_transforms[0];
     auto m0 = m_materials[0];
     auto m1 = m_materials[1];
-    m_scene->createComponent(acre::createComponentDraw(e0, g0, m0, t0));
-    m_scene->createComponent(acre::createComponentDraw(e1, g1, m1, t0));
+    m_scene->createComponentDraw(acre::component::createDraw(e0, g0, m0, t0));
+    m_scene->createComponentDraw(acre::component::createDraw(e1, g1, m1, t0));
 
     auto c0 = m_cameras[0];
 }

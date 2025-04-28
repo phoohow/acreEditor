@@ -603,7 +603,7 @@ void GLTFScene::registerResource()
             const auto& primitive  = mesh.primitives[primitiveIndex];
             auto        materialID = m_materials[primitive.material];
 
-            m_scene->createComponent(acre::createComponentDraw(entityID, geometryID, materialID, transformID));
+            m_scene->createComponentDraw(acre::component::createDraw(entityID, geometryID, materialID, transformID));
         }
     }
 }
