@@ -39,15 +39,15 @@ static auto toImageFormat(int component, int bits)
     {
         switch (bits)
         {
-            case 8:
-                return acre::ImageFormat::RGB8;
-            case 16:
-                return acre::ImageFormat::RGB16;
+            // case 8:
+            //     return acre::Image::Format::RGB8;
+            // case 16:
+            //     return acre::Image::Format::RGB16;
             case 32:
-                return acre::ImageFormat::RGB32;
+                return acre::Image::Format::RGB32_FLOAT;
             default:
                 printf("Unsupport type!\n");
-                return acre::ImageFormat::RGB32;
+                return acre::Image::Format::RGB32_FLOAT;
         }
     }
     else if (component == 4)
@@ -55,18 +55,18 @@ static auto toImageFormat(int component, int bits)
         switch (bits)
         {
             case 8:
-                return acre::ImageFormat::RGBA8;
+                return acre::Image::Format::RGBA8_UNORM;
             case 16:
-                return acre::ImageFormat::RGBA16;
+                return acre::Image::Format::RGBA16_FLOAT;
             case 32:
-                return acre::ImageFormat::RGBA32;
+                return acre::Image::Format::RGBA32_FLOAT;
             default:
                 printf("Unsupport type!\n");
-                return acre::ImageFormat::RGBA32;
+                return acre::Image::Format::RGBA32_FLOAT;
         }
     }
 
-    return acre::ImageFormat::RGBA32;
+    return acre::Image::Format::RGBA32_FLOAT;
 }
 
 
@@ -169,7 +169,7 @@ void GLTFScene::loadHDR(const std::string& fileName)
     image->data    = (hdrData);
     image->width   = width;
     image->height  = height;
-    image->format  = desired == 3 ? acre::ImageFormat::RGB32 : acre::ImageFormat::RGBA32;
+    image->format  = desired == 3 ? acre::Image::Format::RGB32_FLOAT : acre::Image::Format::RGBA32_FLOAT;
     image->mipmaps = log2(width >= height ? width : height);
     auto imageID   = m_scene->create(image);
 

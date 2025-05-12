@@ -246,7 +246,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
     pixels.width  = 1920;
     pixels.height = 1080;
     pixels.data   = new uint32_t[pixels.width * pixels.height];
-    pixels.format = acre::ImageFormat::RGBA8;
+    pixels.format = acre::Image::Format::RGBA8_UNORM;
 
     m_scene->resize(pixels.width, pixels.height);
     switch (g_renderPath)

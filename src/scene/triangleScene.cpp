@@ -79,7 +79,7 @@ void TriangleScene::createMaterial()
     image->data   = (void*)g_image;
     image->width  = 2;
     image->height = 2;
-    image->format = acre::ImageFormat::RGBA8;
+    image->format = acre::Image::Format::RGBA8_UNORM;
     auto imageID  = m_scene->create(image);
     m_images.emplace_back(imageID);
     auto texture   = std::make_shared<acre::Texture>();
@@ -97,7 +97,7 @@ void TriangleScene::createMaterial()
     image->data   = (void*)imgData;
     image->width  = imgWidth;
     image->height = imgHeight;
-    image->format = acre::ImageFormat::RGBA8;
+    image->format = acre::Image::Format::RGBA8_UNORM;
     imageID       = m_scene->create(image);
     m_images.emplace_back(imageID);
     texture        = std::make_shared<acre::Texture>();
