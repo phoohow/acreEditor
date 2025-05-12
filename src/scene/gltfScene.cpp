@@ -217,7 +217,7 @@ void GLTFScene::createMaterial()
     for (const auto& mat : m_model->materials)
     {
         auto material  = acre::createMaterial();
-        material->type = acre::MaterialModelType::Standard;
+        material->type = acre::MaterialModel::mStandard;
         acre::StandardModel model;
         auto                baseColor = vec4ToFloat4(mat.pbrMetallicRoughness.baseColorFactor);
         model.baseColor               = baseColor.xyz();

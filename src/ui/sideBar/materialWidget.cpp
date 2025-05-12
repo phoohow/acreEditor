@@ -190,7 +190,7 @@ void MaterialWidget::updateProperties()
     uint32_t           metalRoughIndex;
     switch (m_material->type)
     {
-        case acre::MaterialModelType::Standard:
+        case acre::MaterialModel::mStandard:
         {
             auto& model     = std::get<acre::StandardModel>(m_material->model);
             baseColor       = model.baseColor;
@@ -277,7 +277,7 @@ void MaterialWidget::updateType()
 {
     switch (m_material->type)
     {
-        case acre::MaterialModelType::Standard:
+        case acre::MaterialModel::mStandard:
             if (m_material->useAlpha())
                 m_comboBox_type->setCurrentIndex(3);
             else
@@ -295,7 +295,7 @@ void MaterialWidget::onUpdateBaseColor()
 
     switch (m_material->type)
     {
-        case acre::MaterialModelType::Standard:
+        case acre::MaterialModel::mStandard:
         {
             auto& model       = std::get<acre::StandardModel>(m_material->model);
             model.baseColor.x = r.toFloat();
@@ -315,7 +315,7 @@ void MaterialWidget::onUpdateRoughness()
     auto value = m_lineEdit_roughness->text();
     switch (m_material->type)
     {
-        case acre::MaterialModelType::Standard:
+        case acre::MaterialModel::mStandard:
         {
             auto& model     = std::get<acre::StandardModel>(m_material->model);
             model.roughness = value.toFloat();
@@ -333,7 +333,7 @@ void MaterialWidget::onUpdateMetallic()
     auto value = m_lineEdit_metal->text();
     switch (m_material->type)
     {
-        case acre::MaterialModelType::Standard:
+        case acre::MaterialModel::mStandard:
         {
             auto& model    = std::get<acre::StandardModel>(m_material->model);
             model.metallic = value.toFloat();
@@ -351,7 +351,7 @@ void MaterialWidget::onUpdateBaseColorMap()
     auto value = m_lineEdit_baseColorMap->text();
     switch (m_material->type)
     {
-        case acre::MaterialModelType::Standard:
+        case acre::MaterialModel::mStandard:
         {
             auto& model          = std::get<acre::StandardModel>(m_material->model);
             model.baseColorIndex = value.toFloat();
@@ -369,7 +369,7 @@ void MaterialWidget::onUpdateMetalRoughMap()
     auto value = m_lineEdit_metalRoughMap->text();
     switch (m_material->type)
     {
-        case acre::MaterialModelType::Standard:
+        case acre::MaterialModel::mStandard:
         {
             auto& model           = std::get<acre::StandardModel>(m_material->model);
             model.metalRoughIndex = value.toFloat();
