@@ -56,20 +56,20 @@ void TriangleScene::createEntity()
 
 void TriangleScene::createGeometry()
 {
-    auto geometry          = std::make_shared<acre::Geometry>();
-    geometry->indexData    = (void*)g_index;
-    geometry->positionData = (void*)g_position;
-    geometry->uvData       = (void*)g_uv;
-    geometry->indexCount   = 6;
-    geometry->vertexCount  = 4;
+    auto geometry                                                        = std::make_shared<acre::Geometry>();
+    geometry->data[acre::GeometryAttr::aIndex]     = (void*)g_index;
+    geometry->data[acre::GeometryAttr::aPosition]  = (void*)g_position;
+    geometry->data[acre::GeometryAttr::aUV1]       = (void*)g_uv;
+    geometry->count[acre::GeometryAttr::aIndex]    = 6;
+    geometry->count[acre::GeometryAttr::aPosition] = 4;
     m_geometrys.emplace_back(m_scene->create(geometry));
 
-    geometry               = std::make_shared<acre::Geometry>();
-    geometry->indexData    = (void*)g_index;
-    geometry->positionData = (void*)g_position;
-    geometry->uvData       = (void*)g_uv;
-    geometry->indexCount   = 6;
-    geometry->vertexCount  = 4;
+    geometry                                                             = std::make_shared<acre::Geometry>();
+    geometry->data[acre::GeometryAttr::aIndex]     = (void*)g_index;
+    geometry->data[acre::GeometryAttr::aPosition]  = (void*)g_position;
+    geometry->data[acre::GeometryAttr::aUV1]       = (void*)g_uv;
+    geometry->count[acre::GeometryAttr::aIndex]    = 6;
+    geometry->count[acre::GeometryAttr::aPosition] = 4;
     m_geometrys.emplace_back(m_scene->create(geometry));
 }
 

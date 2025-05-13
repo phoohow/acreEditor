@@ -76,16 +76,16 @@ void GeometryWidget::setGeometry(acre::GeometryID id)
 void GeometryWidget::updateProperties()
 {
     if (!m_geometry) return;
-    m_checkbox_index->setChecked(m_geometry->indexData != nullptr);
-    m_checkbox_position->setChecked(m_geometry->positionData != nullptr);
-    m_checkbox_uv->setChecked(m_geometry->uvData != nullptr);
-    m_checkbox_normal->setChecked(m_geometry->normalData != nullptr);
-    m_checkbox_tangent->setChecked(m_geometry->tangentData != nullptr);
-    m_checkbox_color->setChecked(m_geometry->vertexColorData != nullptr);
+    m_checkbox_index->setChecked(m_geometry->data[acre::GeometryAttr::aIndex] != nullptr);
+    m_checkbox_position->setChecked(m_geometry->data[acre::GeometryAttr::aPosition] != nullptr);
+    m_checkbox_uv->setChecked(m_geometry->data[acre::GeometryAttr::aUV1] != nullptr);
+    m_checkbox_normal->setChecked(m_geometry->data[acre::GeometryAttr::aNormal] != nullptr);
+    m_checkbox_tangent->setChecked(m_geometry->data[acre::GeometryAttr::aTangent] != nullptr);
+    m_checkbox_color->setChecked(m_geometry->data[static_cast<uint32_t>(acre::GeometryAttr::aVertexColor)] != nullptr);
 
-    auto indexCount = m_geometry->indexCount;
+    auto indexCount = m_geometry->count[acre::GeometryAttr::aIndex];
     m_lineEdit_indexCount->setText(QString::number(indexCount));
 
-    auto vertexCount = m_geometry->vertexCount;
+    auto vertexCount = m_geometry->count[acre::GeometryAttr::aPosition];
     m_lineEdit_vertexCount->setText(QString::number(vertexCount));
 }

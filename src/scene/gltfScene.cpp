@@ -88,7 +88,7 @@ static void appendIndex(acre::GeometryPtr           geometry,
     for (auto i = 0; i < accessor.count; ++i)
         g_index[index][i] = tempVec[i];
 
-    geometry->indexData = g_index[index].data();
+    geometry->data[acre::GeometryAttr::aIndex] = g_index[index].data();
 }
 
 GLTFScene::GLTFScene(acre::Scene* scene) :
@@ -451,11 +451,11 @@ void GLTFScene::createGeometry()
                         appendIndex<double>(geometry, accessor, bufferView, geometryIndex, addr);
                         break;
                     default:
-                        geometry->indexData = addr + bufferView.byteOffset + accessor.byteOffset;
+                        geometry->data[acre::GeometryAttr::aIndex] = addr + bufferView.byteOffset + accessor.byteOffset;
                         break;
                 }
 
-                geometry->indexCount = accessor.count;
+                geometry->count[acre::GeometryAttr::aIndex] = accessor.count;
             }
             if (primitive.attributes.find("POSITION") != primitive.attributes.end())
             {
@@ -467,14 +467,14 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->positionData = addr + bufferView.byteOffset + accessor.byteOffset;
-                geometry->vertexCount  = accessor.count;
+                geometry->data[acre::GeometryAttr::aPosition]  = addr + bufferView.byteOffset + accessor.byteOffset;
+                geometry->count[acre::GeometryAttr::aPosition] = accessor.count;
 
                 // Evaluate object box and scene box
                 acre::math::box3 box = acre::math::box3::empty();
-                for (auto geometryIndex = 0; geometryIndex < geometry->vertexCount; geometryIndex += 3)
+                for (auto geometryIndex = 0; geometryIndex < accessor.count; geometryIndex += 3)
                 {
-                    acre::math::float3* pos = (acre::math::float3*)(geometry->positionData) + geometryIndex;
+                    acre::math::float3* pos = (acre::math::float3*)(geometry->data[acre::GeometryAttr::aPosition]) + geometryIndex;
                     box |= *pos;
                 }
                 geometry->box = box;
@@ -489,7 +489,8 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->uvData = addr + bufferView.byteOffset + accessor.byteOffset;
+                geometry->data[acre::GeometryAttr::aUV1]  = addr + bufferView.byteOffset + accessor.byteOffset;
+                geometry->count[acre::GeometryAttr::aUV1] = accessor.count;
             }
             if (primitive.attributes.find("NORMAL") != primitive.attributes.end())
             {
@@ -501,7 +502,8 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->normalData = addr + bufferView.byteOffset + accessor.byteOffset;
+                geometry->data[acre::GeometryAttr::aNormal]  = addr + bufferView.byteOffset + accessor.byteOffset;
+                geometry->count[acre::GeometryAttr::aNormal] = accessor.count;
             }
             if (primitive.attributes.find("TANGENT") != primitive.attributes.end())
             {
@@ -513,7 +515,8 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->tangentData = addr + bufferView.byteOffset + accessor.byteOffset;
+                geometry->data[acre::GeometryAttr::aTangent]  = addr + bufferView.byteOffset + accessor.byteOffset;
+                geometry->count[acre::GeometryAttr::aTangent] = accessor.count;
             }
 
             auto geometryID = m_scene->create(geometry);
