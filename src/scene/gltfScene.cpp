@@ -189,7 +189,7 @@ void GLTFScene::loadHDR(const std::string& fileName)
 
 void GLTFScene::saveFrame(const std::string& fileName, acre::Pixels* pixels)
 {
-    stbi_write_bmp(fileName.c_str(), pixels->width, pixels->height, 4, (void*)pixels->data);
+    stbi_write_bmp(fileName.c_str(), pixels->desc.width, pixels->desc.height, 4, (void*)pixels->data);
 }
 
 void GLTFScene::createMaterial()

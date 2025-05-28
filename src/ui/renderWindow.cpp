@@ -113,10 +113,10 @@ void RenderWindow::mousePressEvent(QMouseEvent* event)
 
     // Pick operate
     {
-        acre::PickInfo info;
-        info.xPos = m_mousePosition.x() * g_ratio;
-        info.yPos = m_mousePosition.y() * g_ratio;
-        m_renderer->pickPixel(&info);
+        acre::PickUnit info;
+        info.input.xPos = m_mousePosition.x() * g_ratio;
+        info.input.yPos = m_mousePosition.y() * g_ratio;
+        m_renderer->pickTo(&info);
     }
 }
 
@@ -222,12 +222,17 @@ void RenderWindow::keyReleaseEvent(QKeyEvent* event)
 void RenderWindow::render()
 {
     if (width() == 0 || height() == 0) return;
+
+    m_renderer->setupTarget(m_swapchain.get());
+
     switch (g_renderPath)
     {
-        case acre::RenderPath::rRasterGLTF: m_renderer->render(m_swapchain.get(), (void*)m_rasterConfig.get()); break;
-        case acre::RenderPath::rRayGLTF: m_renderer->render(m_swapchain.get(), (void*)m_rayConfig.get()); break;
-        case acre::RenderPath::rPathGLTF: m_renderer->render(m_swapchain.get(), (void*)m_pathConfig.get()); break;
+        case acre::RenderPath::rRasterGLTF: m_renderer->render((void*)m_rasterConfig.get()); break;
+        case acre::RenderPath::rRayGLTF: m_renderer->render((void*)m_rayConfig.get()); break;
+        case acre::RenderPath::rPathGLTF: m_renderer->render((void*)m_pathConfig.get()); break;
     }
+
+    m_swapchain->present();
 }
 
 void RenderWindow::saveFrame(const std::string& fileName)
@@ -243,18 +248,22 @@ void RenderWindow::saveFrame(const std::string& fileName)
     // std::cout << "Time taken by function: " << duration << " seconds" << std::endl;
 
     acre::Pixels pixels;
-    pixels.width  = 1920;
-    pixels.height = 1080;
-    pixels.data   = new uint32_t[pixels.width * pixels.height];
-    pixels.format = acre::Image::Format::RGBA8_UNORM;
+    pixels.desc.width  = 1920;
+    pixels.desc.height = 1080;
+    pixels.desc.format = acre::Image::Format::RGBA8_UNORM;
+    pixels.data        = new uint32_t[pixels.desc.width * pixels.desc.height];
 
-    m_scene->resize(pixels.width, pixels.height);
+    m_renderer->setupTarget(&pixels.desc);
+
+    m_scene->resize(pixels.desc.width, pixels.desc.height);
     switch (g_renderPath)
     {
-        case acre::RenderPath::rRasterGLTF: m_renderer->render(&pixels, (void*)m_rasterConfig.get(), 2048); break;
-        case acre::RenderPath::rRayGLTF: m_renderer->render(&pixels, (void*)m_rayConfig.get(), 2048); break;
-        case acre::RenderPath::rPathGLTF: m_renderer->render(&pixels, (void*)m_pathConfig.get(), 2048); break;
+        case acre::RenderPath::rRasterGLTF: m_renderer->render((void*)m_rasterConfig.get(), 2048); break;
+        case acre::RenderPath::rRayGLTF: m_renderer->render((void*)m_rayConfig.get(), 2048); break;
+        case acre::RenderPath::rPathGLTF: m_renderer->render((void*)m_pathConfig.get(), 2048); break;
     }
+
+    m_renderer->copyTo(&pixels);
     m_scene->saveFrame(fileName, &pixels);
 
     delete[] pixels.data;
