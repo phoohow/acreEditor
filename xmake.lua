@@ -24,13 +24,6 @@ target("acreEditor")
     add_includedirs("include")
     add_files("src/*.cpp", "src/*/*.cpp", "src/*/*/*.cpp")
 
-    after_build(function (target) 
-        if is_mode("release") then 
-            os.cp(os.projectdir().."/ext/acre/src/shaders/*.hlsl", get_config("buildir") .. "/bin/shaders/")
-            os.cp(os.projectdir().."/ext/acre/tools/dxc/bin/x64/dxc.exe", get_config("buildir") .. "/bin")
-        end 
-    end)
-
     after_install(function (target)
         os.cp(os.projectdir().."/ext/acre/tools/dxc/bin/x64/*.dll", get_config("buildir") .. "/acreEditor/bin")
         if is_mode("release") then 
