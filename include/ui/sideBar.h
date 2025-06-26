@@ -1,51 +1,28 @@
 #pragma once
 
 #include <QWidget>
+#include <QVBoxLayout>
 #include <QTabWidget>
 #include <QStackedWidget>
-#include <QListWidget>
-#include <QVBoxLayout>
 
 class BaseScene;
+class SceneWidget;
+class ConfigWidget;
 class SideBar : public QWidget
 {
-    BaseScene* m_scene = nullptr;
-
-    std::function<void()> m_flushFrame;
+    BaseScene* m_scene;
 
     QVBoxLayout*    m_layout;
     QTabWidget*     m_selector;
     QStackedWidget* m_editorStack;
 
-    QListWidget* m_cameraList;
-    QListWidget* m_lightList;
-    QListWidget* m_geometryList;
-    QListWidget* m_materialList;
-    QListWidget* m_transformList;
-
-    QWidget* m_cameraWidget;
-    QWidget* m_lightWidget;
-    QWidget* m_geometryWidget;
-    QWidget* m_materialWidget;
-    QWidget* m_transformWidget;
+    SceneWidget*  m_sceneWidget;
+    ConfigWidget* m_configWidget;
 
 public:
-    explicit SideBar(BaseScene* scene, QWidget* parent = nullptr);
+    SideBar(BaseScene* scene, QWidget* parent = nullptr);
+
+    ~SideBar();
 
     void setFlushFrameCallBack(std::function<void()> func);
-
-private:
-    void initCamera();
-    void initLight();
-    void initGeometry();
-    void initMaterial();
-    void initTransform();
-
-    void onUpdateTab();
-
-    void onSelectMainCamera();
-    void onSelectLight();
-    void onSelectGeometry();
-    void onSelectMaterial();
-    void onSelectTransform();
 };
