@@ -15,15 +15,7 @@
 #include <QBrush>
 #include <QColor>
 #include <stdint.h>
-
-enum TabWidget : uint8_t
-{
-    wCamera,
-    wLight,
-    wGeometry,
-    wMaterial,
-    wTransform,
-};
+#include <unordered_map>
 
 #define toCameraWidget    static_cast<CameraWidget*>(m_cameraWidget)
 #define toLightWidget     static_cast<LightWidget*>(m_lightWidget)
@@ -36,8 +28,9 @@ SceneWidget::SceneWidget(BaseScene* scene, QWidget* parent) :
 {
     m_layout = new QVBoxLayout(this);
 
-    m_selector = new QTabWidget(this);
-    m_selector->setStyleSheet("QTabWidget { background-color: #f0f0f0; }");
+    m_selector = new QTreeWidget(this);
+    m_selector->setHeaderHidden(true);
+    m_selector->setStyleSheet("QTreeWidget { background-color:rgb(242, 243, 242); border: none; } QTreeWidget::item { height: 24px; }");
     m_layout->addWidget(m_selector);
     m_layout->setStretchFactor(m_selector, 1);
 
@@ -46,7 +39,7 @@ SceneWidget::SceneWidget(BaseScene* scene, QWidget* parent) :
     m_layout->setStretchFactor(m_editorStack, 2);
 
     this->setLayout(m_layout);
-    connect(m_selector, &QTabWidget::currentChanged, this, &SceneWidget::onUpdateTab);
+    connect(m_selector, &QTreeWidget::currentItemChanged, this, &SceneWidget::onTreeItemSelected);
 
     initCamera();
     initLight();
@@ -59,229 +52,137 @@ void SceneWidget::initCamera()
 {
     m_cameraWidget = new CameraWidget(this);
     m_editorStack->addWidget(m_cameraWidget);
-
-    m_cameraList = new QListWidget(this);
-    m_cameraList->setStyleSheet("QListWidget { border: none; }");
-    m_selector->insertTab(TabWidget::wCamera, m_cameraList, "camera");
-    connect(m_cameraList, &QListWidget::itemSelectionChanged, this, &SceneWidget::onSelectMainCamera);
+    m_cameraRoot = new QTreeWidgetItem(m_selector);
+    m_cameraRoot->setText(0, "Camera");
+    // m_cameraRoot->setExpanded(true);
+    m_selector->addTopLevelItem(m_cameraRoot);
 }
 
 void SceneWidget::initLight()
 {
     m_lightWidget = new LightWidget(m_scene, this);
     m_editorStack->addWidget(m_lightWidget);
-
-    m_lightList = new QListWidget(this);
-    m_lightList->setStyleSheet("QListWidget { border: none; }");
-    m_selector->insertTab(TabWidget::wLight, m_lightList, "light");
-    m_lightList->addItem("HDR");
-    m_lightList->addItem("Sun");
-
-    connect(m_lightList, &QListWidget::itemSelectionChanged, this, &SceneWidget::onSelectLight);
+    m_lightRoot = new QTreeWidgetItem(m_selector);
+    m_lightRoot->setText(0, "Light");
+    // m_lightRoot->setExpanded(true);
+    m_selector->addTopLevelItem(m_lightRoot);
 }
 
 void SceneWidget::initGeometry()
 {
     m_geometryWidget = new GeometryWidget(m_scene, this);
     m_editorStack->addWidget(m_geometryWidget);
-
-    m_geometryList = new QListWidget(this);
-    m_geometryList->setStyleSheet("QListWidget { border: none; }");
-    m_selector->insertTab(TabWidget::wGeometry, m_geometryList, "geometry");
-    connect(m_geometryList, &QListWidget::itemSelectionChanged, this, &SceneWidget::onSelectGeometry);
+    m_geometryRoot = new QTreeWidgetItem(m_selector);
+    m_geometryRoot->setText(0, "Geometry");
+    // m_geometryRoot->setExpanded(true);
+    m_selector->addTopLevelItem(m_geometryRoot);
 }
 
 void SceneWidget::initMaterial()
 {
     m_materialWidget = new MaterialWidget(m_scene, this);
     m_editorStack->addWidget(m_materialWidget);
-
-    m_materialList = new QListWidget(this);
-    m_materialList->setStyleSheet("QListWidget { border: none; }");
-    m_selector->insertTab(TabWidget::wMaterial, m_materialList, "material");
-    connect(m_materialList, &QListWidget::itemSelectionChanged, this, &SceneWidget::onSelectMaterial);
+    m_materialRoot = new QTreeWidgetItem(m_selector);
+    m_materialRoot->setText(0, "Material");
+    // m_materialRoot->setExpanded(true);
+    m_selector->addTopLevelItem(m_materialRoot);
 }
 
 void SceneWidget::initTransform()
 {
     m_transformWidget = new TransformWidget(m_scene, this);
     m_editorStack->addWidget(m_transformWidget);
-
-    m_transformList = new QListWidget(this);
-    m_transformList->setStyleSheet("QListWidget { border: none; }");
-    m_selector->insertTab(TabWidget::wTransform, m_transformList, "transform");
-    connect(m_transformList, &QListWidget::itemSelectionChanged, this, &SceneWidget::onSelectTransform);
+    m_transformRoot = new QTreeWidgetItem(m_selector);
+    m_transformRoot->setText(0, "Transform");
+    // m_transformRoot->setExpanded(true);
+    m_selector->addTopLevelItem(m_transformRoot);
 }
 
-void SceneWidget::onUpdateTab()
+void SceneWidget::onUpdate()
 {
-    auto tabIndex = m_selector->currentIndex();
-    switch (tabIndex)
+    updateWidget(m_cameraRoot, TabWidget::wCamera);
+    updateWidget(m_lightRoot, TabWidget::wLight);
+    updateWidget(m_geometryRoot, TabWidget::wGeometry);
+    updateWidget(m_materialRoot, TabWidget::wMaterial);
+    updateWidget(m_transformRoot, TabWidget::wTransform);
+}
+
+void SceneWidget::onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* prev)
+{
+    static const std::unordered_map<QString, TabWidget> kTabNameToEnum =
+        {
+            {"Camera", TabWidget::wCamera},
+            {"Light", TabWidget::wLight},
+            {"Geometry", TabWidget::wGeometry},
+            {"Material", TabWidget::wMaterial},
+            {"Transform", TabWidget::wTransform},
+        };
+
+    if (!current) return;
+    QTreeWidgetItem* parent = current->parent();
+    const QString    name   = parent ? parent->text(0) : current->text(0);
+    const auto       it     = kTabNameToEnum.find(name);
+    if (it == kTabNameToEnum.end()) return;
+
+    TabWidget tab = it->second;
+    m_editorStack->setCurrentIndex(static_cast<int>(tab));
+
+    if (parent)
     {
-        case TabWidget::wCamera:
+        switch (tab)
         {
-            auto cameras = m_scene->getCameras();
-            for (auto index : cameras)
+            case TabWidget::wCamera:
+                m_scene->setMainCamera(current->text(0).toInt());
+                toCameraWidget->setCamera(m_scene->getMainCamera());
+                break;
+            case TabWidget::wLight:
             {
-                auto key         = QString::number(index);
-                auto findWidgets = m_cameraList->findItems(key, Qt::MatchExactly);
-                if (findWidgets.empty())
-                    m_cameraList->addItem(key);
+                QString selectedText = current->text(0);
+                if (selectedText == "Sun")
+                {
+                    toLightWidget->disableHDR();
+                    toLightWidget->enableSun();
+                    toLightWidget->updateSunProperties();
+                }
+                else if (selectedText == "HDR")
+                {
+                    toLightWidget->disableSun();
+                    toLightWidget->enableHDR();
+                    toLightWidget->updateHDRProperties();
+                }
+                else
+                {
+                    toLightWidget->disableSun();
+                    toLightWidget->disableHDR();
+                    toLightWidget->setLight(selectedText.toInt());
+                    toLightWidget->updateProperties();
+                }
+                break;
             }
-            toCameraWidget->setCamera(m_scene->getMainCamera());
-            toCameraWidget->updateProperties();
-
-            break;
-        }
-        case TabWidget::wLight:
-        {
-            auto lights = m_scene->getLights();
-            for (auto index : lights)
-            {
-                auto key         = QString::number(index);
-                auto findWidgets = m_lightList->findItems(key, Qt::MatchExactly);
-                if (findWidgets.empty())
-                    m_lightList->addItem(key);
-            }
-            break;
-        }
-        case TabWidget::wGeometry:
-        {
-            auto geometrys = m_scene->getGeometrys();
-            if (geometrys.size() != m_geometryList->count())
-            {
-                m_geometryList->clear();
-            }
-
-            for (auto index : geometrys)
-            {
-                auto key         = QString::number(index);
-                auto findWidgets = m_geometryList->findItems(key, Qt::MatchExactly);
-                if (findWidgets.empty())
-                    m_geometryList->addItem(key);
-            }
-
-            break;
-        }
-        case TabWidget::wMaterial:
-        {
-            auto materials = m_scene->getMaterials();
-            if (materials.size() != m_materialList->count())
-            {
-                m_materialList->clear();
-            }
-
-            for (auto index : materials)
-            {
-                auto key         = QString::number(index);
-                auto findWidgets = m_materialList->findItems(key, Qt::MatchExactly);
-                if (findWidgets.empty())
-                    m_materialList->addItem(key);
-            }
-            break;
-        }
-        case TabWidget::wTransform:
-        {
-            auto transforms = m_scene->getTransforms();
-            if (transforms.size() != m_transformList->count())
-            {
-                m_transformList->clear();
-            }
-
-            for (auto index : transforms)
-            {
-                auto key         = QString::number(index);
-                auto findWidgets = m_transformList->findItems(key, Qt::MatchExactly);
-                if (findWidgets.empty())
-                    m_transformList->addItem(key);
-            }
-            break;
+            case TabWidget::wGeometry:
+                toGeometryWidget->setGeometry(current->text(0).toInt());
+                toGeometryWidget->updateProperties();
+                m_scene->setHighlightGeometry(current->text(0).toInt());
+                if (m_flushFrame) m_flushFrame();
+                break;
+            case TabWidget::wMaterial:
+                toMaterialWidget->setMaterial(current->text(0).toInt());
+                toMaterialWidget->updateProperties();
+                m_scene->setHighlightMaterial(current->text(0).toInt());
+                if (m_flushFrame) m_flushFrame();
+                break;
+            case TabWidget::wTransform:
+                toTransformWidget->setTransform(current->text(0).toInt());
+                toTransformWidget->updateProperties();
+                break;
         }
     }
-
-    m_editorStack->setCurrentIndex(tabIndex);
-}
-
-void SceneWidget::onSelectMainCamera()
-{
-    auto selectedItem = m_cameraList->currentItem();
-    if (selectedItem)
+    else
     {
-        QString selectedText = selectedItem->text();
-        m_scene->setMainCamera(selectedText.toInt());
-    }
+        // updateWidget(current, tab);
+        // current->setExpanded(true);
 
-    toCameraWidget->setCamera(m_scene->getMainCamera());
-}
-
-void SceneWidget::onSelectLight()
-{
-    auto selectedItem = m_lightList->currentItem();
-    if (selectedItem)
-    {
-        QString selectedText = selectedItem->text();
-
-        if (selectedText == "Sun")
-        {
-            toLightWidget->disableHDR();
-            toLightWidget->enableSun();
-            toLightWidget->updateSunProperties();
-        }
-        else if (selectedText == "HDR")
-        {
-            toLightWidget->disableSun();
-            toLightWidget->enableHDR();
-            toLightWidget->updateHDRProperties();
-        }
-        else
-        {
-            toLightWidget->disableSun();
-            toLightWidget->disableHDR();
-            toLightWidget->setLight(selectedText.toInt());
-            toLightWidget->updateProperties();
-        }
-    }
-}
-
-void SceneWidget::onSelectGeometry()
-{
-    auto selectedItem = m_geometryList->currentItem();
-    if (selectedItem)
-    {
-        QString selectedText = selectedItem->text();
-
-        toGeometryWidget->setGeometry(selectedText.toInt());
-        toGeometryWidget->updateProperties();
-
-        m_scene->setHighlightGeometry(selectedText.toInt());
-        m_flushFrame();
-    }
-}
-
-void SceneWidget::onSelectMaterial()
-{
-    auto selectedItem = m_materialList->currentItem();
-    if (selectedItem)
-    {
-        QString selectedText = selectedItem->text();
-
-        toMaterialWidget->setMaterial(selectedText.toInt());
-        toMaterialWidget->updateProperties();
-
-        m_scene->setHighlightMaterial(selectedText.toInt());
-        m_flushFrame();
-    }
-}
-
-void SceneWidget::onSelectTransform()
-{
-    auto selectedItem = m_transformList->currentItem();
-    if (selectedItem)
-    {
-        QString selectedText = selectedItem->text();
-
-        toTransformWidget->setTransform(selectedText.toInt());
-        toTransformWidget->updateProperties();
+        onUpdate();
     }
 }
 
@@ -291,4 +192,70 @@ void SceneWidget::setFlushFrameCallBack(std::function<void()> func)
     toMaterialWidget->setFlushFrameCallBack(func);
     toLightWidget->setFlushFrameCallBack(func);
     toCameraWidget->setFlushFrameCallBack(func);
+}
+
+void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)
+{
+    switch (tab)
+    {
+        case TabWidget::wCamera:
+        {
+            current->takeChildren();
+            auto cameras = m_scene->getCameras();
+            for (auto index : cameras)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index));
+            }
+            break;
+        }
+        case TabWidget::wLight:
+        {
+            current->takeChildren();
+            QTreeWidgetItem* hdrItem = new QTreeWidgetItem(current);
+            hdrItem->setText(0, "HDR");
+            QTreeWidgetItem* sunItem = new QTreeWidgetItem(current);
+            sunItem->setText(0, "Sun");
+            auto lights = m_scene->getLights();
+            for (auto index : lights)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index));
+            }
+            break;
+        }
+        case TabWidget::wGeometry:
+        {
+            current->takeChildren();
+            auto geometrys = m_scene->getGeometrys();
+            for (auto index : geometrys)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index));
+            }
+            break;
+        }
+        case TabWidget::wMaterial:
+        {
+            current->takeChildren();
+            auto materials = m_scene->getMaterials();
+            for (auto index : materials)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index));
+            }
+            break;
+        }
+        case TabWidget::wTransform:
+        {
+            current->takeChildren();
+            auto transforms = m_scene->getTransforms();
+            for (auto index : transforms)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index));
+            }
+            break;
+        }
+    }
 }

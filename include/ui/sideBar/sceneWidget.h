@@ -1,27 +1,30 @@
 #pragma once
 
 #include <QWidget>
-#include <QTabWidget>
+#include <QTreeWidget>
 #include <QStackedWidget>
-#include <QListWidget>
 #include <QVBoxLayout>
+#include <functional>
 
 class BaseScene;
 class SceneWidget : public QWidget
 {
+    enum TabWidget : uint8_t
+    {
+        wCamera,
+        wLight,
+        wGeometry,
+        wMaterial,
+        wTransform,
+    };
+
     BaseScene* m_scene = nullptr;
 
     std::function<void()> m_flushFrame;
 
     QVBoxLayout*    m_layout;
-    QTabWidget*     m_selector;
+    QTreeWidget*    m_selector;
     QStackedWidget* m_editorStack;
-
-    QListWidget* m_cameraList;
-    QListWidget* m_lightList;
-    QListWidget* m_geometryList;
-    QListWidget* m_materialList;
-    QListWidget* m_transformList;
 
     QWidget* m_cameraWidget;
     QWidget* m_lightWidget;
@@ -29,10 +32,18 @@ class SceneWidget : public QWidget
     QWidget* m_materialWidget;
     QWidget* m_transformWidget;
 
+    QTreeWidgetItem* m_cameraRoot    = nullptr;
+    QTreeWidgetItem* m_lightRoot     = nullptr;
+    QTreeWidgetItem* m_geometryRoot  = nullptr;
+    QTreeWidgetItem* m_materialRoot  = nullptr;
+    QTreeWidgetItem* m_transformRoot = nullptr;
+
 public:
     explicit SceneWidget(BaseScene* scene, QWidget* parent = nullptr);
 
     void setFlushFrameCallBack(std::function<void()> func);
+
+    void onUpdate();
 
 private:
     void initCamera();
@@ -41,11 +52,7 @@ private:
     void initMaterial();
     void initTransform();
 
-    void onUpdateTab();
+    void onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* prev);
 
-    void onSelectMainCamera();
-    void onSelectLight();
-    void onSelectGeometry();
-    void onSelectMaterial();
-    void onSelectTransform();
+    void updateWidget(QTreeWidgetItem* current, TabWidget tab);
 };
