@@ -51,7 +51,7 @@ int runEditor(int argc, char* argv[])
     auto bottomBar = new BottomBar(window->getScene());
     bottomBar->setFlushFrameCallBack(flushFrameFunc);
     auto flushStateFunc = [bottomBar]() {
-        bottomBar->onStateTabChanged();
+        bottomBar->flushState();
     };
     menuBar->setFlushStateCallBack(flushStateFunc);
 

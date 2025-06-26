@@ -1,11 +1,6 @@
 #pragma once
-
-#include <QWidget>
-#include <QTabWidget>
-#include <QLabel>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QVBoxLayout>
+#include <ui/bottomBar/cmdWidget.h>
+#include <ui/bottomBar/infoWidget.h>
 
 #include <functional>
 
@@ -16,40 +11,16 @@ class BottomBar : public QWidget
 
     std::function<void()> m_flushFrame;
 
-    QTabWidget* m_selector;
-    QLabel*     m_stateLabel;
-    QLineEdit*  m_cmdLineEdit;
-    QTextEdit*  m_logTextEdit;
-
     QVBoxLayout* m_mainLayout;
-    QVBoxLayout* m_stateLayout;
-    QWidget*     m_stateTab;
+    InfoWidget*  m_infoWidget;
+    QVBoxLayout* m_infoLayout;
+    CmdWidget*   m_cmdWidget;
     QVBoxLayout* m_cmdLayout;
-    QWidget*     m_cmdTab;
-    QTextEdit*   m_cmdResultTextEdit;
-    QVBoxLayout* m_logLayout;
-    QWidget*     m_logTab;
 
 public:
     explicit BottomBar(BaseScene* scene, QWidget* parent = nullptr);
 
-    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
+    void setFlushFrameCallBack(std::function<void()> func);
 
-    void onStateTabChanged();
-
-private:
-    void initState();
-    void initCmd();
-    void initLog();
-
-    void onUpdateTab();
-
-    void onCmdTabChanged();
-    void onLogTabChanged();
-    void updateStateInfo();
-    void updateCmdInfo();
-    void updateLogInfo();
-    void onCmdSubmitted();
-
-    QString processCommand(const QString& command);
+    void flushState();
 };
