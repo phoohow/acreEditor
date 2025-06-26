@@ -117,6 +117,9 @@ void RenderWindow::mousePressEvent(QMouseEvent* event)
         info.input.xPos = m_mousePosition.x() * g_ratio;
         info.input.yPos = m_mousePosition.y() * g_ratio;
         m_renderer->pickTo(&info);
+
+        // m_scene->setHighlightGeometry(info.geometryID);
+        // std::cout << "GeometryID: " << info.geometryID << std::endl;
     }
 }
 
@@ -208,6 +211,10 @@ void RenderWindow::keyPressEvent(QKeyEvent* event)
         case Qt::Key_R:
             m_renderer->markShaderDirty();
             break;
+        case Qt::Key_P:
+            render();
+            showProfiler();
+            break;
         default:
             break;
     }
@@ -219,6 +226,30 @@ void RenderWindow::keyReleaseEvent(QKeyEvent* event)
 {
 }
 
+void RenderWindow::showProfiler()
+{
+    if (!m_renderer) return;
+
+    if (!m_profiler)
+    {
+        m_renderer->getProfilerCount(m_profilerCount);
+        m_profiler = new acre::Profiler[m_profilerCount];
+    }
+
+    m_renderer->getProfiler(m_profiler);
+    auto next      = m_profiler;
+    auto totalTime = 0.0;
+
+    for (int i = 0; i < m_profilerCount; i++)
+    {
+        std::cout << "name:" << next->name << " time:" << next->time << "ms" << std::endl;
+        totalTime += next->time;
+        next++;
+    }
+
+    std::cout << "total time:" << totalTime << "ms" << std::endl;
+}
+
 void RenderWindow::render()
 {
     if (width() == 0 || height() == 0) return;
@@ -227,7 +258,9 @@ void RenderWindow::render()
 
     switch (g_renderPath)
     {
+        case acre::RenderPath::rRasterTriangle:
         case acre::RenderPath::rRasterGLTF: m_renderer->render((void*)m_rasterConfig.get()); break;
+        case acre::RenderPath::rRayTriangle:
         case acre::RenderPath::rRayGLTF: m_renderer->render((void*)m_rayConfig.get()); break;
         case acre::RenderPath::rPathGLTF: m_renderer->render((void*)m_pathConfig.get()); break;
     }
@@ -285,7 +318,9 @@ void RenderWindow::initScene()
     m_scene = new GLTFScene(m_renderScene.get());
     switch (g_renderPath)
     {
+        case acre::RenderPath::rRasterTriangle:
         case acre::RenderPath::rRasterGLTF: m_rasterConfig->camera = m_scene->getCameraID(); break;
+        case acre::RenderPath::rRayTriangle:
         case acre::RenderPath::rRayGLTF: m_rayConfig->camera = m_scene->getCameraID(); break;
         case acre::RenderPath::rPathGLTF: m_pathConfig->camera = m_scene->getCameraID(); break;
     }

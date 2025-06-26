@@ -10,6 +10,7 @@ class Swapchain;
 class DeviceMgr;
 class Renderer;
 class Scene;
+struct Profiler;
 namespace config
 {
 struct Raster;
@@ -28,6 +29,9 @@ class RenderWindow : public QWindow
     std::unique_ptr<acre::config::Raster>      m_rasterConfig = nullptr;
     std::unique_ptr<acre::config::RayTracing>  m_rayConfig    = nullptr;
     std::unique_ptr<acre::config::PathTracing> m_pathConfig   = nullptr;
+
+    acre::Profiler* m_profiler      = nullptr;
+    uint32_t        m_profilerCount = 0;
 
     QPointF m_mousePosition;
     bool    m_enableRotate = false;
@@ -53,6 +57,8 @@ public:
     auto getScene() { return m_scene; }
 
     void render();
+
+    void showProfiler();
 
     void saveFrame(const std::string& fileName);
 
