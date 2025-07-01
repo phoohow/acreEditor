@@ -81,6 +81,8 @@ public:
     auto getGeometrys() { return m_geometrys; }
     auto getGeometryCount() { return m_geometrys.size(); }
     auto getGeometry(acre::GeometryID id) { return m_scene->findGeometry(id); }
+    auto getVIndexBuffer(acre::UintBufferID id) { return m_scene->findVIndexBuffer(id); }
+    auto getVPositionBuffer(acre::Float3BufferID id) { return m_scene->findVPositionBuffer(id); }
     void updateGeometry(acre::GeometryID id) { m_scene->updateGeometry(id); }
     void setHighlightGeometry(acre::GeometryID id) { m_scene->highlightGeometry(id); }
     void unhighlightGeometry(acre::GeometryID id) { m_scene->unhighlightGeometry(id); }

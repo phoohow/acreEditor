@@ -56,20 +56,31 @@ void TriangleScene::createEntity()
 
 void TriangleScene::createGeometry()
 {
-    auto geometry                                                        = std::make_shared<acre::Geometry>();
-    geometry->data[acre::GeometryAttr::aIndex]     = (void*)g_index;
-    geometry->data[acre::GeometryAttr::aPosition]  = (void*)g_position;
-    geometry->data[acre::GeometryAttr::aUV1]       = (void*)g_uv;
-    geometry->count[acre::GeometryAttr::aIndex]    = 6;
-    geometry->count[acre::GeometryAttr::aPosition] = 4;
+    auto index   = acre::createUintBuffer();
+    index->data  = (void*)g_index;
+    index->count = 6;
+    auto indexID = m_scene->createVIndexBuffer(index);
+
+    auto position   = acre::createFloat3Buffer();
+    position->data  = (void*)g_position;
+    position->count = 4;
+    auto positionID = m_scene->createVPositionBuffer(position);
+
+    auto uv   = acre::createFloat2Buffer();
+    uv->data  = (void*)g_uv;
+    uv->count = 4;
+    auto uvID = m_scene->createVUVBuffer(uv);
+
+    auto geometry      = std::make_shared<acre::Geometry>();
+    geometry->index    = indexID;
+    geometry->position = positionID;
+    geometry->uv       = uvID;
     m_geometrys.emplace_back(m_scene->create(geometry));
 
-    geometry                                                             = std::make_shared<acre::Geometry>();
-    geometry->data[acre::GeometryAttr::aIndex]     = (void*)g_index;
-    geometry->data[acre::GeometryAttr::aPosition]  = (void*)g_position;
-    geometry->data[acre::GeometryAttr::aUV1]       = (void*)g_uv;
-    geometry->count[acre::GeometryAttr::aIndex]    = 6;
-    geometry->count[acre::GeometryAttr::aPosition] = 4;
+    geometry           = std::make_shared<acre::Geometry>();
+    geometry->index    = indexID;
+    geometry->position = positionID;
+    geometry->uv       = uvID;
     m_geometrys.emplace_back(m_scene->create(geometry));
 }
 

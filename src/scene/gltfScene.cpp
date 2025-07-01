@@ -75,20 +75,21 @@ std::vector<std::vector<uint32_t>> g_index;
 std::map<std::string, int>         g_geometry;
 
 template <typename Type>
-static void appendIndex(acre::GeometryPtr           geometry,
+static void appendIndex(acre::UintBufferPtr         indexBuffer,
                         const tinygltf::Accessor&   accessor,
                         const tinygltf::BufferView& bufferView,
                         uint32_t                    index,
                         unsigned char*              addr)
 {
     std::vector<Type> tempVec;
-    g_index[index].resize(accessor.count);
     tempVec.resize(accessor.count);
     memcpy(tempVec.data(), (void*)(addr + bufferView.byteOffset + accessor.byteOffset), sizeof(Type) * accessor.count);
-    for (auto i = 0; i < accessor.count; ++i)
-        g_index[index][i] = tempVec[i];
 
-    geometry->data[acre::GeometryAttr::aIndex] = g_index[index].data();
+    g_index[index].resize(accessor.count);
+    for (auto i = 0; i < accessor.count; ++i)
+        g_index[index][i] = (uint32_t)(tempVec[i]);
+
+    indexBuffer->data = g_index[index].data();
 }
 
 GLTFScene::GLTFScene(acre::Scene* scene) :
@@ -424,38 +425,41 @@ void GLTFScene::createGeometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
+                auto indexBuffer = acre::createUintBuffer();
+
                 switch (accessor.componentType)
                 {
                     case TINYGLTF_COMPONENT_TYPE_BYTE:
-                        appendIndex<int8_t>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<int8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-                        appendIndex<uint8_t>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<uint8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     case TINYGLTF_COMPONENT_TYPE_SHORT:
-                        appendIndex<int16_t>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<int16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-                        appendIndex<uint16_t>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<uint16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     case TINYGLTF_COMPONENT_TYPE_INT:
-                        appendIndex<int32_t>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<int32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-                        appendIndex<uint32_t>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<uint32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     case TINYGLTF_COMPONENT_TYPE_FLOAT:
-                        appendIndex<float>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<float>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     case TINYGLTF_COMPONENT_TYPE_DOUBLE:
-                        appendIndex<double>(geometry, accessor, bufferView, geometryIndex, addr);
+                        appendIndex<double>(indexBuffer, accessor, bufferView, geometryIndex, addr);
                         break;
                     default:
-                        geometry->data[acre::GeometryAttr::aIndex] = addr + bufferView.byteOffset + accessor.byteOffset;
+                        indexBuffer->data = addr + bufferView.byteOffset + accessor.byteOffset;
                         break;
                 }
 
-                geometry->count[acre::GeometryAttr::aIndex] = accessor.count;
+                indexBuffer->count = accessor.count;
+                geometry->index    = m_scene->createVIndexBuffer(indexBuffer);
             }
             if (primitive.attributes.find("POSITION") != primitive.attributes.end())
             {
@@ -467,14 +471,17 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->data[acre::GeometryAttr::aPosition]  = addr + bufferView.byteOffset + accessor.byteOffset;
-                geometry->count[acre::GeometryAttr::aPosition] = accessor.count;
+
+                auto position      = acre::createFloat3Buffer();
+                position->data     = addr + bufferView.byteOffset + accessor.byteOffset;
+                position->count    = accessor.count;
+                geometry->position = m_scene->createVPositionBuffer(position);
 
                 // Evaluate object box and scene box
                 acre::math::box3 box = acre::math::box3::empty();
                 for (auto geometryIndex = 0; geometryIndex < accessor.count; geometryIndex += 3)
                 {
-                    acre::math::float3* pos = (acre::math::float3*)(geometry->data[acre::GeometryAttr::aPosition]) + geometryIndex;
+                    acre::math::float3* pos = (acre::math::float3*)(position->data) + geometryIndex;
                     box |= *pos;
                 }
                 geometry->box = box;
@@ -489,8 +496,11 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->data[acre::GeometryAttr::aUV1]  = addr + bufferView.byteOffset + accessor.byteOffset;
-                geometry->count[acre::GeometryAttr::aUV1] = accessor.count;
+
+                auto uv      = acre::createFloat2Buffer();
+                uv->data     = addr + bufferView.byteOffset + accessor.byteOffset;
+                uv->count    = accessor.count;
+                geometry->uv = m_scene->createVUVBuffer(uv);
             }
             if (primitive.attributes.find("NORMAL") != primitive.attributes.end())
             {
@@ -502,8 +512,10 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->data[acre::GeometryAttr::aNormal]  = addr + bufferView.byteOffset + accessor.byteOffset;
-                geometry->count[acre::GeometryAttr::aNormal] = accessor.count;
+                auto normal      = acre::createFloat3Buffer();
+                normal->data     = addr + bufferView.byteOffset + accessor.byteOffset;
+                normal->count    = accessor.count;
+                geometry->normal = m_scene->createVNormalBuffer(normal);
             }
             if (primitive.attributes.find("TANGENT") != primitive.attributes.end())
             {
@@ -515,8 +527,10 @@ void GLTFScene::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                geometry->data[acre::GeometryAttr::aTangent]  = addr + bufferView.byteOffset + accessor.byteOffset;
-                geometry->count[acre::GeometryAttr::aTangent] = accessor.count;
+                auto tangent      = acre::createFloat4Buffer();
+                tangent->data     = addr + bufferView.byteOffset + accessor.byteOffset;
+                tangent->count    = accessor.count;
+                geometry->tangent = m_scene->createVTangentBuffer(tangent);
             }
 
             auto geometryID = m_scene->create(geometry);
