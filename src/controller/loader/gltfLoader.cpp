@@ -1,10 +1,9 @@
 #include <controller/loader/gltfLoader.h>
 
-#define TINYGLTF_IMPLEMENTATION
-// #define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <tinygltf/tiny_gltf.h>
 #include <acre/render/renderer.h>
+
+#define TINYGLTF_IMPLEMENTATION
+#include <tinygltf/tiny_gltf.h>
 
 template <typename T>
 static auto vec3ToFloat3(T& vec)

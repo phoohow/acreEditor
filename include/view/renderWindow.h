@@ -21,6 +21,7 @@ struct PathTracing;
 
 class SceneMgr;
 class CameraController;
+class Exporter;
 class RenderWindow : public QWindow
 {
     std::unique_ptr<acre::DeviceMgr>           m_deviceMgr    = nullptr;
@@ -39,6 +40,7 @@ class RenderWindow : public QWindow
 
     SceneMgr*         m_scene            = nullptr;
     CameraController* m_cameraController = nullptr;
+    Exporter*         m_exporter         = nullptr;
 
 protected:
     virtual void exposeEvent(QExposeEvent*) override;

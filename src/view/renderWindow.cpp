@@ -2,6 +2,7 @@
 
 #include <view/renderWindow.h>
 #include <controller/cameraController.h>
+#include <controller/exporter.h>
 #include <model/sceneMgr.h>
 
 #include <acre/render/deviceMgr.h>
@@ -264,7 +265,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
     }
 
     m_renderer->copyTo(&pixels);
-    m_scene->saveFrame(fileName, &pixels);
+    m_exporter->saveFrame(fileName, pixels.data, pixels.desc.width, pixels.desc.height, 4);
 
     delete[] pixels.data;
 
@@ -283,6 +284,7 @@ void RenderWindow::initScene()
 {
     m_scene            = new SceneMgr(m_renderScene.get());
     m_cameraController = new CameraController(m_scene);
+    m_exporter         = new Exporter(m_scene);
 
     switch (g_renderPath)
     {

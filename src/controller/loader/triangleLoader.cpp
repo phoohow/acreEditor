@@ -1,9 +1,10 @@
+#include <config.h>
+
 #include <controller/loader/triangleLoader.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include <config.h>
 #include <string>
 
 constexpr float g_position[4][3] = {

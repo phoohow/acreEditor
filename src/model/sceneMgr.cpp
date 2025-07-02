@@ -1,8 +1,5 @@
 #include <model/sceneMgr.h>
 
-// #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb/stb_image_write.h>
-
 #include <acre/utils/math/math.h>
 #include <acre/render/renderer.h>
 
@@ -86,11 +83,6 @@ void SceneMgr::clearHDR()
     for (auto index : m_hdrTextures)
         m_scene->removeTexture(index);
     m_hdrTextures.resize(0);
-}
-
-void SceneMgr::saveFrame(const std::string& fileName, acre::Pixels* pixels)
-{
-    stbi_write_bmp(fileName.c_str(), pixels->desc.width, pixels->desc.height, 4, (void*)pixels->data);
 }
 
 acre::UintBufferID SceneMgr::createVIndexBuffer(acre::UintBufferPtr buffer)

@@ -5,11 +5,6 @@
 
 #include <vector>
 
-namespace acre
-{
-struct Pixels;
-}
-
 class SceneMgr
 {
     acre::Scene*                   m_scene;
@@ -36,7 +31,6 @@ public:
 
     void clearScene();
     void clearHDR();
-    void saveFrame(const std::string& fileName, acre::Pixels* pixels);
 
     acre::UintBufferID   createVIndexBuffer(acre::UintBufferPtr);
     acre::Float3BufferID createVPositionBuffer(acre::Float3BufferPtr);
