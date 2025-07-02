@@ -6,20 +6,6 @@
 #include <acre/utils/math/math.h>
 #include <acre/render/renderer.h>
 
-static constexpr double M_PI  = 3.14159265358979;
-static constexpr float  g_fov = 60;
-
-static void setCameraView(Camera* camera, acre::math::box3 box, acre::math::float3 dir)
-{
-    auto fov      = g_fov;
-    auto radius   = acre::math::length(box.diagonal()) * 0.5f;
-    auto distance = radius / sinf(acre::math::radians(fov * 0.5f));
-    camera->setPosition(box.center() + dir * distance);
-    camera->setTarget(box.center());
-    camera->resetYaw();
-    camera->resetPitch();
-}
-
 SceneMgr::SceneMgr(acre::Scene* scene) :
     m_scene(scene)
 {
@@ -34,27 +20,14 @@ SceneMgr::~SceneMgr()
 
 void SceneMgr::initCamera()
 {
-    m_camera = new Camera;
-
     auto mainCamera = std::make_shared<acre::Camera>();
     m_cameraID      = m_scene->create(mainCamera);
     m_cameras.emplace_back(m_cameraID);
-
-    m_camera->setPosition(acre::math::float3(0.0f, 0.0f, 1.0f));
-    m_camera->setTarget(0.0f);
-    m_camera->setUp(acre::math::float3(0.0f, 1.0f, 0.0f));
-
-    m_camera->setFOV(45.0f);
-    m_camera->setAspect(1.0f);
-    m_camera->setNear(1e-1f);
-    m_camera->setFar(1e6f);
-
-    syncCamera();
 }
 
 void SceneMgr::initDirectionLight()
 {
-    auto light       = std::make_shared<acre::SunLight>();
+    auto light       = acre::createSunLight();
     light->color     = acre::math::float3(1.0, 1.0, 1.0);
     light->direction = acre::math::normalize(acre::math::float3(0, -1, -1));
     light->factor    = 1.0;
@@ -67,69 +40,10 @@ void SceneMgr::initPointLight()
     acre::PointLight point;
     point.position = acre::math::float3(0, 1, 1);
 
-    auto light   = std::make_shared<acre::Light>();
+    auto light   = acre::createLight();
     light->light = point;
     light->type  = acre::LightType::Point;
     m_lights.emplace_back(m_scene->create(light));
-}
-
-void SceneMgr::updateBox(acre::math::box3 box)
-{
-    m_box |= box;
-    resetMainCamera();
-}
-
-void SceneMgr::resetMainCamera()
-{
-    auto fov    = g_fov;
-    auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-
-    auto mainCamera = getMainCamera();
-    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
-    {
-        m_camera->setFOV(fov);
-        m_camera->setAspect(float(m_width) / float(m_height));
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-    }
-    else
-    {
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-        m_camera->setLeft(-radius);
-        m_camera->setRight(radius);
-        m_camera->setTop(radius);
-        m_camera->setBottom(-radius);
-    }
-
-    forwardView();
-}
-
-void SceneMgr::syncCamera()
-{
-    auto mainCamera      = getMainCamera();
-    mainCamera->position = m_camera->getPosition();
-    mainCamera->target   = m_camera->getTarget();
-    mainCamera->up       = m_camera->getUp();
-
-    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
-    {
-        auto& projection     = std::get<acre::Camera::Perspective>(mainCamera->projection);
-        projection.fov       = m_camera->getFOV();
-        projection.aspect    = m_camera->getAspect();
-        projection.nearPlane = m_camera->getNear();
-        projection.farPlane  = m_camera->getFar();
-    }
-    else
-    {
-        auto& projection       = std::get<acre::Camera::Orthonormal>(mainCamera->projection);
-        projection.nearPlane   = m_camera->getNear();
-        projection.farPlane    = m_camera->getFar();
-        projection.topPlane    = m_camera->getTop();
-        projection.bottomPlane = m_camera->getBottom();
-        projection.leftPlane   = m_camera->getLeft();
-        projection.rightPlane  = m_camera->getRight();
-    }
 }
 
 void SceneMgr::clearScene()
@@ -172,117 +86,6 @@ void SceneMgr::clearHDR()
     for (auto index : m_hdrTextures)
         m_scene->removeTexture(index);
     m_hdrTextures.resize(0);
-}
-
-void SceneMgr::resize(uint32_t width, uint32_t height)
-{
-    m_width  = width;
-    m_height = height;
-
-    auto fov    = g_fov;
-    auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-
-    auto mainCamera = getMainCamera();
-    if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
-    {
-        m_camera->setFOV(fov);
-        m_camera->setAspect(float(m_width) / float(m_height));
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-    }
-    else
-    {
-        m_camera->setNear(radius * 0.1);
-        m_camera->setFar(100000.0f);
-        m_camera->setLeft(-radius);
-        m_camera->setRight(radius);
-        m_camera->setTop(radius);
-        m_camera->setBottom(-radius);
-    }
-
-    syncCamera();
-}
-
-void SceneMgr::cameraMove(acre::math::float3 delta)
-{
-    auto radius = acre::math::length(m_box.diagonal()) * 0.5f;
-    m_camera->translate(delta * radius * 0.02f);
-
-    syncCamera();
-}
-
-void SceneMgr::cameraForward()
-{
-    auto dir = acre::math::normalize(m_camera->getTarget() - m_camera->getPosition());
-    cameraMove(dir);
-}
-
-void SceneMgr::cameraBack()
-{
-    auto dir = acre::math::normalize(m_camera->getTarget() - m_camera->getPosition());
-    cameraMove(-dir);
-}
-
-void SceneMgr::cameraRotateY(float degree)
-{
-    m_camera->rotate(0, acre::math::radians(degree));
-
-    syncCamera();
-}
-
-void SceneMgr::cameraRotateX(float degree)
-{
-    m_camera->rotate(acre::math::radians(degree), 0);
-
-    syncCamera();
-}
-
-void SceneMgr::leftView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(1, 0, 0));
-    m_camera->rotate(0, M_PI * 1.5);
-
-    syncCamera();
-}
-
-void SceneMgr::rightView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(-1, 0, 0));
-    m_camera->rotate(0, M_PI * 0.5);
-
-    syncCamera();
-}
-
-void SceneMgr::forwardView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, 0, 1));
-    m_camera->rotate(0, M_PI);
-
-    syncCamera();
-}
-
-void SceneMgr::backView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, 0, -1));
-    m_camera->rotate(0, 0);
-
-    syncCamera();
-}
-
-void SceneMgr::topView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, 1, 0));
-    m_camera->rotate(M_PI * 0.5, 0);
-
-    syncCamera();
-}
-
-void SceneMgr::bottomView()
-{
-    setCameraView(m_camera, m_box, acre::math::float3(0, -1, 0));
-    m_camera->rotate(-M_PI * 0.5, 0);
-
-    syncCamera();
 }
 
 void SceneMgr::saveFrame(const std::string& fileName, acre::Pixels* pixels)
@@ -364,60 +167,30 @@ void SceneMgr::create(acre::component::DrawPtr draw)
 
 acre::ImageID SceneMgr::findImage(uint32_t index)
 {
-    if (index < m_images.size())
-    {
-        return m_images[index];
-    }
-
-    return RESOURCE_ID_VALID;
+    return index < m_images.size() ? m_images[index] : RESOURCE_ID_VALID;
 }
 
 acre::TextureID SceneMgr::findTexture(uint32_t index)
 {
-    if (index < m_textures.size())
-    {
-        return m_textures[index];
-    }
-
-    return RESOURCE_ID_VALID;
+    return index < m_textures.size() ? m_textures[index] : RESOURCE_ID_VALID;
 }
 
 acre::GeometryID SceneMgr::findGeometry(uint32_t index)
 {
-    if (index < m_geometries.size())
-    {
-        return m_geometries[index];
-    }
-
-    return RESOURCE_ID_VALID;
+    return index < m_geometries.size() ? m_geometries[index] : RESOURCE_ID_VALID;
 }
 
 acre::MaterialID SceneMgr::findMaterial(uint32_t index)
 {
-    if (index < m_materials.size())
-    {
-        return m_materials[index];
-    }
-
-    return RESOURCE_ID_VALID;
+    return index < m_materials.size() ? m_materials[index] : RESOURCE_ID_VALID;
 }
 
 acre::TransformID SceneMgr::findTransform(uint32_t index)
 {
-    if (index < m_transforms.size())
-    {
-        return m_transforms[index];
-    }
-
-    return RESOURCE_ID_VALID;
+    return index < m_transforms.size() ? m_transforms[index] : RESOURCE_ID_VALID;
 }
 
 acre::EntityID SceneMgr::findEntity(uint32_t index)
 {
-    if (index < m_entities.size())
-    {
-        return m_entities[index];
-    }
-
-    return RESOURCE_ID_VALID;
+    return index < m_entities.size() ? m_entities[index] : RESOURCE_ID_VALID;
 }

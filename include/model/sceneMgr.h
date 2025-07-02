@@ -28,31 +28,11 @@ class SceneMgr
 
     acre::math::box3 m_box      = acre::math::box3::empty();
     acre::CameraID   m_cameraID = -1;
-    Camera*          m_camera   = nullptr;
-
-    uint32_t m_width  = 1;
-    uint32_t m_height = 1;
 
 public:
     SceneMgr(acre::Scene*);
 
-    virtual ~SceneMgr();
-
-    void resize(uint32_t width, uint32_t height);
-
-    void resetMainCamera();
-    void cameraMove(acre::math::float3);
-    void cameraRotateY(float degree);
-    void cameraRotateX(float degree);
-    void cameraForward();
-    void cameraBack();
-
-    void leftView();
-    void rightView();
-    void forwardView();
-    void backView();
-    void topView();
-    void bottomView();
+    ~SceneMgr();
 
     void clearScene();
     void clearHDR();
@@ -79,8 +59,9 @@ public:
     acre::TransformID findTransform(uint32_t index);
     acre::EntityID    findEntity(uint32_t index);
 
+    auto getBox() { return m_box; }
     void resetBox() { m_box = acre::math::box3::empty(); }
-    void updateBox(acre::math::box3 box);
+    void mergeBox(acre::math::box3 box) { m_box |= box; }
 
     auto getCameras() { return m_cameras; }
     auto getCameraID() { return m_cameraID; }
@@ -127,6 +108,4 @@ private:
     void initCamera();
     void initDirectionLight();
     void initPointLight();
-
-    void syncCamera();
 };

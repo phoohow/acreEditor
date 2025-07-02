@@ -102,8 +102,10 @@ void MenuBar::onOpenScene()
 
     if (!fileName.empty())
     {
+        m_scene->clearScene();
         m_loader->loadScene(fileName);
-        // m_scene->createScene();
+
+        m_resetView();
         m_flushState();
         m_flushFrame();
     }

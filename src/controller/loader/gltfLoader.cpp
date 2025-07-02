@@ -575,5 +575,5 @@ void GLTFLoader::createComponent()
         }
     }
 
-    m_scene->updateBox(sceneBox);
+    m_scene->mergeBox(sceneBox);
 }

@@ -20,7 +20,7 @@ struct PathTracing;
 } // namespace acre
 
 class SceneMgr;
-class Loader;
+class CameraController;
 class RenderWindow : public QWindow
 {
     std::unique_ptr<acre::DeviceMgr>           m_deviceMgr    = nullptr;
@@ -37,7 +37,8 @@ class RenderWindow : public QWindow
     QPointF m_mousePosition;
     bool    m_enableRotate = false;
 
-    SceneMgr* m_scene = nullptr;
+    SceneMgr*         m_scene            = nullptr;
+    CameraController* m_cameraController = nullptr;
 
 protected:
     virtual void exposeEvent(QExposeEvent*) override;
@@ -60,6 +61,8 @@ public:
     void render();
 
     void showProfiler();
+
+    void resetView();
 
     void saveFrame(const std::string& fileName);
 

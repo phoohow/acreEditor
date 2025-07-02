@@ -42,6 +42,7 @@ int runEditor(int argc, char* argv[])
     mainWindow->setMenuBar(menuBar->getMenuBar());
     menuBar->setFlushFrameCallBack(flushFrameFunc);
     menuBar->setSaveFrameCallBack(saveFrameFunc);
+    menuBar->setResetViewCallBack([window]() { window->resetView(); });
 
     // SideBar
     auto sideBar = new SideBar(window->getScene());
@@ -50,10 +51,7 @@ int runEditor(int argc, char* argv[])
     // BottomBar
     auto bottomBar = new BottomBar(window->getScene());
     bottomBar->setFlushFrameCallBack(flushFrameFunc);
-    auto flushStateFunc = [bottomBar]() {
-        bottomBar->flushState();
-    };
-    menuBar->setFlushStateCallBack(flushStateFunc);
+    menuBar->setFlushStateCallBack([bottomBar]() { bottomBar->flushState(); });
 
     auto hSplitter = new QSplitter(Qt::Horizontal);
     hSplitter->addWidget(container);
