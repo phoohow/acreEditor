@@ -1,7 +1,7 @@
-#include <ui/renderWindow.h>
-#include <ui/menuBar.h>
-#include <ui/sideBar.h>
-#include <ui/bottomBar.h>
+#include <view/renderWindow.h>
+#include <view/menuBar.h>
+#include <view/sideBar.h>
+#include <view/bottomBar.h>
 
 #include <QGuiApplication>
 #include <QApplication>
