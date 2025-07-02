@@ -12,13 +12,8 @@ BottomBar::BottomBar(SceneMgr* scene, QWidget* parent) :
     m_mainLayout = new QVBoxLayout(this);
     this->setLayout(m_mainLayout);
 
-    m_cmdWidget = new CmdWidget(scene, this);
-    m_cmdLayout = new QVBoxLayout(m_cmdWidget);
-    m_cmdLayout->setContentsMargins(0, 0, 0, 0);
-
+    m_cmdWidget  = new CmdWidget(scene, this);
     m_infoWidget = new InfoWidget(scene, this);
-    m_infoLayout = new QVBoxLayout(m_infoWidget);
-    m_infoLayout->setContentsMargins(0, 0, 0, 0);
 
     auto hSplitter = new QSplitter(Qt::Horizontal);
     hSplitter->addWidget(m_infoWidget);

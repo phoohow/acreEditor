@@ -34,7 +34,7 @@ int runEditor(int argc, char* argv[])
     auto saveFrameFunc = [window, statusBar](const std::string& fileName) {
         statusBar->showMessage("Start saving frame ...", 0);
         window->saveFrame(fileName);
-        statusBar->showMessage((std::string("Saved frame succeed: ") + fileName).c_str(), 5000);
+        statusBar->showMessage((std::string("Saved frame succeed: ") + fileName).c_str(), 10000);
     };
 
     // MenuBar

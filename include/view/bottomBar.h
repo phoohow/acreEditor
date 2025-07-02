@@ -16,9 +16,7 @@ class BottomBar : public QWidget
 
     QVBoxLayout* m_mainLayout;
     InfoWidget*  m_infoWidget;
-    QVBoxLayout* m_infoLayout;
     CmdWidget*   m_cmdWidget;
-    QVBoxLayout* m_cmdLayout;
 
 public:
     explicit BottomBar(SceneMgr* scene, QWidget* parent = nullptr);
