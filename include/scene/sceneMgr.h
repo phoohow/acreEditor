@@ -9,12 +9,11 @@ namespace acre
 struct Pixels;
 }
 
-class BaseScene
+class SceneMgr
 {
-protected:
     acre::Scene*                   m_scene;
     std::vector<acre::EntityID>    m_entities;
-    std::vector<acre::GeometryID>  m_geometrys;
+    std::vector<acre::GeometryID>  m_geometries;
     std::vector<acre::MaterialID>  m_materials;
     std::vector<acre::TransformID> m_transforms;
     std::vector<acre::CameraID>    m_cameras;
@@ -23,8 +22,8 @@ protected:
     std::vector<acre::ImageID>     m_images;
     std::vector<acre::SamplerID>   m_samplers;
 
-    std::vector<acre::TextureID> m_textureExts;
-    std::vector<acre::ImageID>   m_imageExts;
+    std::vector<acre::TextureID> m_hdrTextures;
+    std::vector<acre::ImageID>   m_hdrImages;
 
     acre::math::box3 m_box      = acre::math::box3::empty();
     acre::CameraID   m_cameraID = -1;
@@ -34,17 +33,13 @@ protected:
     uint32_t m_height = 1;
 
 public:
-    BaseScene(acre::Scene*);
+    SceneMgr(acre::Scene*);
 
-    virtual ~BaseScene();
-
-    virtual void createScene() = 0;
-
-    virtual void registerResource() = 0;
+    virtual ~SceneMgr();
 
     void resize(uint32_t width, uint32_t height);
 
-    void setMainCamera();
+    void resetMainCamera();
     void cameraMove(acre::math::float3);
     void cameraRotateY(float degree);
     void cameraRotateX(float degree);
@@ -58,11 +53,33 @@ public:
     void topView();
     void bottomView();
 
-    virtual void loadGLTF(const std::string& fileName) {}
-    void         clearScene();
-    virtual void loadHDR(const std::string& fileName) {}
-    void         clearHDR();
-    virtual void saveFrame(const std::string& fileName, acre::Pixels* pixels) {}
+    void clearScene();
+    void clearHDR();
+    void saveFrame(const std::string& fileName, acre::Pixels* pixels);
+
+    acre::UintBufferID   createVIndexBuffer(acre::UintBufferPtr);
+    acre::Float3BufferID createVPositionBuffer(acre::Float3BufferPtr);
+    acre::Float2BufferID createVUVBuffer(acre::Float2BufferPtr);
+    acre::Float3BufferID createVNormalBuffer(acre::Float3BufferPtr);
+    acre::Float4BufferID createVTangentBuffer(acre::Float4BufferPtr);
+
+    acre::ImageID     create(acre::ImagePtr);
+    acre::TextureID   create(acre::TexturePtr);
+    acre::GeometryID  create(acre::GeometryPtr);
+    acre::MaterialID  create(acre::MaterialPtr);
+    acre::TransformID create(acre::TransformPtr);
+    acre::EntityID    create(acre::EntityPtr);
+    void              create(acre::component::DrawPtr);
+
+    acre::ImageID     findImage(uint32_t index);
+    acre::TextureID   findTexture(uint32_t index);
+    acre::GeometryID  findGeometry(uint32_t index);
+    acre::MaterialID  findMaterial(uint32_t index);
+    acre::TransformID findTransform(uint32_t index);
+    acre::EntityID    findEntity(uint32_t index);
+
+    void resetBox() { m_box = acre::math::box3::empty(); }
+    void updateBox(acre::math::box3 box);
 
     auto getCameras() { return m_cameras; }
     auto getCameraID() { return m_cameraID; }
@@ -75,11 +92,12 @@ public:
     auto getLightCount() { return m_lights.size(); }
     auto getLight(acre::LightID id) { return m_scene->findLight(id); }
     auto getHDRLight() { return m_scene->getHDRLight(); }
+    void setHDRLight(acre::HDRLightPtr light) { m_scene->setHDRLight(light); }
     auto getSunLight() { return m_scene->getSunLight(); }
     void updateLight(acre::LightID id) { m_scene->updateLight(id); }
 
-    auto getGeometrys() { return m_geometrys; }
-    auto getGeometryCount() { return m_geometrys.size(); }
+    auto getGeometrys() { return m_geometries; }
+    auto getGeometryCount() { return m_geometries.size(); }
     auto getGeometry(acre::GeometryID id) { return m_scene->findGeometry(id); }
     auto getVIndexBuffer(acre::UintBufferID id) { return m_scene->findVIndexBuffer(id); }
     auto getVPositionBuffer(acre::Float3BufferID id) { return m_scene->findVPositionBuffer(id); }
@@ -102,13 +120,12 @@ public:
     auto getTextureCount() { return m_textures.size(); }
     auto getImageCount() { return m_images.size(); }
 
-protected:
-    void swapCamera();
-
 private:
     void init();
 
-    void createDirectionLight();
-    void createPointLight();
-    void createCamera();
+    void initCamera();
+    void initDirectionLight();
+    void initPointLight();
+
+    void syncCamera();
 };

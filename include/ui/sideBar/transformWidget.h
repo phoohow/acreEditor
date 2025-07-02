@@ -8,10 +8,10 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-class BaseScene;
+class SceneMgr;
 class TransformWidget : public QWidget
 {
-    BaseScene*        m_scene;
+    SceneMgr*        m_scene;
     acre::TransformPtr m_transform;
     acre::TransformID  m_transformID;
 
@@ -30,7 +30,7 @@ class TransformWidget : public QWidget
     QLineEdit*   m_lineEdit_scale_z;
 
 public:
-    explicit TransformWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit TransformWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     ~TransformWidget();
 

@@ -9,10 +9,10 @@
 
 #include <functional>
 
-class BaseScene;
+class SceneMgr;
 class InfoWidget : public QWidget
 {
-    BaseScene* m_scene = nullptr;
+    SceneMgr* m_scene = nullptr;
 
     std::function<void()> m_flushFrame;
 
@@ -27,7 +27,7 @@ class InfoWidget : public QWidget
     QWidget*     m_logTab;
 
 public:
-    explicit InfoWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit InfoWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
 

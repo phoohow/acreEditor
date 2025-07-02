@@ -4,10 +4,10 @@
 
 #include <functional>
 
-class BaseScene;
+class SceneMgr;
 class BottomBar : public QWidget
 {
-    BaseScene* m_scene = nullptr;
+    SceneMgr* m_scene = nullptr;
 
     std::function<void()> m_flushFrame;
 
@@ -18,7 +18,7 @@ class BottomBar : public QWidget
     QVBoxLayout* m_cmdLayout;
 
 public:
-    explicit BottomBar(BaseScene* scene, QWidget* parent = nullptr);
+    explicit BottomBar(SceneMgr* scene, QWidget* parent = nullptr);
 
     void setFlushFrameCallBack(std::function<void()> func);
 

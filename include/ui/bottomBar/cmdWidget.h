@@ -9,10 +9,10 @@
 
 #include <functional>
 
-class BaseScene;
+class SceneMgr;
 class CmdWidget : public QWidget
 {
-    BaseScene* m_scene = nullptr;
+    SceneMgr* m_scene = nullptr;
 
     std::function<void()> m_flushFrame;
 
@@ -25,7 +25,7 @@ class CmdWidget : public QWidget
     QWidget*     m_cmdTab;
 
 public:
-    explicit CmdWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit CmdWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
 

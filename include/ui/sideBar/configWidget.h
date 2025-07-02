@@ -5,10 +5,10 @@
 #include <QToolBox>
 #include <QListWidget>
 
-class BaseScene;
+class SceneMgr;
 class ConfigWidget : public QWidget
 {
-    BaseScene* m_scene;
+    SceneMgr* m_scene;
 
     QToolBox*    m_toolBox;
     QVBoxLayout* m_layout;
@@ -18,7 +18,7 @@ class ConfigWidget : public QWidget
     QListWidget* m_animationList;
 
 public:
-    explicit ConfigWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit ConfigWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     ~ConfigWidget();
 

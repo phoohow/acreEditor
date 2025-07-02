@@ -1,5 +1,6 @@
 #include <ui/menuBar.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
+#include <scene/gltfLoader.h>
 
 #include <QMenu>
 #include <QAction>
@@ -8,9 +9,10 @@
 #include <QPushButton>
 #include <QDateTime>
 
-MenuBar::MenuBar(BaseScene* scene, QWidget* parent) :
+MenuBar::MenuBar(SceneMgr* scene, QWidget* parent) :
     QMenuBar(parent),
-    m_scene(scene)
+    m_scene(scene),
+    m_loader(new GLTFLoader(m_scene))
 {
     initFileMenu();
     initEditMenu();
@@ -97,8 +99,8 @@ void MenuBar::onOpenScene()
 
     if (!fileName.empty())
     {
-        m_scene->loadGLTF(fileName);
-        m_scene->createScene();
+        m_loader->loadScene(fileName);
+        // m_scene->createScene();
         m_flushState();
         m_flushFrame();
     }
@@ -130,7 +132,7 @@ void MenuBar::onOpenHDR()
 
     if (!fileName.empty())
     {
-        m_scene->loadHDR(fileName);
+        m_loader->loadHDR(fileName);
         m_flushFrame();
     }
 }

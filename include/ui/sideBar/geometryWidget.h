@@ -8,10 +8,10 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-class BaseScene;
+class SceneMgr;
 class GeometryWidget : public QWidget
 {
-    BaseScene*       m_scene;
+    SceneMgr*       m_scene;
     acre::GeometryID  m_geometryID = -1;
     acre::GeometryPtr m_geometry;
 
@@ -28,7 +28,7 @@ class GeometryWidget : public QWidget
     QLineEdit*   m_lineEdit_vertexCount;
 
 public:
-    explicit GeometryWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit GeometryWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     ~GeometryWidget();
 

@@ -1,7 +1,7 @@
 #include <ui/bottomBar/infoWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
-InfoWidget::InfoWidget(BaseScene* scene, QWidget* parent) :
+InfoWidget::InfoWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
     m_mainLayout = new QVBoxLayout(this);

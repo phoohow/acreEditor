@@ -10,7 +10,7 @@
 
 #include <functional>
 
-class BaseScene;
+class SceneMgr;
 class LightWidget : public QWidget
 {
     enum LightType
@@ -20,7 +20,7 @@ class LightWidget : public QWidget
         Point,
     };
 
-    BaseScene* m_scene;
+    SceneMgr* m_scene;
 
     std::function<void()> m_flushFrame;
 
@@ -63,7 +63,7 @@ class LightWidget : public QWidget
     QLineEdit*   m_lineEdit_position_z;
 
 public:
-    explicit LightWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit LightWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
 

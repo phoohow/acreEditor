@@ -19,7 +19,8 @@ struct PathTracing;
 } // namespace config
 } // namespace acre
 
-class BaseScene;
+class SceneMgr;
+class Loader;
 class RenderWindow : public QWindow
 {
     std::unique_ptr<acre::DeviceMgr>           m_deviceMgr    = nullptr;
@@ -36,7 +37,7 @@ class RenderWindow : public QWindow
     QPointF m_mousePosition;
     bool    m_enableRotate = false;
 
-    BaseScene* m_scene = nullptr;
+    SceneMgr* m_scene = nullptr;
 
 protected:
     virtual void exposeEvent(QExposeEvent*) override;

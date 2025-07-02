@@ -1,7 +1,6 @@
 #include <config.h>
 #include <ui/renderWindow.h>
-#include <scene/triangleScene.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
 #include <acre/render/deviceMgr.h>
 #include <acre/render/swapchain.h>
@@ -314,8 +313,8 @@ void RenderWindow::createRenderer()
 
 void RenderWindow::initScene()
 {
-    // m_scene = new TriangleScene(m_renderScene);
-    m_scene = new GLTFScene(m_renderScene.get());
+    // m_scene = new TriangleLoader(m_renderScene);
+    m_scene = new SceneMgr(m_renderScene.get());
     switch (g_renderPath)
     {
         case acre::RenderPath::rRasterTriangle:

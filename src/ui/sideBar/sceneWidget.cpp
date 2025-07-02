@@ -5,7 +5,7 @@
 #include <ui/sideBar/geometryWidget.h>
 #include <ui/sideBar/transformWidget.h>
 
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -23,7 +23,7 @@
 #define toMaterialWidget  static_cast<MaterialWidget*>(m_materialWidget)
 #define toTransformWidget static_cast<TransformWidget*>(m_transformWidget)
 
-SceneWidget::SceneWidget(BaseScene* scene, QWidget* parent) :
+SceneWidget::SceneWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
     m_layout = new QVBoxLayout(this);

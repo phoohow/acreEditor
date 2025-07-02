@@ -6,7 +6,7 @@
 #include <QVBoxLayout>
 #include <functional>
 
-class BaseScene;
+class SceneMgr;
 class SceneWidget : public QWidget
 {
     enum TabWidget : uint8_t
@@ -18,7 +18,7 @@ class SceneWidget : public QWidget
         wTransform,
     };
 
-    BaseScene* m_scene = nullptr;
+    SceneMgr* m_scene = nullptr;
 
     std::function<void()> m_flushFrame;
 
@@ -39,7 +39,7 @@ class SceneWidget : public QWidget
     QTreeWidgetItem* m_transformRoot = nullptr;
 
 public:
-    explicit SceneWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit SceneWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     void setFlushFrameCallBack(std::function<void()> func);
 

@@ -9,10 +9,10 @@
 
 #include <functional>
 
-class BaseScene;
+class SceneMgr;
 class MaterialWidget : public QWidget
 {
-    BaseScene* m_scene;
+    SceneMgr* m_scene;
 
     std::function<void()> m_flushFrame;
 
@@ -57,7 +57,7 @@ class MaterialWidget : public QWidget
     QLineEdit* m_lineEdit_normalMap;
 
 public:
-    explicit MaterialWidget(BaseScene* scene, QWidget* parent = nullptr);
+    explicit MaterialWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     ~MaterialWidget();
 

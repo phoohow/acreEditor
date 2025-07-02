@@ -1,10 +1,10 @@
 #include <ui/sideBar/transformWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
 #include <QDoubleValidator>
 
 
-TransformWidget::TransformWidget(BaseScene* scene, QWidget* parent) :
+TransformWidget::TransformWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene),
     QWidget(parent)
 {

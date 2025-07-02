@@ -1,7 +1,7 @@
 #include <ui/bottomBar/cmdWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
-CmdWidget::CmdWidget(BaseScene* scene, QWidget* parent) :
+CmdWidget::CmdWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
     m_mainLayout = new QVBoxLayout(this);

@@ -5,12 +5,12 @@
 #include <QTabWidget>
 #include <QStackedWidget>
 
-class BaseScene;
+class SceneMgr;
 class SceneWidget;
 class ConfigWidget;
 class SideBar : public QWidget
 {
-    BaseScene* m_scene;
+    SceneMgr* m_scene;
 
     QVBoxLayout*    m_layout;
     QTabWidget*     m_selector;
@@ -20,7 +20,7 @@ class SideBar : public QWidget
     ConfigWidget* m_configWidget;
 
 public:
-    SideBar(BaseScene* scene, QWidget* parent = nullptr);
+    SideBar(SceneMgr* scene, QWidget* parent = nullptr);
 
     ~SideBar();
 

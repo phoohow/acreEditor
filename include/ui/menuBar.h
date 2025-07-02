@@ -5,10 +5,12 @@
 #include <QLabel>
 #include <functional>
 
-class BaseScene;
+class SceneMgr;
+class Loader;
 class MenuBar : QMenuBar
 {
-    BaseScene* m_scene = nullptr;
+    SceneMgr* m_scene  = nullptr;
+    Loader*   m_loader = nullptr;
 
     std::function<void()>                            m_flushFrame;
     std::function<void()>                            m_flushState;
@@ -43,7 +45,7 @@ class MenuBar : QMenuBar
     QAction* m_action_about;
 
 public:
-    explicit MenuBar(BaseScene* scene, QWidget* parent = nullptr);
+    explicit MenuBar(SceneMgr* scene, QWidget* parent = nullptr);
 
     auto getMenuBar() { return static_cast<QMenuBar*>(this); }
 

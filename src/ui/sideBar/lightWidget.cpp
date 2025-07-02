@@ -1,10 +1,10 @@
 #include <ui/sideBar/lightWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
 #include <QDoubleValidator>
 #include <QIntValidator>
 
-LightWidget::LightWidget(BaseScene* scene, QWidget* parent) :
+LightWidget::LightWidget(SceneMgr* scene, QWidget* parent) :
     QWidget(parent),
     m_scene(scene),
     m_type(LightType::Sun)

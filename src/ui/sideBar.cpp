@@ -1,9 +1,9 @@
 #include <ui/sideBar.h>
 #include <ui/sideBar/sceneWidget.h>
 #include <ui/sideBar/configWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
-SideBar::SideBar(BaseScene* scene, QWidget* parent) :
+SideBar::SideBar(SceneMgr* scene, QWidget* parent) :
     QWidget(parent), m_scene(scene)
 {
     m_scene        = scene;

@@ -1,9 +1,9 @@
 #include <ui/sideBar/geometryWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
 #include <QDoubleValidator>
 
-GeometryWidget::GeometryWidget(BaseScene* scene, QWidget* parent) :
+GeometryWidget::GeometryWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene),
     QWidget(parent)
 {

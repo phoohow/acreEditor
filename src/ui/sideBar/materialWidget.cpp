@@ -1,10 +1,10 @@
 #include <ui/sideBar/materialWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
 #include <QDoubleValidator>
 #include <QIntValidator>
 
-MaterialWidget::MaterialWidget(BaseScene* scene, QWidget* parent) :
+MaterialWidget::MaterialWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene),
     QWidget(parent)
 {

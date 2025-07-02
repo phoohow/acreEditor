@@ -1,10 +1,10 @@
 #include <ui/bottomBar.h>
 
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
 #include <QSplitter>
 
-BottomBar::BottomBar(BaseScene* scene, QWidget* parent) :
+BottomBar::BottomBar(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
     m_mainLayout = new QVBoxLayout(this);

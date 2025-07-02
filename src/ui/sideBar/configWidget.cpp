@@ -1,7 +1,7 @@
 #include <ui/sideBar/configWidget.h>
-#include <scene/gltfScene.h>
+#include <scene/sceneMgr.h>
 
-ConfigWidget::ConfigWidget(BaseScene* scene, QWidget* parent) :
+ConfigWidget::ConfigWidget(SceneMgr* scene, QWidget* parent) :
     QWidget(parent), m_scene(scene)
 {
     m_toolBox       = new QToolBox(this);
