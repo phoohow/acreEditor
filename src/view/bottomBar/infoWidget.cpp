@@ -92,3 +92,9 @@ void InfoWidget::updateLogInfo()
     // logInfo += m_scene->getLogEntries();
     m_logTextEdit->setText(logInfo);
 }
+
+void InfoWidget::showProfiler(const std::string& profiler)
+{
+    m_selector->setCurrentIndex(1);
+    m_logTextEdit->setText(profiler.c_str());
+}

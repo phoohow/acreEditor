@@ -21,6 +21,14 @@
 static constexpr float  g_ratio      = 1.5f;
 static acre::RenderPath g_renderPath = acre::RenderPath::rRasterGLTF;
 
+template <uint32_t N>
+std::string toNchar(const std::string& str)
+{
+    std::string ret = str;
+    ret.resize(N, ' ');
+    return ret;
+}
+
 RenderWindow::RenderWindow() :
     QWindow()
 {
@@ -176,7 +184,7 @@ void RenderWindow::keyPressEvent(QKeyEvent* event)
         case Qt::Key_5: m_cameraController->topView(); break;
         case Qt::Key_0: m_cameraController->bottomView(); break;
         case Qt::Key_R: m_renderer->markShaderDirty(); break;
-        case Qt::Key_P: showProfiler(); break;
+        case Qt::Key_P: getProfiler(); break;
         default: break;
     }
 
@@ -187,9 +195,9 @@ void RenderWindow::keyReleaseEvent(QKeyEvent* event)
 {
 }
 
-void RenderWindow::showProfiler()
+std::string RenderWindow::getProfiler()
 {
-    if (!m_renderer) return;
+    if (!m_renderer) return "";
 
     if (!m_profiler)
     {
@@ -199,17 +207,20 @@ void RenderWindow::showProfiler()
 
     render();
     m_renderer->getProfiler(m_profiler);
-    auto next      = m_profiler;
-    auto totalTime = 0.0;
 
+    std::string profiler  = "";
+    auto        totalTime = 0.0;
+    auto        next      = m_profiler;
     for (int i = 0; i < m_profilerCount; i++)
     {
-        std::cout << "name:" << next->name << " time:" << next->time << "ms" << std::endl;
+        profiler += "name:" + toNchar<15>(next->name) + "\ttime:" + std::to_string(next->time) + "ms\n";
         totalTime += next->time;
         next++;
     }
 
-    std::cout << "total time:" << totalTime << "ms" << std::endl;
+    profiler += "total time:\t" + std::to_string(totalTime) + "ms\n";
+
+    return profiler;
 }
 
 void RenderWindow::render()

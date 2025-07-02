@@ -13,6 +13,7 @@ class BottomBar : public QWidget
     SceneMgr* m_scene = nullptr;
 
     std::function<void()> m_flushFrame;
+    std::function<void()> m_showProfiler;
 
     QVBoxLayout* m_mainLayout;
     InfoWidget*  m_infoWidget;
@@ -23,5 +24,9 @@ public:
 
     void setFlushFrameCallBack(std::function<void()> func);
 
+    void setShowProfilerCallback(std::function<void()> func);
+
     void flushState();
+
+    void showProfiler(const std::string& profiler);
 };

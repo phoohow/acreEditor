@@ -28,9 +28,21 @@ BottomBar::BottomBar(SceneMgr* scene, QWidget* parent) :
 void BottomBar::setFlushFrameCallBack(std::function<void()> func)
 {
     m_flushFrame = func;
+    m_cmdWidget->setFlushFrameCallBack(func);
+}
+
+void BottomBar::setShowProfilerCallback(std::function<void()> func)
+{
+    m_showProfiler = func;
+    m_cmdWidget->setShowProfilerCallback(func);
 }
 
 void BottomBar::flushState()
 {
     m_infoWidget->flushState();
+}
+
+void BottomBar::showProfiler(const std::string& profiler)
+{
+    m_infoWidget->showProfiler(profiler);
 }

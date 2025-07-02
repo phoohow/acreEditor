@@ -32,6 +32,8 @@ public:
 
     void flushState();
 
+    void showProfiler(const std::string& profiler);
+
 private:
     void initState();
     void initLog();

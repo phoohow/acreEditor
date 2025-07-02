@@ -202,7 +202,7 @@ void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)
         case TabWidget::wCamera:
         {
             current->takeChildren();
-            auto cameras = m_scene->getCameras();
+            auto cameras = m_scene->getCameraList();
             for (auto index : cameras)
             {
                 QTreeWidgetItem* item = new QTreeWidgetItem(current);
@@ -217,7 +217,7 @@ void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)
             hdrItem->setText(0, "HDR");
             QTreeWidgetItem* sunItem = new QTreeWidgetItem(current);
             sunItem->setText(0, "Sun");
-            auto lights = m_scene->getLights();
+            auto lights = m_scene->getLightList();
             for (auto index : lights)
             {
                 QTreeWidgetItem* item = new QTreeWidgetItem(current);
@@ -228,7 +228,7 @@ void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)
         case TabWidget::wGeometry:
         {
             current->takeChildren();
-            auto geometrys = m_scene->getGeometrys();
+            auto geometrys = m_scene->getGeometryList();
             for (auto index : geometrys)
             {
                 QTreeWidgetItem* item = new QTreeWidgetItem(current);
@@ -239,7 +239,7 @@ void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)
         case TabWidget::wMaterial:
         {
             current->takeChildren();
-            auto materials = m_scene->getMaterials();
+            auto materials = m_scene->getMaterialList();
             for (auto index : materials)
             {
                 QTreeWidgetItem* item = new QTreeWidgetItem(current);
@@ -250,7 +250,7 @@ void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)
         case TabWidget::wTransform:
         {
             current->takeChildren();
-            auto transforms = m_scene->getTransforms();
+            auto transforms = m_scene->getTransformList();
             for (auto index : transforms)
             {
                 QTreeWidgetItem* item = new QTreeWidgetItem(current);

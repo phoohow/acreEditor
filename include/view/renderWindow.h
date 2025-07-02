@@ -62,7 +62,7 @@ public:
 
     void render();
 
-    void showProfiler();
+    std::string getProfiler();
 
     void resetView();
 

@@ -57,14 +57,23 @@ public:
     void resetBox() { m_box = acre::math::box3::empty(); }
     void mergeBox(acre::math::box3 box) { m_box |= box; }
 
-    auto getCameras() { return m_cameras; }
+    auto getCameraList() { return m_cameras; }
     auto getCameraID() { return m_cameraID; }
     auto getMainCamera() { return m_scene->findCamera(m_cameraID); }
     void setMainCamera(acre::CameraID id) { m_cameraID = id; }
 
+    auto getEntityList() { return m_entities; }
     auto getEntityCount() { return m_entities.size(); }
+    void setHighlightEntity(acre::EntityID id) { m_scene->highlightEntity(id); }
+    void unhighlightEntity(acre::EntityID id) { m_scene->unhighlightEntity(id); }
+    void unAliveEntity(acre::EntityID id) { m_scene->findEntity(id)->unAlive(); }
+    void removeEntity(acre::EntityID id)
+    {
+        m_entities.erase(std::find(m_entities.begin(), m_entities.end(), id));
+        m_scene->removeEntity(id);
+    }
 
-    auto getLights() { return m_lights; }
+    auto getLightList() { return m_lights; }
     auto getLightCount() { return m_lights.size(); }
     auto getLight(acre::LightID id) { return m_scene->findLight(id); }
     auto getHDRLight() { return m_scene->getHDRLight(); }
@@ -72,23 +81,34 @@ public:
     auto getSunLight() { return m_scene->getSunLight(); }
     void updateLight(acre::LightID id) { m_scene->updateLight(id); }
 
-    auto getGeometrys() { return m_geometries; }
-    auto getGeometryCount() { return m_geometries.size(); }
-    auto getGeometry(acre::GeometryID id) { return m_scene->findGeometry(id); }
     auto getVIndexBuffer(acre::UintBufferID id) { return m_scene->findVIndexBuffer(id); }
     auto getVPositionBuffer(acre::Float3BufferID id) { return m_scene->findVPositionBuffer(id); }
+
+    auto getGeometryList() { return m_geometries; }
+    auto getGeometryCount() { return m_geometries.size(); }
+    auto getGeometry(acre::GeometryID id) { return m_scene->findGeometry(id); }
     void updateGeometry(acre::GeometryID id) { m_scene->updateGeometry(id); }
     void setHighlightGeometry(acre::GeometryID id) { m_scene->highlightGeometry(id); }
     void unhighlightGeometry(acre::GeometryID id) { m_scene->unhighlightGeometry(id); }
+    void removeGeometry(acre::GeometryID id)
+    {
+        m_geometries.erase(std::find(m_geometries.begin(), m_geometries.end(), id));
+        m_scene->removeGeometry(id);
+    }
 
-    auto getMaterials() { return m_materials; }
+    auto getMaterialList() { return m_materials; }
     auto getMaterialCount() { return m_materials.size(); }
     auto getMaterial(acre::MaterialID id) { return m_scene->findMaterial(id); }
     void updateMaterial(acre::MaterialID id) { m_scene->updateMaterial(id); }
     void setHighlightMaterial(acre::MaterialID id) { m_scene->highlightMaterial(id); }
     void unhighlightMaterial(acre::MaterialID id) { m_scene->unhighlightMaterial(id); }
+    void removeMaterial(acre::MaterialID id)
+    {
+        m_materials.erase(std::find(m_materials.begin(), m_materials.end(), id));
+        m_scene->removeMaterial(id);
+    }
 
-    auto getTransforms() { return m_transforms; }
+    auto getTransformList() { return m_transforms; }
     auto getTransformCount() { return m_transforms.size(); }
     auto getTransform(acre::TransformID id) { return m_scene->findTransform(id); }
     void updateTransform(acre::TransformID id) { m_scene->updateTransform(id); }
