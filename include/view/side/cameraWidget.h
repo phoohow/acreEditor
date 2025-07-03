@@ -13,7 +13,7 @@ class CameraWidget : public QWidget
 {
     acre::CameraPtr m_camera = nullptr;
 
-    std::function<void()> m_flushFrameFunc;
+    std::function<void()> m_renderFrameFunc;
 
     QVBoxLayout* m_layout;
     QLabel*      m_label_eye;
@@ -36,7 +36,7 @@ public:
 
     ~CameraWidget();
 
-    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrameFunc = func; }
+    void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
 
     void setCamera(acre::CameraPtr camera) { m_camera = camera; }
 

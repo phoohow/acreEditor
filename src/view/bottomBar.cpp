@@ -25,10 +25,9 @@ BottomBar::BottomBar(SceneMgr* scene, QWidget* parent) :
     m_mainLayout->addStretch();
 }
 
-void BottomBar::setFlushFrameCallBack(std::function<void()> func)
+void BottomBar::setRenderFrameCallBack(std::function<void()> func)
 {
-    m_flushFrameFunc = func;
-    m_cmdWidget->setFlushFrameCallBack(func);
+    m_cmdWidget->setRenderFrameCallBack(func);
 }
 
 void BottomBar::setSaveFrameCallBack(std::function<void()> func)
@@ -38,7 +37,6 @@ void BottomBar::setSaveFrameCallBack(std::function<void()> func)
 
 void BottomBar::setShowProfilerCallBack(std::function<void()> func)
 {
-    m_showProfilerFunc = func;
     m_cmdWidget->setShowProfilerCallBack(func);
 }
 

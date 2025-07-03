@@ -13,8 +13,6 @@ class InfoWidget : public QWidget
 {
     SceneMgr* m_scene = nullptr;
 
-    std::function<void()> m_flushFrameFunc;
-
     QTabWidget* m_selector;
     QLabel*     m_stateLabel;
     QTextEdit*  m_logTextEdit;
@@ -27,8 +25,6 @@ class InfoWidget : public QWidget
 
 public:
     explicit InfoWidget(SceneMgr* scene, QWidget* parent = nullptr);
-
-    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrameFunc = func; }
 
     void flushState();
 

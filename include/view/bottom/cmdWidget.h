@@ -28,7 +28,7 @@ class CmdWidget : public QWidget
 public:
     explicit CmdWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setFlushFrameCallBack(std::function<void()> func);
+    void setRenderFrameCallBack(std::function<void()> func);
 
     void setSaveFrameCallBack(std::function<void()> func);
 

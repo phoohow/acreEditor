@@ -107,14 +107,14 @@ void MenuBar::onOpenScene()
 
         m_resetView();
         m_flushState();
-        m_flushFrameFunc();
+        m_renderFrameFunc();
     }
 }
 
 void MenuBar::onClearScene()
 {
     m_scene->clearScene();
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MenuBar::onOpenHDR()
@@ -138,7 +138,7 @@ void MenuBar::onOpenHDR()
     if (!fileName.empty())
     {
         m_loader->loadHDR(fileName);
-        m_flushFrameFunc();
+        m_renderFrameFunc();
     }
 }
 

@@ -352,7 +352,7 @@ void LightWidget::onUpdateColor()
         }
     }
 
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void LightWidget::onUpdateIntensity()
@@ -385,7 +385,7 @@ void LightWidget::onUpdateIntensity()
         }
     }
 
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void LightWidget::onUpdateDirection()
@@ -398,7 +398,7 @@ void LightWidget::onUpdateDirection()
     auto z = m_lineEdit_direction_z->text();
 
     light->direction = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void LightWidget::onUpdateTexture()
@@ -408,7 +408,7 @@ void LightWidget::onUpdateTexture()
 
     auto value = m_lineEdit_texture->text();
     light->id  = value.toInt();
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void LightWidget::onUpdatePosition()
@@ -429,5 +429,5 @@ void LightWidget::onUpdatePosition()
     }
 
     m_scene->updateLight(m_lightID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }

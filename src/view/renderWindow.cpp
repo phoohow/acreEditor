@@ -18,8 +18,9 @@
 #include <iostream>
 #include <chrono>
 
-static constexpr float  g_ratio      = 1.5f;
-static acre::RenderPath g_renderPath = acre::RenderPath::rRasterGLTF;
+static constexpr float  g_pixelRatio  = 1.5f;
+static constexpr float  g_degreeRatio = 180.f;
+static acre::RenderPath g_renderPath  = acre::RenderPath::rRasterGLTF;
 
 template <uint32_t N>
 std::string toNchar(const std::string& str)
@@ -63,7 +64,7 @@ void RenderWindow::exposeEvent(QExposeEvent* event)
     //     createRenderer();
     // }
 
-    // render();
+    // renderFrame();
 }
 
 void RenderWindow::resizeEvent(QResizeEvent* event)
@@ -76,11 +77,11 @@ void RenderWindow::resizeEvent(QResizeEvent* event)
 
     if (!isVisible()) return;
 
-    m_swapchain->resize(g_ratio * width(), g_ratio * height());
+    m_swapchain->resize(g_pixelRatio * width(), g_pixelRatio * height());
 
     m_cameraController->resize(width(), height());
 
-    render();
+    renderFrame();
 }
 
 void RenderWindow::paintEvent(QPaintEvent* event)
@@ -89,7 +90,7 @@ void RenderWindow::paintEvent(QPaintEvent* event)
 
     if (!m_swapchain) return;
 
-    render();
+    renderFrame();
 }
 
 void RenderWindow::mouseMoveEvent(QMouseEvent* event)
@@ -103,12 +104,12 @@ void RenderWindow::mouseMoveEvent(QMouseEvent* event)
         m_mousePosition      = currentPosition;
         if (delta.x() != 0 || delta.y() != 0)
         {
-            m_cameraController->rotateY(delta.x() / float(width()));
-            m_cameraController->rotateX(delta.y() / float(height()));
+            m_cameraController->rotateY(delta.x() * g_degreeRatio / float(width()));
+            m_cameraController->rotateX(delta.y() * g_degreeRatio / float(height()));
         }
     }
 
-    render();
+    renderFrame();
 }
 
 void RenderWindow::mousePressEvent(QMouseEvent* event)
@@ -121,8 +122,8 @@ void RenderWindow::mousePressEvent(QMouseEvent* event)
     // Pick operate
     {
         acre::PickUnit info;
-        info.input.xPos = m_mousePosition.x() * g_ratio;
-        info.input.yPos = m_mousePosition.y() * g_ratio;
+        info.input.xPos = m_mousePosition.x() * g_pixelRatio;
+        info.input.yPos = m_mousePosition.y() * g_pixelRatio;
         m_renderer->pickTo(&info);
 
         // m_scene->setHighlightGeometry(info.geometryID);
@@ -140,11 +141,11 @@ void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
     auto delta           = currentPosition - m_mousePosition;
     if (delta.x() != 0 || delta.y() != 0)
     {
-        m_cameraController->rotateY(delta.x() / float(width()));
-        m_cameraController->rotateX(delta.y() / float(height()));
+        m_cameraController->rotateY(delta.x() * g_degreeRatio / float(width()));
+        m_cameraController->rotateX(delta.y() * g_degreeRatio / float(height()));
     }
 
-    render();
+    renderFrame();
 }
 
 void RenderWindow::wheelEvent(QWheelEvent* event)
@@ -160,7 +161,7 @@ void RenderWindow::wheelEvent(QWheelEvent* event)
         m_cameraController->moveBack();
     }
 
-    render();
+    renderFrame();
 }
 
 void RenderWindow::keyPressEvent(QKeyEvent* event)
@@ -184,11 +185,11 @@ void RenderWindow::keyPressEvent(QKeyEvent* event)
         case Qt::Key_5: m_cameraController->topView(); break;
         case Qt::Key_0: m_cameraController->bottomView(); break;
         case Qt::Key_R: m_renderer->markShaderDirty(); break;
-        case Qt::Key_P: getProfiler(); break;
+        case Qt::Key_P: std::cout << getProfiler(); break;
         default: break;
     }
 
-    render();
+    renderFrame();
 }
 
 void RenderWindow::keyReleaseEvent(QKeyEvent* event)
@@ -205,7 +206,7 @@ std::string RenderWindow::getProfiler()
         m_profiler = new acre::Profiler[m_profilerCount];
     }
 
-    render();
+    renderFrame();
     m_renderer->getProfiler(m_profiler);
 
     std::string profiler  = "";
@@ -223,7 +224,7 @@ std::string RenderWindow::getProfiler()
     return profiler;
 }
 
-void RenderWindow::render()
+void RenderWindow::renderFrame()
 {
     if (width() == 0 || height() == 0) return;
 
@@ -244,7 +245,6 @@ void RenderWindow::render()
 void RenderWindow::resetView()
 {
     m_cameraController->reset();
-    render();
 }
 
 void RenderWindow::saveFrame(const std::string& fileName)
@@ -253,7 +253,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
     // auto start = std::chrono::high_resolution_clock::now();
     // for (auto index = 0; index < 4096; ++index)
     // {
-    //     render();
+    //     renderFrame();
     // }
     // auto end      = std::chrono::high_resolution_clock::now();
     // auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
@@ -282,12 +282,12 @@ void RenderWindow::saveFrame(const std::string& fileName)
 
     // Note: need refrash to swapchain after render
     m_cameraController->resize(width(), height());
-    render();
+    renderFrame();
 }
 
 void RenderWindow::createRenderer()
 {
-    m_swapchain = std::make_unique<acre::Swapchain>(m_deviceMgr.get(), (void*)(winId()), g_ratio * width(), g_ratio * height());
+    m_swapchain = std::make_unique<acre::Swapchain>(m_deviceMgr.get(), (void*)(winId()), g_pixelRatio * width(), g_pixelRatio * height());
     m_renderer  = std::make_unique<acre::Renderer>(m_renderScene.get(), g_renderPath);
 }
 

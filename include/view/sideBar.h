@@ -24,7 +24,7 @@ public:
 
     ~SideBar();
 
-    void setFlushFrameCallBack(std::function<void()> func);
+    void setRenderFrameCallBack(std::function<void()> func);
 
 private:
     void onTabChanged(int index);

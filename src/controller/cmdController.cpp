@@ -108,7 +108,7 @@ CmdController::CmdStatus CmdController::execute(const std::string& command)
     }
 
     m_history.append(result);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 
     return status;
 }
@@ -116,7 +116,7 @@ CmdController::CmdStatus CmdController::execute(const std::string& command)
 // single cmd
 CmdController::CmdStatus CmdController::render(const std::vector<std::string>& params)
 {
-    m_flushFrameFunc();
+    m_renderFrameFunc();
     return CmdStatus::eSuccess;
 }
 

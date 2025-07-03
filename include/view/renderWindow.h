@@ -60,7 +60,7 @@ public:
 
     auto getScene() { return m_scene; }
 
-    void render();
+    void renderFrame();
 
     std::string getProfiler();
 

@@ -21,7 +21,7 @@ class SceneWidget : public QWidget
 
     SceneMgr* m_scene = nullptr;
 
-    std::function<void()> m_flushFrameFunc;
+    std::function<void()> m_renderFrameFunc;
 
     QVBoxLayout*    m_layout;
     QTreeWidget*    m_selector;
@@ -42,7 +42,7 @@ class SceneWidget : public QWidget
 public:
     explicit SceneWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setFlushFrameCallBack(std::function<void()> func);
+    void setRenderFrameCallBack(std::function<void()> func);
 
     void onUpdate();
 

@@ -101,9 +101,9 @@ void CmdWidget::onCmdSubmitted()
     m_cmdLineEdit->clear();
 }
 
-void CmdWidget::setFlushFrameCallBack(std::function<void()> func)
+void CmdWidget::setRenderFrameCallBack(std::function<void()> func)
 {
-    m_cmdController->setFlushFrameCallBack(func);
+    m_cmdController->setRenderFrameCallBack(func);
 }
 
 void CmdWidget::setSaveFrameCallBack(std::function<void()> func)

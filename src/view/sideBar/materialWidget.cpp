@@ -230,7 +230,7 @@ void MaterialWidget::onUpdateAlpha()
     updateType();
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateEmissive()
@@ -248,7 +248,7 @@ void MaterialWidget::onUpdateEmissive()
     model.emission.z  = b.toFloat();
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateNormalMap()
@@ -260,7 +260,7 @@ void MaterialWidget::onUpdateNormalMap()
     model.normalIndex = value.toFloat();
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateEmissiveMap()
@@ -271,7 +271,7 @@ void MaterialWidget::onUpdateEmissiveMap()
     model.emissionIndex = value.toFloat();
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::updateType()
@@ -307,7 +307,7 @@ void MaterialWidget::onUpdateBaseColor()
     }
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateRoughness()
@@ -325,7 +325,7 @@ void MaterialWidget::onUpdateRoughness()
     }
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateMetallic()
@@ -343,7 +343,7 @@ void MaterialWidget::onUpdateMetallic()
     }
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateBaseColorMap()
@@ -361,7 +361,7 @@ void MaterialWidget::onUpdateBaseColorMap()
     }
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateMetalRoughMap()
@@ -379,5 +379,5 @@ void MaterialWidget::onUpdateMetalRoughMap()
     }
 
     m_scene->updateMaterial(m_materialID);
-    m_flushFrameFunc();
+    m_renderFrameFunc();
 }

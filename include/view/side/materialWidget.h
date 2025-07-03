@@ -15,7 +15,7 @@ class MaterialWidget : public QWidget
 {
     SceneMgr* m_scene;
 
-    std::function<void()> m_flushFrameFunc;
+    std::function<void()> m_renderFrameFunc;
 
     acre::MaterialID  m_materialID = -1;
     acre::MaterialPtr m_material;
@@ -62,7 +62,7 @@ public:
 
     ~MaterialWidget();
 
-    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrameFunc = func; }
+    void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
 
     void setMaterial(acre::MaterialID id);
 

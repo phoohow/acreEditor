@@ -164,13 +164,13 @@ void SceneWidget::onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* 
                 toGeometryWidget->setGeometry(current->text(0).toInt());
                 toGeometryWidget->updateProperties();
                 m_scene->setHighlightGeometry(current->text(0).toInt());
-                if (m_flushFrameFunc) m_flushFrameFunc();
+                m_renderFrameFunc();
                 break;
             case TabWidget::wMaterial:
                 toMaterialWidget->setMaterial(current->text(0).toInt());
                 toMaterialWidget->updateProperties();
                 m_scene->setHighlightMaterial(current->text(0).toInt());
-                if (m_flushFrameFunc) m_flushFrameFunc();
+                m_renderFrameFunc();
                 break;
             case TabWidget::wTransform:
                 toTransformWidget->setTransform(current->text(0).toInt());
@@ -187,12 +187,12 @@ void SceneWidget::onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* 
     }
 }
 
-void SceneWidget::setFlushFrameCallBack(std::function<void()> func)
+void SceneWidget::setRenderFrameCallBack(std::function<void()> func)
 {
-    m_flushFrameFunc = func;
-    toMaterialWidget->setFlushFrameCallBack(func);
-    toLightWidget->setFlushFrameCallBack(func);
-    toCameraWidget->setFlushFrameCallBack(func);
+    m_renderFrameFunc = func;
+    toMaterialWidget->setRenderFrameCallBack(func);
+    toLightWidget->setRenderFrameCallBack(func);
+    toCameraWidget->setRenderFrameCallBack(func);
 }
 
 void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)

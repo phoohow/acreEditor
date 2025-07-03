@@ -10,7 +10,7 @@ class CmdController
     SceneMgr*   m_scene;
     std::string m_history;
 
-    std::function<void()> m_flushFrameFunc;
+    std::function<void()> m_renderFrameFunc;
     std::function<void()> m_saveFrameFunc;
     std::function<void()> m_showProfilerFunc;
 
@@ -60,7 +60,7 @@ public:
 
     ~CmdController() {}
 
-    void setFlushFrameCallBack(std::function<void()> callback) { m_flushFrameFunc = callback; }
+    void setRenderFrameCallBack(std::function<void()> callback) { m_renderFrameFunc = callback; }
     void setSaveFrameCallBack(std::function<void()> callback) { m_saveFrameFunc = callback; }
     void setShowProfilerCallBack(std::function<void()> callback) { m_showProfilerFunc = callback; }
 

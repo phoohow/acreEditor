@@ -33,9 +33,9 @@ SideBar::~SideBar()
     delete m_layout;
 }
 
-void SideBar::setFlushFrameCallBack(std::function<void()> func)
+void SideBar::setRenderFrameCallBack(std::function<void()> func)
 {
-    m_sceneWidget->setFlushFrameCallBack(func);
+    m_sceneWidget->setRenderFrameCallBack(func);
 }
 
 void SideBar::onTabChanged(int index)

@@ -27,8 +27,8 @@ int runEditor(int argc, char* argv[])
     auto container = QWidget::createWindowContainer(window);
     container->setStyleSheet("background-color: lightGreen;");
 
-    auto flushFrameFunc = [window]() {
-        window->render();
+    auto renderFrameFunc = [window]() {
+        window->renderFrame();
     };
 
     auto saveFrameFunc = [window, statusBar](const std::string& fileName) {
@@ -40,17 +40,17 @@ int runEditor(int argc, char* argv[])
     // MenuBar
     auto menuBar = new MenuBar(window->getScene(), mainWindow);
     mainWindow->setMenuBar(menuBar->getMenuBar());
-    menuBar->setFlushFrameCallBack(flushFrameFunc);
+    menuBar->setRenderFrameCallBack(renderFrameFunc);
     menuBar->setSaveFrameCallBack(saveFrameFunc);
     menuBar->setResetViewCallBack([window]() { window->resetView(); });
 
     // SideBar
     auto sideBar = new SideBar(window->getScene());
-    sideBar->setFlushFrameCallBack(flushFrameFunc);
+    sideBar->setRenderFrameCallBack(renderFrameFunc);
 
     // BottomBar
     auto bottomBar = new BottomBar(window->getScene());
-    bottomBar->setFlushFrameCallBack(flushFrameFunc);
+    bottomBar->setRenderFrameCallBack(renderFrameFunc);
     bottomBar->setSaveFrameCallBack([menuBar]() { menuBar->saveFrame(); });
     bottomBar->setShowProfilerCallBack([window, bottomBar]() {
         auto profiler = window->getProfiler();

@@ -3,7 +3,7 @@
 static constexpr double M_PI          = 3.14159265358979;
 static constexpr float  g_fov         = 60;
 static constexpr float  g_far         = 1e6f;
-static constexpr float  g_rotateSpeed = 100.0f;
+static constexpr float  g_rotateSpeed = 1.0f;
 
 static void setView(Camera* camera, acre::math::box3 box, acre::math::float3 dir)
 {
