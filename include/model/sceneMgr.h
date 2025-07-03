@@ -18,8 +18,8 @@ class SceneMgr
     std::vector<acre::ImageID>     m_images;
     std::vector<acre::SamplerID>   m_samplers;
 
-    std::vector<acre::TextureID> m_hdrTextures;
-    std::vector<acre::ImageID>   m_hdrImages;
+    std::vector<acre::TextureID> m_extTextureList;
+    std::vector<acre::ImageID>   m_extImageList;
 
     acre::math::box3 m_box      = acre::math::box3::empty();
     acre::CameraID   m_cameraID = -1;
@@ -45,6 +45,9 @@ public:
     acre::TransformID create(acre::TransformPtr);
     acre::EntityID    create(acre::EntityPtr);
     void              create(acre::component::DrawPtr);
+
+    acre::ImageID   createExt(acre::ImagePtr);
+    acre::TextureID createExt(acre::TexturePtr);
 
     acre::ImageID     findImage(uint32_t index);
     acre::TextureID   findTexture(uint32_t index);

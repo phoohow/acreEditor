@@ -14,7 +14,9 @@ public:
 
     virtual void exportScene(const std::string& fileName) {}
 
-    virtual void exportImage(const std::string& fileName, void* data, int width, int height, int channel, int pixelByte);
+    void exportImage(const std::string& fileName, void* data, int width, int height, int channel, int pixelByte);
 
-    virtual void saveFrame(const std::string& fileName, void* data, int width, int height, int channels = 4);
+    void saveFrame(const std::string& fileName, void* data, int width, int height, int channels = 4);
+
+    void exportCamera(const std::string& fileName);
 };

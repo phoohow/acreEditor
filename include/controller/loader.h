@@ -16,7 +16,18 @@ public:
 
     virtual void loadScene(const std::string& fileName) = 0;
 
-    virtual void loadHDR(const std::string& fileName);
+    void loadImage(const std::string& fileName);
 
-    virtual void loadImage(const std::string& fileName);
+    void loadHDR(const std::string& fileName);
+
+    /**
+     * @brief load camera from file
+     * @note format example:
+     *      ProjectType: perspective
+     *      fov: 60
+     *      aspect: 1.0
+     *      near: 0.1
+     *      far: 1000
+     */
+    void loadCamera(const std::string& fileName);
 };

@@ -76,13 +76,13 @@ void SceneMgr::clearScene()
 
 void SceneMgr::clearHDR()
 {
-    for (auto index : m_hdrImages)
+    for (auto index : m_extImageList)
         m_scene->removeImage(index);
-    m_hdrImages.resize(0);
+    m_extImageList.resize(0);
 
-    for (auto index : m_hdrTextures)
+    for (auto index : m_extTextureList)
         m_scene->removeTexture(index);
-    m_hdrTextures.resize(0);
+    m_extTextureList.resize(0);
 }
 
 acre::UintBufferID SceneMgr::createVIndexBuffer(acre::UintBufferPtr buffer)
@@ -155,6 +155,20 @@ acre::EntityID SceneMgr::create(acre::EntityPtr entity)
 void SceneMgr::create(acre::component::DrawPtr draw)
 {
     m_scene->createComponentDraw(draw);
+}
+
+acre::ImageID SceneMgr::createExt(acre::ImagePtr image)
+{
+    auto id = m_scene->create(image);
+    m_extImageList.push_back(id);
+    return id;
+}
+
+acre::TextureID SceneMgr::createExt(acre::TexturePtr texture)
+{
+    auto id = m_scene->create(texture);
+    m_extTextureList.push_back(id);
+    return id;
 }
 
 acre::ImageID SceneMgr::findImage(uint32_t index)
