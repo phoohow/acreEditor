@@ -30,9 +30,11 @@ public:
 
     void setRenderFrameCallBack(std::function<void()> func);
 
-    void setSaveFrameCallBack(std::function<void()> func);
-
     void setShowProfilerCallBack(std::function<void()> func);
+
+    void setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> func);
+
+    void setSaveFrameCallBack(std::function<void()> func);
 
 private:
     void initCmd();

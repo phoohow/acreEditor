@@ -119,16 +119,7 @@ void RenderWindow::mousePressEvent(QMouseEvent* event)
     m_enableRotate  = true;
     m_mousePosition = event->position();
 
-    // Pick operate
-    {
-        acre::PickUnit info;
-        info.input.xPos = m_mousePosition.x() * g_pixelRatio;
-        info.input.yPos = m_mousePosition.y() * g_pixelRatio;
-        m_renderer->pickTo(&info);
-
-        // m_scene->setHighlightGeometry(info.geometryID);
-        // std::cout << "GeometryID: " << info.geometryID << std::endl;
-    }
+    pickPixel(m_mousePosition.x() * g_pixelRatio, m_mousePosition.y() * g_pixelRatio);
 }
 
 void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
@@ -196,6 +187,24 @@ void RenderWindow::keyReleaseEvent(QKeyEvent* event)
 {
 }
 
+void RenderWindow::renderFrame()
+{
+    if (width() == 0 || height() == 0) return;
+
+    m_renderer->setupTarget(m_swapchain.get());
+
+    switch (g_renderPath)
+    {
+        case acre::RenderPath::rRasterTriangle:
+        case acre::RenderPath::rRasterGLTF: m_renderer->render((void*)m_rasterConfig.get()); break;
+        case acre::RenderPath::rRayTriangle:
+        case acre::RenderPath::rRayGLTF: m_renderer->render((void*)m_rayConfig.get()); break;
+        case acre::RenderPath::rPathGLTF: m_renderer->render((void*)m_pathConfig.get()); break;
+    }
+
+    m_swapchain->present();
+}
+
 std::string RenderWindow::getProfiler()
 {
     if (!m_renderer) return "";
@@ -224,27 +233,21 @@ std::string RenderWindow::getProfiler()
     return profiler;
 }
 
-void RenderWindow::renderFrame()
+std::string RenderWindow::pickPixel(uint32_t x, uint32_t y)
 {
-    if (width() == 0 || height() == 0) return;
+    if (!m_renderer) return "";
 
-    m_renderer->setupTarget(m_swapchain.get());
+    acre::PickUnit info;
+    info.input.xPos = x;
+    info.input.yPos = y;
+    m_renderer->pickTo(&info);
 
-    switch (g_renderPath)
-    {
-        case acre::RenderPath::rRasterTriangle:
-        case acre::RenderPath::rRasterGLTF: m_renderer->render((void*)m_rasterConfig.get()); break;
-        case acre::RenderPath::rRayTriangle:
-        case acre::RenderPath::rRayGLTF: m_renderer->render((void*)m_rayConfig.get()); break;
-        case acre::RenderPath::rPathGLTF: m_renderer->render((void*)m_pathConfig.get()); break;
-    }
+    std::string result = "";
+    result += "Entity: " + std::to_string(info.entityID) + "\n";
+    result += "Geometry: " + std::to_string(info.geometryID) + "\n";
+    result += "Material: " + std::to_string(info.materialID) + "\n";
 
-    m_swapchain->present();
-}
-
-void RenderWindow::resetView()
-{
-    m_cameraController->reset();
+    return result;
 }
 
 void RenderWindow::saveFrame(const std::string& fileName)
@@ -283,6 +286,11 @@ void RenderWindow::saveFrame(const std::string& fileName)
     // Note: need refrash to swapchain after render
     m_cameraController->resize(width(), height());
     renderFrame();
+}
+
+void RenderWindow::resetView()
+{
+    m_cameraController->reset();
 }
 
 void RenderWindow::createRenderer()

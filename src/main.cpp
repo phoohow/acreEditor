@@ -56,6 +56,10 @@ int runEditor(int argc, char* argv[])
         auto profiler = window->getProfiler();
         bottomBar->showProfiler(profiler);
     });
+    bottomBar->setPickPixelCallBack([window, bottomBar](uint32_t x, uint32_t y) {
+        auto info = window->pickPixel(x, y);
+        bottomBar->showPickInfo(info);
+    });
     menuBar->setFlushStateCallBack([bottomBar]() { bottomBar->flushState(); });
 
     auto hSplitter = new QSplitter(Qt::Horizontal);

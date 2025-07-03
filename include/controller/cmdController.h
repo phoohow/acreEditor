@@ -10,9 +10,10 @@ class CmdController
     SceneMgr*   m_scene;
     std::string m_history;
 
-    std::function<void()> m_renderFrameFunc;
-    std::function<void()> m_saveFrameFunc;
-    std::function<void()> m_showProfilerFunc;
+    std::function<void()>                   m_renderFrameFunc;
+    std::function<void()>                   m_showProfilerFunc;
+    std::function<void(uint32_t, uint32_t)> m_pickPixelFunc;
+    std::function<void()>                   m_saveFrameFunc;
 
 public:
     enum class CmdType
@@ -21,9 +22,9 @@ public:
 
         // single cmd
         cNone,
-        cRender,
+        cRenderFrame,
         cProfiler,
-        cPick,
+        cPickPixel,
         cSaveFrame,
         cExit,
 
@@ -61,8 +62,9 @@ public:
     ~CmdController() {}
 
     void setRenderFrameCallBack(std::function<void()> callback) { m_renderFrameFunc = callback; }
-    void setSaveFrameCallBack(std::function<void()> callback) { m_saveFrameFunc = callback; }
     void setShowProfilerCallBack(std::function<void()> callback) { m_showProfilerFunc = callback; }
+    void setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> callback) { m_pickPixelFunc = callback; }
+    void setSaveFrameCallBack(std::function<void()> callback) { m_saveFrameFunc = callback; }
 
     CmdStatus execute(const std::string& command);
 
@@ -71,9 +73,9 @@ public:
 
 private:
     // single cmd
-    CmdStatus render(const std::vector<std::string>& params);
+    CmdStatus renderFrame(const std::vector<std::string>& params);
     CmdStatus profiler(const std::vector<std::string>& params);
-    CmdStatus pick(const std::vector<std::string>& params);
+    CmdStatus pickPixel(const std::vector<std::string>& params);
     CmdStatus saveFrame(const std::vector<std::string>& params);
     CmdStatus exit(const std::vector<std::string>& params);
 

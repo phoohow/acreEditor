@@ -64,9 +64,11 @@ public:
 
     std::string getProfiler();
 
-    void resetView();
+    std::string pickPixel(uint32_t x, uint32_t y);
 
     void saveFrame(const std::string& fileName);
+
+    void resetView();
 
 private:
     void createRenderer();

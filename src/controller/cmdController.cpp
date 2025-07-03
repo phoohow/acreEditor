@@ -9,9 +9,9 @@
 static std::map<std::string, CmdController::CmdType> g_cmdTypeMap = {
     // single cmd
     {"", CmdController::CmdType::cNone},
-    {"render", CmdController::CmdType::cRender},
+    {"renderFrame", CmdController::CmdType::cRenderFrame},
     {"profiler", CmdController::CmdType::cProfiler},
-    {"pick", CmdController::CmdType::cPick},
+    {"pickPixel", CmdController::CmdType::cPickPixel},
     {"saveFrame", CmdController::CmdType::cSaveFrame},
     {"exit", CmdController::CmdType::cExit},
 
@@ -76,9 +76,9 @@ CmdController::CmdStatus CmdController::execute(const std::string& command)
         // single cmd
         case CmdController::CmdType::cInvalid: status = CmdStatus::eInvalidCmd; break;
         case CmdController::CmdType::cNone: status = CmdStatus::eNone; break;
-        case CmdController::CmdType::cRender: status = render(params); break;
+        case CmdController::CmdType::cRenderFrame: status = renderFrame(params); break;
         case CmdController::CmdType::cProfiler: status = profiler(params); break;
-        case CmdController::CmdType::cPick: status = pick(params); break;
+        case CmdController::CmdType::cPickPixel: status = pickPixel(params); break;
         case CmdController::CmdType::cSaveFrame: status = saveFrame(params); break;
         case CmdController::CmdType::cExit: status = exit(params); break;
 
@@ -107,14 +107,15 @@ CmdController::CmdStatus CmdController::execute(const std::string& command)
         default: break;
     }
 
-    m_history.append(result);
+    m_history.append(result + "\n");
+
     m_renderFrameFunc();
 
     return status;
 }
 
 // single cmd
-CmdController::CmdStatus CmdController::render(const std::vector<std::string>& params)
+CmdController::CmdStatus CmdController::renderFrame(const std::vector<std::string>& params)
 {
     m_renderFrameFunc();
     return CmdStatus::eSuccess;
@@ -126,9 +127,16 @@ CmdController::CmdStatus CmdController::profiler(const std::vector<std::string>&
     return CmdStatus::eSuccess;
 }
 
-CmdController::CmdStatus CmdController::pick(const std::vector<std::string>& params)
+CmdController::CmdStatus CmdController::pickPixel(const std::vector<std::string>& params)
 {
-    return CmdStatus::eUnSupportedCmd;
+    if (params.size() != 2) return CmdStatus::eInvalidParam;
+
+    auto x = std::stoi(params[0]);
+    auto y = std::stoi(params[1]);
+
+    m_pickPixelFunc(x, y);
+
+    return CmdStatus::eSuccess;
 }
 
 CmdController::CmdStatus CmdController::saveFrame(const std::vector<std::string>& params)

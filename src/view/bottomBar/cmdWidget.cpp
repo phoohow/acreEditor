@@ -5,9 +5,9 @@
 static QStringList g_cmdList = {
     // single cmd
     "",
-    "render",
+    "renderFrame",
     "profiler",
-    "pick",
+    "pickPixel",
     "saveFrame",
     "exit",
 
@@ -106,12 +106,17 @@ void CmdWidget::setRenderFrameCallBack(std::function<void()> func)
     m_cmdController->setRenderFrameCallBack(func);
 }
 
-void CmdWidget::setSaveFrameCallBack(std::function<void()> func)
-{
-    m_cmdController->setSaveFrameCallBack(func);
-}
-
 void CmdWidget::setShowProfilerCallBack(std::function<void()> func)
 {
     m_cmdController->setShowProfilerCallBack(func);
+}
+
+void CmdWidget::setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> func)
+{
+    m_cmdController->setPickPixelCallBack(func);
+}
+
+void CmdWidget::setSaveFrameCallBack(std::function<void()> func)
+{
+    m_cmdController->setSaveFrameCallBack(func);
 }

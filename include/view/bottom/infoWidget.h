@@ -30,6 +30,8 @@ public:
 
     void showProfiler(const std::string& profiler);
 
+    void showPickInfo(const std::string& info);
+
 private:
     void initState();
     void initLog();

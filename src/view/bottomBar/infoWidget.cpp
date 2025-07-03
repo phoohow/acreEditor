@@ -98,3 +98,9 @@ void InfoWidget::showProfiler(const std::string& profiler)
     m_selector->setCurrentIndex(1);
     m_logTextEdit->setText(profiler.c_str());
 }
+
+void InfoWidget::showPickInfo(const std::string& info)
+{
+    m_selector->setCurrentIndex(0);
+    m_stateLabel->setText(info.c_str());
+}

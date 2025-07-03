@@ -35,6 +35,11 @@ void BottomBar::setSaveFrameCallBack(std::function<void()> func)
     m_cmdWidget->setSaveFrameCallBack(func);
 }
 
+void BottomBar::setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> func)
+{
+    m_cmdWidget->setPickPixelCallBack(func);
+}
+
 void BottomBar::setShowProfilerCallBack(std::function<void()> func)
 {
     m_cmdWidget->setShowProfilerCallBack(func);
@@ -48,4 +53,9 @@ void BottomBar::flushState()
 void BottomBar::showProfiler(const std::string& profiler)
 {
     m_infoWidget->showProfiler(profiler);
+}
+
+void BottomBar::showPickInfo(const std::string& info)
+{
+    m_infoWidget->showPickInfo(info);
 }

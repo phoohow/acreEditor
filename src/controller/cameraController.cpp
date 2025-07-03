@@ -69,6 +69,8 @@ void CameraController::reset()
 
 void CameraController::resize(float width, float height)
 {
+    if (m_width == width && m_height == height) return;
+
     m_width  = width;
     m_height = height;
 
