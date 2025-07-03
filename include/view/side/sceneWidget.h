@@ -21,7 +21,7 @@ class SceneWidget : public QWidget
 
     SceneMgr* m_scene = nullptr;
 
-    std::function<void()> m_flushFrame;
+    std::function<void()> m_flushFrameFunc;
 
     QVBoxLayout*    m_layout;
     QTreeWidget*    m_selector;

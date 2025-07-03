@@ -120,7 +120,7 @@ void CameraWidget::onUpdateEye()
     auto z = m_lineEdit_eye_z->text();
 
     m_camera->position = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
-    m_flushFrame();
+    m_flushFrameFunc();
 }
 
 void CameraWidget::onUpdateTarget()
@@ -130,7 +130,7 @@ void CameraWidget::onUpdateTarget()
     auto z = m_lineEdit_target_z->text();
 
     m_camera->target = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
-    m_flushFrame();
+    m_flushFrameFunc();
 }
 
 void CameraWidget::onUpdateFov()
@@ -143,7 +143,7 @@ void CameraWidget::onUpdateFov()
         projection.fov   = value.toFloat();
     }
 
-    m_flushFrame();
+    m_flushFrameFunc();
 }
 
 void CameraWidget::onUpdateNear()
@@ -156,7 +156,7 @@ void CameraWidget::onUpdateNear()
         projection.nearPlane = value.toFloat();
     }
 
-    m_flushFrame();
+    m_flushFrameFunc();
 }
 
 void CameraWidget::onUpdateFar()
@@ -169,5 +169,5 @@ void CameraWidget::onUpdateFar()
         projection.farPlane = value.toFloat();
     }
 
-    m_flushFrame();
+    m_flushFrameFunc();
 }

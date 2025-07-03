@@ -66,6 +66,7 @@ public:
     auto getEntityCount() { return m_entities.size(); }
     void setHighlightEntity(acre::EntityID id) { m_scene->highlightEntity(id); }
     void unhighlightEntity(acre::EntityID id) { m_scene->unhighlightEntity(id); }
+    void aliveEntity(acre::EntityID id) { m_scene->findEntity(id)->markAlive(); }
     void unAliveEntity(acre::EntityID id) { m_scene->findEntity(id)->unAlive(); }
     void removeEntity(acre::EntityID id)
     {

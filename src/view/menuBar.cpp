@@ -107,14 +107,14 @@ void MenuBar::onOpenScene()
 
         m_resetView();
         m_flushState();
-        m_flushFrame();
+        m_flushFrameFunc();
     }
 }
 
 void MenuBar::onClearScene()
 {
     m_scene->clearScene();
-    m_flushFrame();
+    m_flushFrameFunc();
 }
 
 void MenuBar::onOpenHDR()
@@ -138,7 +138,7 @@ void MenuBar::onOpenHDR()
     if (!fileName.empty())
     {
         m_loader->loadHDR(fileName);
-        m_flushFrame();
+        m_flushFrameFunc();
     }
 }
 
@@ -150,7 +150,7 @@ void MenuBar::onSaveFrame()
 
     auto qFileName = dirStr + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss-zzz") + ".bmp";
     auto fileName  = qFileName.toStdString();
-    if (!fileName.empty()) m_saveFrame(fileName);
+    if (!fileName.empty()) m_saveFrameFunc(fileName);
 }
 
 void MenuBar::onSaveScene()

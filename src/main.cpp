@@ -51,11 +51,11 @@ int runEditor(int argc, char* argv[])
     // BottomBar
     auto bottomBar = new BottomBar(window->getScene());
     bottomBar->setFlushFrameCallBack(flushFrameFunc);
-    auto showProfilerFunc = [window, bottomBar]() {
+    bottomBar->setSaveFrameCallBack([menuBar]() { menuBar->saveFrame(); });
+    bottomBar->setShowProfilerCallBack([window, bottomBar]() {
         auto profiler = window->getProfiler();
         bottomBar->showProfiler(profiler);
-    };
-    bottomBar->setShowProfilerCallback(showProfilerFunc);
+    });
     menuBar->setFlushStateCallBack([bottomBar]() { bottomBar->flushState(); });
 
     auto hSplitter = new QSplitter(Qt::Horizontal);

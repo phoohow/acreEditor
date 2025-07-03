@@ -1,17 +1,22 @@
 #include <view/bottom/cmdWidget.h>
-
+#include <controller/cmdController.h>
 #include <model/sceneMgr.h>
 
-#include <tuple>
-
 static QStringList g_cmdList = {
-    "clear history",
-    "exit",
-    "reset view",
+    // single cmd
+    "",
     "render",
+    "profiler",
     "pick",
+    "saveFrame",
+    "exit",
+
+    // multi cmd
+    "clear history",
     "clear hdr",
     "clear scene",
+    "clear sunlight",
+    "reset view",
     "highlight entity",
     "highlight geometry",
     "highlight material",
@@ -21,50 +26,23 @@ static QStringList g_cmdList = {
     "remove entity",
     "remove geometry",
     "remove material",
+    "move entity",
+    "move geometry",
+    "move camera",
+    "rotate entity",
+    "rotate geometry",
+    "rotate camera",
+    "active entity",
     "unAlive entity",
-    "move entity (x,y,z)",
-    "move geometry (x,y,z)",
-    "move material (x,y,z)",
-    "move camera (x,y,z)",
-    "rotate entity (x,y,z)",
-    "rotate geometry (x,y,z)",
-    "rotate material (x,y,z)",
-    "rotate camera (x,y,z)",
-    "profiler",
-    "saveFrame",
+    "load image",
+    "load scene",
 };
-
-static std::tuple<QString, std::vector<QString>> splitCommand(const QString& input)
-{
-    std::istringstream   iss(input.toStdString());
-    std::vector<QString> params;
-    std::string          token;
-    QString              cmd;
-
-    bool isFirst = true;
-    while (iss >> token)
-    {
-        if (isFirst)
-        {
-            cmd     = QString::fromStdString(token);
-            isFirst = false;
-            continue;
-        }
-
-        params.push_back(QString::fromStdString(token));
-    }
-
-    return {cmd, params};
-}
-
-static uint32_t toID(std::string entity)
-{
-    return std::stoi(entity);
-}
 
 CmdWidget::CmdWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
+    m_cmdController = new CmdController(scene);
+
     m_mainLayout = new QVBoxLayout(this);
     this->setLayout(m_mainLayout);
 
@@ -116,137 +94,24 @@ void CmdWidget::onCmdSubmitted()
 {
     QString command = m_cmdLineEdit->text();
 
-    processCommand(command);
-}
-
-void CmdWidget::processCommand(QString& command)
-{
-    auto [cmd, params] = splitCommand(command);
-
-    if (cmd == "") return;
-
-    if (cmd == "clear")
-    {
-        m_historyTextEdit->clear();
-    }
-    else
-    {
-        if (cmd == "highlight")
-        {
-            if (params.size() < 2)
-            {
-                command = "Invalid highlight command";
-            }
-            else
-            {
-                if (params[0] == "entity")
-                {
-                    m_scene->setHighlightEntity(toID(params[1].toStdString()));
-                }
-                else if (params[0] == "geometry")
-                {
-                    m_scene->setHighlightGeometry(toID(params[1].toStdString()));
-                }
-                else if (params[0] == "material")
-                {
-                    m_scene->setHighlightMaterial(toID(params[1].toStdString()));
-                }
-                else
-                {
-                    command = "Unknown highlight type: " + params[0];
-                }
-            }
-        }
-        else if (cmd == "unhighlight")
-        {
-            if (params.size() < 2)
-            {
-                command = "Invalid unhighlight command";
-            }
-            else
-            {
-                if (params[0] == "entity")
-                {
-                    m_scene->unhighlightEntity(toID(params[1].toStdString()));
-                }
-                else if (params[0] == "geometry")
-                {
-                    m_scene->unhighlightGeometry(toID(params[1].toStdString()));
-                }
-                else if (params[0] == "material")
-                {
-                    m_scene->unhighlightMaterial(toID(params[1].toStdString()));
-                }
-                else
-                {
-                    command = "Unknown unhighlight type: " + params[0];
-                }
-            }
-        }
-        else if (cmd == "remove")
-        {
-            if (params.size() < 2)
-            {
-                command = "Invalid remove command";
-            }
-            else
-            {
-                if (params[0] == "entity")
-                {
-                    m_scene->removeEntity(toID(params[1].toStdString()));
-                }
-                else if (params[0] == "geometry")
-                {
-                    m_scene->removeGeometry(toID(params[1].toStdString()));
-                }
-                else if (params[0] == "material")
-                {
-                    m_scene->removeMaterial(toID(params[1].toStdString()));
-                }
-                else
-                {
-                    command = "Unknown remove type: " + params[0];
-                }
-            }
-        }
-        else if (cmd == "unAlive")
-        {
-            if (params.size() < 2)
-            {
-                command = "Invalid unAlive command";
-            }
-            else
-            {
-                if (params[0] == "entity")
-                {
-                    m_scene->unAliveEntity(toID(params[1].toStdString()));
-                }
-                else
-                {
-                    command = "Unknown unAlive type: " + params[0];
-                }
-            }
-        }
-        else if (cmd == "profiler")
-        {
-            if (params.size() > 2)
-            {
-                command = "Invalid profiler command";
-            }
-            else
-            {
-                m_showProfiler();
-            }
-        }
-        else
-        {
-            command = "UnSupported Command: " + command;
-        }
-
-        QString result = ">> " + command;
-        m_historyTextEdit->append(result);
-    }
+    auto  status  = m_cmdController->execute(command.toStdString());
+    auto& history = m_cmdController->getHistory();
+    m_historyTextEdit->setPlainText(QString::fromStdString(history));
 
     m_cmdLineEdit->clear();
-    m_flushFrame();
+}
+
+void CmdWidget::setFlushFrameCallBack(std::function<void()> func)
+{
+    m_cmdController->setFlushFrameCallBack(func);
+}
+
+void CmdWidget::setSaveFrameCallBack(std::function<void()> func)
+{
+    m_cmdController->setSaveFrameCallBack(func);
+}
+
+void CmdWidget::setShowProfilerCallBack(std::function<void()> func)
+{
+    m_cmdController->setShowProfilerCallBack(func);
 }

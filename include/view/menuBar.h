@@ -12,10 +12,10 @@ class MenuBar : QMenuBar
     SceneMgr* m_scene  = nullptr;
     Loader*   m_loader = nullptr;
 
-    std::function<void()>                            m_flushFrame;
+    std::function<void()>                            m_flushFrameFunc;
     std::function<void()>                            m_flushState;
     std::function<void()>                            m_resetView;
-    std::function<void(const std::string& fileName)> m_saveFrame;
+    std::function<void(const std::string& fileName)> m_saveFrameFunc;
 
     QMenu*   m_menu_file;
     QMenu*   m_menu_file_scene;
@@ -50,13 +50,15 @@ public:
 
     auto getMenuBar() { return static_cast<QMenuBar*>(this); }
 
-    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
+    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrameFunc = func; }
 
     void setFlushStateCallBack(std::function<void()> func) { m_flushState = func; }
 
     void setResetViewCallBack(std::function<void()> func) { m_resetView = func; }
 
-    void setSaveFrameCallBack(std::function<void(const std::string& fileName)> func) { m_saveFrame = func; }
+    void setSaveFrameCallBack(std::function<void(const std::string& fileName)> func) { m_saveFrameFunc = func; }
+
+    void saveFrame() { onSaveFrame(); }
 
 private:
     void initFileMenu();

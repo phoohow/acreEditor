@@ -10,12 +10,11 @@
 #include <functional>
 
 class SceneMgr;
+class CmdController;
 class CmdWidget : public QWidget
 {
-    SceneMgr* m_scene = nullptr;
-
-    std::function<void()> m_flushFrame;
-    std::function<void()> m_showProfiler;
+    SceneMgr*      m_scene         = nullptr;
+    CmdController* m_cmdController = nullptr;
 
     QTabWidget* m_selector;
     QLineEdit*  m_cmdLineEdit;
@@ -29,9 +28,11 @@ class CmdWidget : public QWidget
 public:
     explicit CmdWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
+    void setFlushFrameCallBack(std::function<void()> func);
 
-    void setShowProfilerCallback(std::function<void()> func) { m_showProfiler = func; }
+    void setSaveFrameCallBack(std::function<void()> func);
+
+    void setShowProfilerCallBack(std::function<void()> func);
 
 private:
     void initCmd();
@@ -43,12 +44,4 @@ private:
     void onCmdSubmitted();
 
     void processCommand(QString& command);
-
-    void moveEntity(const std::string& entity, const std::string& x, const std::string& y, const std::string& z);
-    void moveGeometry(const std::string& geometry, const std::string& x, const std::string& y, const std::string& z);
-
-    void resetView();
-    void resetScene();
-    void loadScene(const char* scene);
-    void saveFrame();
 };

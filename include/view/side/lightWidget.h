@@ -23,7 +23,7 @@ class LightWidget : public QWidget
 
     SceneMgr* m_scene;
 
-    std::function<void()> m_flushFrame;
+    std::function<void()> m_flushFrameFunc;
 
     acre::LightPtr m_light   = nullptr;
     acre::LightID  m_lightID = -1;
@@ -66,7 +66,7 @@ class LightWidget : public QWidget
 public:
     explicit LightWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrame = func; }
+    void setFlushFrameCallBack(std::function<void()> func) { m_flushFrameFunc = func; }
 
     void setLight(acre::LightID id);
 
