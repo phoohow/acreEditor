@@ -1,6 +1,7 @@
 #pragma once
 
 #include <model/sceneMgr.h>
+#include <string>
 
 class Exporter
 {

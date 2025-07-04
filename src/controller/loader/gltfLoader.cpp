@@ -556,7 +556,7 @@ void GLTFLoader::createComponent()
         {
             auto key = std::to_string(node.mesh) + "_" + std::to_string(primitiveIndex);
 
-            auto entity   = acre::createEntity(key);
+            auto entity   = acre::createEntity(key.c_str());
             auto entityID = m_scene->create(entity);
 
             auto geometryIndex = g_geometry[key];
