@@ -110,6 +110,11 @@ acre::Float4BufferID SceneMgr::createVTangentBuffer(acre::Float4BufferPtr buffer
     return m_scene->createVTangentBuffer(buffer);
 }
 
+acre::Float4BufferID SceneMgr::createVColorBuffer(acre::Float4BufferPtr buffer)
+{
+    return m_scene->createVColorBuffer(buffer);
+}
+
 acre::ImageID SceneMgr::create(acre::ImagePtr image)
 {
     auto id = m_scene->create(image);

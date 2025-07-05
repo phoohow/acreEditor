@@ -37,6 +37,7 @@ public:
     acre::Float2BufferID createVUVBuffer(acre::Float2BufferPtr);
     acre::Float3BufferID createVNormalBuffer(acre::Float3BufferPtr);
     acre::Float4BufferID createVTangentBuffer(acre::Float4BufferPtr);
+    acre::Float4BufferID createVColorBuffer(acre::Float4BufferPtr);
 
     acre::ImageID     create(acre::ImagePtr);
     acre::TextureID   create(acre::TexturePtr);

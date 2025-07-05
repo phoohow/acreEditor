@@ -28,6 +28,13 @@ constexpr float g_normal[4][3] = {
     {0.0, 0.0, 1.0},
 };
 
+constexpr float g_color[4][4] = {
+    {1.0, 0.0, 0.0, 1.0},
+    {0.0, 1.0, 0.0, 1.0},
+    {0.0, 0.0, 1.0, 1.0},
+    {1.0, 1.0, 1.0, 1.0},
+};
+
 // Use inverse clockwise order
 constexpr uint32_t g_index[] = {
     0, 1, 2, // left bottom, right bottom, right top
@@ -79,11 +86,16 @@ void TriangleLoader::createGeometry()
     normal->data  = (void*)g_normal;
     normal->count = 4;
 
+    auto color   = acre::createFloat4Buffer();
+    color->data  = (void*)g_color;
+    color->count = 4;
+
     auto geo      = acre::createGeometry();
     geo->index    = m_scene->createVIndexBuffer(index);
     geo->position = m_scene->createVPositionBuffer(position);
     geo->uv       = m_scene->createVUVBuffer(uv);
     geo->normal   = m_scene->createVNormalBuffer(normal);
+    geo->color    = m_scene->createVColorBuffer(color);
     m_scene->create(geo);
 }
 
@@ -98,12 +110,12 @@ void TriangleLoader::createMaterial()
     auto texture   = acre::createTexture();
     texture->image = m_scene->create(image);
 
-    acre::StandardModel standard;
-    standard.baseColor      = {1.0f, 1.0f, 1.0f};
-    standard.baseColorIndex = m_scene->create(texture);
-    auto material           = acre::createMaterial();
-    material->type          = acre::MaterialModel::mStandard;
-    material->model         = standard;
+    acre::SimpleModel model;
+    model.color      = {1.0f, 1.0f, 1.0f};
+    model.colorIndex = m_scene->create(texture);
+    auto material    = acre::createMaterial();
+    material->type   = acre::MaterialModel::mSimple;
+    material->model  = model;
     m_scene->create(material);
 }
 
