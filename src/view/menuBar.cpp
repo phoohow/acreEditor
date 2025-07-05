@@ -1,6 +1,7 @@
 #include <view/menuBar.h>
 
 #include <controller/loader/gltfLoader.h>
+#include <controller/loader/triangleLoader.h>
 
 #include <model/sceneMgr.h>
 
@@ -15,6 +16,7 @@
 MenuBar::MenuBar(SceneMgr* scene, QWidget* parent) :
     QMenuBar(parent),
     m_scene(scene),
+    // m_loader(new TriangleLoader(m_scene))
     m_loader(new GLTFLoader(m_scene))
 {
     initFileMenu();
