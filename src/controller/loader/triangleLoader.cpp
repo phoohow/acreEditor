@@ -70,32 +70,32 @@ void TriangleLoader::loadScene(const std::string& fileName)
 
 void TriangleLoader::createGeometry()
 {
-    auto index   = acre::createUintBuffer();
+    auto index   = acre::createVIndex();
     index->data  = (void*)g_index;
     index->count = sizeof(g_index) / sizeof(uint32_t);
 
-    auto position   = acre::createFloat3Buffer();
+    auto position   = acre::createVPosition();
     position->data  = (void*)g_position;
     position->count = 4;
 
-    auto uv   = acre::createFloat2Buffer();
+    auto uv   = acre::createVUV();
     uv->data  = (void*)g_uv;
     uv->count = 4;
 
-    auto normal   = acre::createFloat3Buffer();
+    auto normal   = acre::createVNormal();
     normal->data  = (void*)g_normal;
     normal->count = 4;
 
-    auto color   = acre::createFloat4Buffer();
+    auto color   = acre::createVColor();
     color->data  = (void*)g_color;
     color->count = 4;
 
     auto geo      = acre::createGeometry();
-    geo->index    = m_scene->createVIndexBuffer(index);
-    geo->position = m_scene->createVPositionBuffer(position);
-    geo->uv       = m_scene->createVUVBuffer(uv);
-    geo->normal   = m_scene->createVNormalBuffer(normal);
-    geo->color    = m_scene->createVColorBuffer(color);
+    geo->index    = m_scene->createVIndex(index);
+    geo->position = m_scene->createVPosition(position);
+    geo->uv       = m_scene->createVUV(uv);
+    geo->normal   = m_scene->createVNormal(normal);
+    geo->color    = m_scene->createVColor(color);
     m_scene->create(geo);
 }
 

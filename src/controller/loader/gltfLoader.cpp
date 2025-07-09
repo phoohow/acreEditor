@@ -377,7 +377,7 @@ void GLTFLoader::createGeometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                auto indexBuffer = acre::createUintBuffer();
+                auto indexBuffer = acre::createVIndex();
 
                 switch (accessor.componentType)
                 {
@@ -411,7 +411,7 @@ void GLTFLoader::createGeometry()
                 }
 
                 indexBuffer->count = accessor.count;
-                geometry->index    = m_scene->createVIndexBuffer(indexBuffer);
+                geometry->index    = m_scene->createVIndex(indexBuffer);
             }
             if (primitive.attributes.find("POSITION") != primitive.attributes.end())
             {
@@ -424,10 +424,10 @@ void GLTFLoader::createGeometry()
                     printf("Undo!\n");
                 }
 
-                auto position      = acre::createFloat3Buffer();
+                auto position      = acre::createVPosition();
                 position->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 position->count    = accessor.count;
-                geometry->position = m_scene->createVPositionBuffer(position);
+                geometry->position = m_scene->createVPosition(position);
 
                 // Evaluate object objBox and scene objBox
                 acre::math::box3 box = acre::math::box3::empty();
@@ -449,10 +449,10 @@ void GLTFLoader::createGeometry()
                     printf("Undo!\n");
                 }
 
-                auto uv      = acre::createFloat2Buffer();
+                auto uv      = acre::createVUV();
                 uv->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 uv->count    = accessor.count;
-                geometry->uv = m_scene->createVUVBuffer(uv);
+                geometry->uv = m_scene->createVUV(uv);
             }
             if (primitive.attributes.find("NORMAL") != primitive.attributes.end())
             {
@@ -464,10 +464,10 @@ void GLTFLoader::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                auto normal      = acre::createFloat3Buffer();
+                auto normal      = acre::createVNormal();
                 normal->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 normal->count    = accessor.count;
-                geometry->normal = m_scene->createVNormalBuffer(normal);
+                geometry->normal = m_scene->createVNormal(normal);
             }
             if (primitive.attributes.find("TANGENT") != primitive.attributes.end())
             {
@@ -479,10 +479,10 @@ void GLTFLoader::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                auto tangent      = acre::createFloat4Buffer();
+                auto tangent      = acre::createVTangent();
                 tangent->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 tangent->count    = accessor.count;
-                geometry->tangent = m_scene->createVTangentBuffer(tangent);
+                geometry->tangent = m_scene->createVTangent(tangent);
             }
 
             auto geometryID = m_scene->create(geometry);

@@ -32,12 +32,12 @@ public:
     void clearScene();
     void clearHDR();
 
-    acre::UintBufferID   createVIndexBuffer(acre::UintBufferPtr);
-    acre::Float3BufferID createVPositionBuffer(acre::Float3BufferPtr);
-    acre::Float2BufferID createVUVBuffer(acre::Float2BufferPtr);
-    acre::Float3BufferID createVNormalBuffer(acre::Float3BufferPtr);
-    acre::Float4BufferID createVTangentBuffer(acre::Float4BufferPtr);
-    acre::Float4BufferID createVColorBuffer(acre::Float4BufferPtr);
+    acre::UintBufferID   createVIndex(acre::UintBufferPtr);
+    acre::Float3BufferID createVPosition(acre::Float3BufferPtr);
+    acre::Float2BufferID createVUV(acre::Float2BufferPtr);
+    acre::Float3BufferID createVNormal(acre::Float3BufferPtr);
+    acre::Float4BufferID createVTangent(acre::Float4BufferPtr);
+    acre::Float4BufferID createVColor(acre::Float4BufferPtr);
 
     acre::ImageID     create(acre::ImagePtr);
     acre::TextureID   create(acre::TexturePtr);
@@ -86,8 +86,8 @@ public:
     auto getSunLight() { return m_scene->getSunLight(); }
     void updateLight(acre::LightID id) { m_scene->updateLight(id); }
 
-    auto getVIndexBuffer(acre::UintBufferID id) { return m_scene->findVIndexBuffer(id); }
-    auto getVPositionBuffer(acre::Float3BufferID id) { return m_scene->findVPositionBuffer(id); }
+    auto getVIndexBuffer(acre::UintBufferID id) { return m_scene->findVIndex(id); }
+    auto getVPositionBuffer(acre::Float3BufferID id) { return m_scene->findVPosition(id); }
 
     auto getGeometryList() { return m_geometries; }
     auto getGeometryCount() { return m_geometries.size(); }

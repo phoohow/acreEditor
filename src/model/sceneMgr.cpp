@@ -85,34 +85,34 @@ void SceneMgr::clearHDR()
     m_extTextureList.resize(0);
 }
 
-acre::UintBufferID SceneMgr::createVIndexBuffer(acre::UintBufferPtr buffer)
+acre::UintBufferID SceneMgr::createVIndex(acre::UintBufferPtr buffer)
 {
-    return m_scene->createVIndexBuffer(buffer);
+    return m_scene->createVIndex(buffer);
 }
 
-acre::Float3BufferID SceneMgr::createVPositionBuffer(acre::Float3BufferPtr buffer)
+acre::Float3BufferID SceneMgr::createVPosition(acre::Float3BufferPtr buffer)
 {
-    return m_scene->createVPositionBuffer(buffer);
+    return m_scene->createVPosition(buffer);
 }
 
-acre::Float2BufferID SceneMgr::createVUVBuffer(acre::Float2BufferPtr buffer)
+acre::Float2BufferID SceneMgr::createVUV(acre::Float2BufferPtr buffer)
 {
-    return m_scene->createVUVBuffer(buffer);
+    return m_scene->createVUV(buffer);
 }
 
-acre::Float3BufferID SceneMgr::createVNormalBuffer(acre::Float3BufferPtr buffer)
+acre::Float3BufferID SceneMgr::createVNormal(acre::Float3BufferPtr buffer)
 {
-    return m_scene->createVNormalBuffer(buffer);
+    return m_scene->createVNormal(buffer);
 }
 
-acre::Float4BufferID SceneMgr::createVTangentBuffer(acre::Float4BufferPtr buffer)
+acre::Float4BufferID SceneMgr::createVTangent(acre::Float4BufferPtr buffer)
 {
-    return m_scene->createVTangentBuffer(buffer);
+    return m_scene->createVTangent(buffer);
 }
 
-acre::Float4BufferID SceneMgr::createVColorBuffer(acre::Float4BufferPtr buffer)
+acre::Float4BufferID SceneMgr::createVColor(acre::Float4BufferPtr buffer)
 {
-    return m_scene->createVColorBuffer(buffer);
+    return m_scene->createVColor(buffer);
 }
 
 acre::ImageID SceneMgr::create(acre::ImagePtr image)
