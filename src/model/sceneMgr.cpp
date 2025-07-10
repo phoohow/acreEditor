@@ -45,33 +45,18 @@ void SceneMgr::initPointLight()
 
 void SceneMgr::clearScene()
 {
-    for (auto id : m_entities)
-        m_scene->removeEntity(id);
     m_entities.resize(0);
-
-    for (auto id : m_geometries)
-        m_scene->removeGeometry(id);
     m_geometries.resize(0);
-
-    for (auto id : m_materials)
-        m_scene->removeMaterial(id);
     m_materials.resize(0);
-
-    for (auto id : m_transforms)
-        m_scene->removeTransform(id);
     m_transforms.resize(0);
-
-    for (auto id : m_textures)
-        m_scene->removeTexture(id);
     m_textures.resize(0);
-
-    for (auto id : m_images)
-        m_scene->removeImage(id);
     m_images.resize(0);
-
-    for (auto id : m_samplers)
-        m_scene->removeSampler(id);
     m_samplers.resize(0);
+
+    m_scene->clear();
+
+    initCamera();
+    initDirectionLight();
 }
 
 void SceneMgr::clearHDR()
