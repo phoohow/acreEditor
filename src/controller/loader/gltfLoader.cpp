@@ -188,6 +188,11 @@ void GLTFLoader::createMaterial()
         model.emission                = vec3ToFloat3(mat.emissiveFactor);
         model.emissionIndex           = mat.emissiveTexture.index != -1 ? m_scene->findTexture(mat.emissiveTexture.index) : -1;
 
+        createTextureTransform(mat.pbrMetallicRoughness.baseColorTexture.extensions, model.baseColorIndex);
+        createTextureTransform(mat.pbrMetallicRoughness.metallicRoughnessTexture.extensions, model.metalRoughIndex);
+        createTextureTransform(mat.normalTexture.extensions, model.normalIndex);
+        createTextureTransform(mat.emissiveTexture.extensions, model.emissionIndex);
+
         const auto& exts = mat.extensions;
         if (exts.find("KHR_materials_ior") != exts.end())
         {
@@ -208,16 +213,19 @@ void GLTFLoader::createMaterial()
             {
                 const auto& clearcoatTexture = clearcoat->second.Get("clearcoatTexture");
                 model.clearcoatIndex         = m_scene->findTexture(clearcoatTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(clearcoatTexture, model.clearcoatIndex);
             }
             if (clearcoat->second.Has("clearcoatRoughnessTexture"))
             {
                 const auto& clearcoatRoughnessTexture = clearcoat->second.Get("clearcoatRoughnessTexture");
                 model.clearcoatRoughnessIndex         = m_scene->findTexture(clearcoatRoughnessTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(clearcoatRoughnessTexture, model.clearcoatRoughnessIndex);
             }
             if (clearcoat->second.Has("clearcoatNormalTexture"))
             {
                 const auto& clearcoatNormalTexture = clearcoat->second.Get("clearcoatNormalTexture");
                 model.clearcoatNormalIndex         = m_scene->findTexture(clearcoatNormalTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(clearcoatNormalTexture, model.clearcoatNormalIndex);
             }
         }
 
@@ -236,11 +244,13 @@ void GLTFLoader::createMaterial()
             {
                 const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
                 model.sheenColorIndex         = m_scene->findTexture(sheenColorTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(sheenColorTexture, model.sheenColorIndex);
             }
             if (sheen->second.Has("sheenRoughnessTexture"))
             {
                 const auto& sheenRoughnessTexture = sheen->second.Get("sheenRoughnessTexture");
                 model.sheenRoughnessIndex         = m_scene->findTexture(sheenRoughnessTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(sheenRoughnessTexture, model.sheenRoughnessIndex);
             }
         }
 
@@ -261,6 +271,7 @@ void GLTFLoader::createMaterial()
             {
                 const auto& anisotropyTexture = anisotropy->second.Get("anisotropyTexture");
                 model.anisotropyIndex         = m_scene->findTexture(anisotropyTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(anisotropyTexture, model.anisotropyIndex);
             }
         }
 
@@ -275,6 +286,7 @@ void GLTFLoader::createMaterial()
             {
                 const auto& iridescenceTexture = iridescence->second.Get("iridescenceTexture");
                 model.iridescenceIndex         = m_scene->findTexture(iridescenceTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(iridescenceTexture, model.iridescenceIndex);
             }
             if (iridescence->second.Has("iridescenceIor"))
             {
@@ -295,6 +307,7 @@ void GLTFLoader::createMaterial()
             {
                 const auto& iridescenceThicknessTexture = iridescence->second.Get("iridescenceThicknessTexture");
                 model.iridescenceThicknessIndex         = m_scene->findTexture(iridescenceThicknessTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(iridescenceThicknessTexture, model.iridescenceThicknessIndex);
             }
         }
 
@@ -316,6 +329,7 @@ void GLTFLoader::createMaterial()
             {
                 const auto& transmissionTexture = transmission->second.Get("transmissionTexture");
                 model.transmissionIndex         = m_scene->findTexture(transmissionTexture.Get("index").GetNumberAsInt());
+                checkCreateTextureTransform(transmissionTexture, model.transmissionIndex);
             }
 
             const auto& volumeExt = exts.find("KHR_materials_volume");
@@ -328,6 +342,7 @@ void GLTFLoader::createMaterial()
                 {
                     const auto& thicknessTexture = volumeExt->second.Get("thicknessTexture");
                     model.thicknessIndex         = m_scene->findTexture(thicknessTexture.Get("index").GetNumberAsInt());
+                    checkCreateTextureTransform(thicknessTexture, model.thicknessIndex);
                 }
 
                 if (volumeExt->second.Has("attenuationDistance"))
@@ -549,8 +564,8 @@ void GLTFLoader::createComponent()
         const auto& node = m_model->nodes[nodeIndex];
         if (node.mesh == -1) continue;
 
-        const auto& transformID = nodeIndex;
-        const auto& transform   = m_scene->getTransform(m_scene->findTransform(transformID));
+        const auto& transformID = m_scene->findTransform(nodeIndex);
+        const auto& transform   = m_scene->getTransform(transformID);
         const auto& mesh        = m_model->meshes[node.mesh];
         for (int primitiveIndex = 0; primitiveIndex < mesh.primitives.size(); ++primitiveIndex)
         {
@@ -575,4 +590,74 @@ void GLTFLoader::createComponent()
     }
 
     m_scene->mergeBox(sceneBox);
+}
+
+void GLTFLoader::createTextureTransform(const tinygltf::ExtensionMap& ext, acre::TextureID textureID)
+{
+    if (ext.find("KHR_texture_transform") == ext.end()) return;
+
+    const auto& transform = ext.find("KHR_texture_transform")->second;
+    createTextureTransform(transform, textureID);
+}
+
+void GLTFLoader::checkCreateTextureTransform(const tinygltf::Value& value, acre::TextureID textureID)
+{
+    if (!value.Has("extensions")) return;
+
+    const auto& extensions = value.Get("extensions");
+    if (!extensions.Has("KHR_texture_transform")) return;
+
+    createTextureTransform(extensions.Get("KHR_texture_transform"), textureID);
+}
+
+void GLTFLoader::createTextureTransform(const tinygltf::Value& value, acre::TextureID textureID)
+{
+    acre::math::float4x4 transformMat = acre::math::float4x4::identity();
+    if (value.Has("scale"))
+    {
+        acre::math::float2 scale(1.0f, 1.0f);
+        const auto&        scale_ = value.Get("scale");
+        scale.x                   = scale_.Get(0).GetNumberAsDouble();
+        scale.y                   = scale_.Get(1).GetNumberAsDouble();
+
+        acre::math::float4x4 scaleMat = acre::math::float4x4::identity();
+        scaleMat.m00                  = scale.x;
+        scaleMat.m11                  = scale.y;
+
+        transformMat *= scaleMat;
+    }
+    if (value.Has("rotation"))
+    {
+        float rotation = 0.0f;
+        rotation       = value.Get("rotation").GetNumberAsDouble();
+
+        acre::math::float4x4 rotationMat = acre::math::float4x4::identity();
+        rotationMat.m00                  = cos(rotation);
+        rotationMat.m01                  = -sin(rotation);
+        rotationMat.m10                  = sin(rotation);
+        rotationMat.m11                  = cos(rotation);
+
+        transformMat *= rotationMat;
+    }
+    if (value.Has("offset"))
+    {
+        acre::math::float2 offset(0.0f, 0.0f);
+        const auto&        offset_ = value.Get("offset");
+        offset.x                   = offset_.Get(0).GetNumberAsDouble();
+        offset.y                   = offset_.Get(1).GetNumberAsDouble();
+
+        acre::math::float4x4 translation = acre::math::float4x4::identity();
+        translation.m30                  = offset.x;
+        translation.m31                  = offset.y;
+
+        transformMat *= translation;
+    }
+
+    auto acreTransform    = acre::createTransform();
+    acreTransform->matrix = transformMat;
+    acreTransform->affine = acre::math::homogeneousToAffine(transformMat);
+    auto transformID      = m_scene->createExt(acreTransform);
+
+    auto texture       = m_scene->getTexture(textureID);
+    texture->transform = transformID;
 }

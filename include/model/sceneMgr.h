@@ -18,8 +18,9 @@ class SceneMgr
     std::vector<acre::ImageID>     m_images;
     std::vector<acre::SamplerID>   m_samplers;
 
-    std::vector<acre::TextureID> m_extTextureList;
-    std::vector<acre::ImageID>   m_extImageList;
+    std::vector<acre::TextureID>   m_extTextureList;
+    std::vector<acre::ImageID>     m_extImageList;
+    std::vector<acre::TransformID> m_extTransforms;
 
     acre::math::box3 m_box      = acre::math::box3::empty();
     acre::CameraID   m_cameraID = -1;
@@ -47,8 +48,9 @@ public:
     acre::EntityID    create(acre::EntityPtr);
     void              create(acre::component::DrawPtr);
 
-    acre::ImageID   createExt(acre::ImagePtr);
-    acre::TextureID createExt(acre::TexturePtr);
+    acre::ImageID     createExt(acre::ImagePtr);
+    acre::TextureID   createExt(acre::TexturePtr);
+    acre::TransformID createExt(acre::TransformPtr);
 
     acre::ImageID     findImage(uint32_t index);
     acre::TextureID   findTexture(uint32_t index);
@@ -81,10 +83,14 @@ public:
     auto getLightList() { return m_lights; }
     auto getLightCount() { return m_lights.size(); }
     auto getLight(acre::LightID id) { return m_scene->findLight(id); }
-    auto getHDRLight() { return m_scene->getHDRLight(); }
-    void setHDRLight(acre::HDRLightPtr light) { m_scene->setHDRLight(light); }
-    auto getSunLight() { return m_scene->getSunLight(); }
     void updateLight(acre::LightID id) { m_scene->updateLight(id); }
+
+    auto getSunLight() { return m_scene->getSunLight(); }
+    void setHDRLight(acre::HDRLightPtr light) { m_scene->setHDRLight(light); }
+    auto getHDRLight() { return m_scene->getHDRLight(); }
+    void setLutGGX(acre::TextureID texture) { m_scene->setLutGGX(texture); }
+    void setLutCharlie(acre::TextureID texture) { m_scene->setLutCharlie(texture); }
+    void setLutSheenAlbedoScale(acre::TextureID texture) { m_scene->setLutSheenAlbedoScale(texture); }
 
     auto getVIndexBuffer(acre::UintBufferID id) { return m_scene->findVIndex(id); }
     auto getVPositionBuffer(acre::Float3BufferID id) { return m_scene->findVPosition(id); }
@@ -100,6 +106,8 @@ public:
         m_geometries.erase(std::find(m_geometries.begin(), m_geometries.end(), id));
         m_scene->removeGeometry(id);
     }
+
+    auto getTexture(acre::TextureID id) { return m_scene->findTexture(id); }
 
     auto getMaterialList() { return m_materials; }
     auto getMaterialCount() { return m_materials.size(); }

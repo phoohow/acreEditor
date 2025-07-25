@@ -20,6 +20,12 @@ public:
 
     void loadHDR(const std::string& fileName);
 
+    void loadLutGGX(const std::string& fileName);
+
+    void loadLutCharlie(const std::string& fileName);
+
+    void loadLutSheenAlbedoScale(const std::string& fileName);
+
     /**
      * @brief load camera from file
      * @note format example:

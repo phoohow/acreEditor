@@ -38,10 +38,21 @@ void MenuBar::initFileMenu()
     connect(m_action_openScene, &QAction::triggered, this, [this]() { onOpenScene(); });
     connect(m_action_closeScene, &QAction::triggered, this, [this]() { onClearScene(); });
 
-    m_menu_file_hdr  = m_menu_file->addMenu("HDR");
-    m_action_openHDR = m_menu_file_hdr->addAction("Open");
+    m_menu_file_image  = m_menu_file->addMenu("Image");
+    m_action_openImage = m_menu_file_image->addAction("Open Image");
+    m_action_openImage->setShortcut(Qt::CTRL | Qt::Key_I);
+    connect(m_action_openImage, &QAction::triggered, this, [this]() { onOpenImage(); });
+
+    m_action_openHDR = m_menu_file_image->addAction("Open HDR");
     m_action_openHDR->setShortcut(Qt::CTRL | Qt::Key_H);
     connect(m_action_openHDR, &QAction::triggered, this, [this]() { onOpenHDR(); });
+
+    m_action_openLutGGX = m_menu_file_image->addAction("Open LUT GGX");
+    connect(m_action_openLutGGX, &QAction::triggered, this, [this]() { onOpenLutGGX(); });
+    m_action_openLutCharlie = m_menu_file_image->addAction("Open LUT Charlie");
+    connect(m_action_openLutCharlie, &QAction::triggered, this, [this]() { onOpenLutCharlie(); });
+    m_action_openLutSheenAlbedoScale = m_menu_file_image->addAction("Open LUT Sheen Albedo Scale");
+    connect(m_action_openLutSheenAlbedoScale, &QAction::triggered, this, [this]() { onOpenLutSheenAlbedoScale(); });
 
     m_menu_file_frame  = m_menu_file->addMenu("Frame");
     m_action_saveFrame = m_menu_file_frame->addAction("Save");
@@ -107,8 +118,8 @@ void MenuBar::onOpenScene()
         m_scene->clearScene();
         m_loader->loadScene(fileName);
 
-        m_resetView();
-        m_flushState();
+        m_resetViewFunc();
+        m_flushStateFunc();
         m_renderFrameFunc();
     }
 }
@@ -119,12 +130,37 @@ void MenuBar::onClearScene()
     m_renderFrameFunc();
 }
 
+void MenuBar::onOpenImage()
+{
+    std::string fileName;
+
+    QFileDialog fileDialog;
+    fileDialog.setWindowTitle(QObject::tr("Open Image"));
+    fileDialog.setNameFilter(QObject::tr("*.png;;*.jpg;;*.jpeg;;*.bmp;;All Files (*)"));
+    fileDialog.setDirectory(QDir::currentPath());
+
+    if (fileDialog.exec() == QFileDialog::Accepted)
+    {
+        fileName = (fileDialog.selectedFiles().first()).toStdString();
+    }
+    else
+    {
+        qDebug() << "File dialog canceled";
+    }
+
+    if (!fileName.empty())
+    {
+        m_loader->loadImage(fileName);
+        m_renderFrameFunc();
+    }
+}
+
 void MenuBar::onOpenHDR()
 {
     std::string fileName;
 
     QFileDialog fileDialog;
-    fileDialog.setWindowTitle(QObject::tr("Open File"));
+    fileDialog.setWindowTitle(QObject::tr("Open HDR"));
     fileDialog.setNameFilter(QObject::tr("*.hdr;;*.exr;;All Files (*)"));
     fileDialog.setDirectory(QDir::currentPath());
 
@@ -140,6 +176,81 @@ void MenuBar::onOpenHDR()
     if (!fileName.empty())
     {
         m_loader->loadHDR(fileName);
+        m_renderFrameFunc();
+    }
+}
+
+void MenuBar::onOpenLutGGX()
+{
+    std::string fileName;
+
+    QFileDialog fileDialog;
+    fileDialog.setWindowTitle(QObject::tr("Open LUT GGX"));
+    fileDialog.setNameFilter(QObject::tr("*.png;;*.jpg;;*.jpeg;;*.bmp;;All Files (*)"));
+    fileDialog.setDirectory(QDir::currentPath());
+
+    if (fileDialog.exec() == QFileDialog::Accepted)
+    {
+        fileName = (fileDialog.selectedFiles().first()).toStdString();
+    }
+    else
+    {
+        qDebug() << "File dialog canceled";
+    }
+
+    if (!fileName.empty())
+    {
+        m_loader->loadLutGGX(fileName);
+        m_renderFrameFunc();
+    }
+}
+
+void MenuBar::onOpenLutCharlie()
+{
+    std::string fileName;
+
+    QFileDialog fileDialog;
+    fileDialog.setWindowTitle(QObject::tr("Open LUT Charlie"));
+    fileDialog.setNameFilter(QObject::tr("*.png;;*.jpg;;*.jpeg;;*.bmp;;All Files (*)"));
+    fileDialog.setDirectory(QDir::currentPath());
+
+    if (fileDialog.exec() == QFileDialog::Accepted)
+    {
+        fileName = (fileDialog.selectedFiles().first()).toStdString();
+    }
+    else
+    {
+        qDebug() << "File dialog canceled";
+    }
+
+    if (!fileName.empty())
+    {
+        m_loader->loadLutCharlie(fileName);
+        m_renderFrameFunc();
+    }
+}
+
+void MenuBar::onOpenLutSheenAlbedoScale()
+{
+    std::string fileName;
+
+    QFileDialog fileDialog;
+    fileDialog.setWindowTitle(QObject::tr("Open LUT Sheen Albedo Scale"));
+    fileDialog.setNameFilter(QObject::tr("*.png;;*.jpg;;*.jpeg;;*.bmp;;All Files (*)"));
+    fileDialog.setDirectory(QDir::currentPath());
+
+    if (fileDialog.exec() == QFileDialog::Accepted)
+    {
+        fileName = (fileDialog.selectedFiles().first()).toStdString();
+    }
+    else
+    {
+        qDebug() << "File dialog canceled";
+    }
+
+    if (!fileName.empty())
+    {
+        m_loader->loadLutSheenAlbedoScale(fileName);
         m_renderFrameFunc();
     }
 }

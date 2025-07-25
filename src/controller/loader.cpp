@@ -28,44 +28,17 @@ static auto splitCameraParameter(const std::string& line)
     return tokens;
 }
 
-Loader::Loader(SceneMgr* scene) :
-    m_scene(scene) {}
-
-void Loader::loadHDR(const std::string& fileName)
+static auto createImage(const std::string& fileName)
 {
-    int  width;
-    int  height;
-    int  channels;
-    int  desired = 4;
-    auto hdrData = stbi_loadf(fileName.c_str(), &width, &height, &channels, desired);
+    auto image = acre::createImage();
 
-    auto image     = acre::createImage();
-    image->name    = "hdrTexture";
-    image->data    = (hdrData);
-    image->width   = width;
-    image->height  = height;
-    image->format  = desired == 3 ? acre::Image::Format::RGB32_FLOAT : acre::Image::Format::RGBA32_FLOAT;
-    image->mipmaps = log2(width >= height ? width : height);
-
-    auto texture   = acre::createTexture();
-    texture->image = m_scene->createExt(image);
-
-    auto light    = acre::createHDRLight();
-    light->id     = m_scene->createExt(texture);
-    light->enable = true;
-    m_scene->setHDRLight(light);
-}
-
-void Loader::loadImage(const std::string& fileName)
-{
     int  width;
     int  height;
     int  channels;
     int  desired   = 4;
     auto imageData = stbi_loadf(fileName.c_str(), &width, &height, &channels, desired);
-    if (!imageData) return;
+    if (!imageData) return image;
 
-    auto image     = acre::createImage();
     image->name    = fileName.c_str();
     image->data    = (imageData);
     image->width   = width;
@@ -73,10 +46,57 @@ void Loader::loadImage(const std::string& fileName)
     image->format  = desired == 3 ? acre::Image::Format::RGB32_FLOAT : acre::Image::Format::RGBA32_FLOAT;
     image->mipmaps = log2(width >= height ? width : height);
 
-    auto imageID = m_scene->createExt(image);
+    return image;
+}
 
-    auto texture = acre::createTexture();
+Loader::Loader(SceneMgr* scene) :
+    m_scene(scene) {}
+
+void Loader::loadImage(const std::string& fileName)
+{
+    auto texture   = acre::createTexture();
+    texture->image = m_scene->createExt(createImage(fileName));
+
     m_scene->createExt(texture);
+}
+
+void Loader::loadHDR(const std::string& fileName)
+{
+    auto texture   = acre::createTexture();
+    texture->image = m_scene->createExt(createImage(fileName));
+    auto textureID = m_scene->createExt(texture);
+
+    auto light    = acre::createHDRLight();
+    light->id     = textureID;
+    light->enable = true;
+    m_scene->setHDRLight(light);
+}
+
+void Loader::loadLutGGX(const std::string& fileName)
+{
+    auto texture   = acre::createTexture();
+    texture->image = m_scene->createExt(createImage(fileName));
+    auto textureID = m_scene->createExt(texture);
+
+    m_scene->setLutGGX(textureID);
+}
+
+void Loader::loadLutCharlie(const std::string& fileName)
+{
+    auto texture   = acre::createTexture();
+    texture->image = m_scene->createExt(createImage(fileName));
+    auto textureID = m_scene->createExt(texture);
+
+    m_scene->setLutCharlie(textureID);
+}
+
+void Loader::loadLutSheenAlbedoScale(const std::string& fileName)
+{
+    auto texture   = acre::createTexture();
+    texture->image = m_scene->createExt(createImage(fileName));
+    auto textureID = m_scene->createExt(texture);
+
+    m_scene->setLutSheenAlbedoScale(textureID);
 }
 
 void Loader::loadCamera(const std::string& fileName)

@@ -149,15 +149,22 @@ void SceneMgr::create(acre::component::DrawPtr draw)
 
 acre::ImageID SceneMgr::createExt(acre::ImagePtr image)
 {
-    auto id = m_scene->create(image);
+    auto id = m_scene->createImmortal(image);
     m_extImageList.push_back(id);
     return id;
 }
 
 acre::TextureID SceneMgr::createExt(acre::TexturePtr texture)
 {
-    auto id = m_scene->create(texture);
+    auto id = m_scene->createImmortal(texture);
     m_extTextureList.push_back(id);
+    return id;
+}
+
+acre::TransformID SceneMgr::createExt(acre::TransformPtr transform)
+{
+    auto id = m_scene->create(transform);
+    m_extTransforms.push_back(id);
     return id;
 }
 

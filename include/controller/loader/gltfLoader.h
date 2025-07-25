@@ -2,10 +2,13 @@
 
 #include <controller/loader.h>
 
+#include <map>
+
 namespace tinygltf
 {
 class Model;
 class TinyGLTF;
+class Value;
 } // namespace tinygltf
 
 class GLTFLoader : public Loader
@@ -28,4 +31,10 @@ private:
     void createTransform();
 
     void createComponent();
+
+    void createTextureTransform(const std::map<std::string, tinygltf::Value>& map, acre::TextureID textureID);
+
+    void checkCreateTextureTransform(const tinygltf::Value& value, acre::TextureID textureID);
+
+    void createTextureTransform(const tinygltf::Value& value, acre::TextureID textureID);
 };
