@@ -86,10 +86,10 @@ void TransformWidget::initUI()
     m_layout->addStretch();
 }
 
-void TransformWidget::setTransform(acre::TransformID id)
+void TransformWidget::setTransform(uint32_t uuid)
 {
-    m_transformID = id;
-    m_transform   = m_scene->getTransform(id);
+    m_transformR = m_scene->find<acre::TransformID>(uuid);
+    m_transform  = m_transformR->ptr<acre::TransformID>();
 }
 
 void TransformWidget::updateProperties()

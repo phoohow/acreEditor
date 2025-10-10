@@ -28,16 +28,20 @@ static auto splitCameraParameter(const std::string& line)
     return tokens;
 }
 
-static auto createImage(const std::string& fileName)
+Loader::Loader(SceneMgr* scene) :
+    m_scene(scene) {}
+
+acre::Resource* Loader::createImage(const std::string& fileName)
 {
-    auto image = acre::createImage();
+    auto node  = m_scene->create<acre::ImageID>(std::hash<std::string>{}(fileName));
+    auto image = node->ptr<acre::ImageID>();
 
     int  width;
     int  height;
     int  channels;
     int  desired   = 4;
     auto imageData = stbi_loadf(fileName.c_str(), &width, &height, &channels, desired);
-    if (!imageData) return image;
+    if (!imageData) return nullptr;
 
     image->name    = fileName.c_str();
     image->data    = (imageData);
@@ -46,62 +50,70 @@ static auto createImage(const std::string& fileName)
     image->format  = desired == 3 ? acre::Image::Format::RGB32_FLOAT : acre::Image::Format::RGBA32_FLOAT;
     image->mipmaps = log2(width >= height ? width : height);
 
-    return image;
+    return node;
 }
-
-Loader::Loader(SceneMgr* scene) :
-    m_scene(scene) {}
 
 void Loader::loadImage(const std::string& fileName)
 {
-    auto texture   = acre::createTexture();
-    texture->image = m_scene->createExt(createImage(fileName));
+    auto node    = m_scene->create<acre::TextureID>(std::hash<std::string>{}(fileName));
+    auto texture = node->ptr<acre::TextureID>();
 
-    m_scene->createExt(texture);
+    auto imageR    = createImage(fileName);
+    texture->image = imageR->id<acre::ImageID>();
 }
 
 void Loader::loadHDR(const std::string& fileName)
 {
-    auto texture   = acre::createTexture();
-    texture->image = m_scene->createExt(createImage(fileName));
-    auto textureID = m_scene->createExt(texture);
+    auto node    = m_scene->create<acre::TextureID>(std::hash<std::string>{}(fileName));
+    auto texture = node->ptr<acre::TextureID>();
 
-    auto light    = acre::createHDRLight();
-    light->id     = textureID;
+    auto imageR    = createImage(fileName);
+    texture->image = imageR->id<acre::ImageID>();
+
+    auto light    = new acre::HDRLight;
+    light->id     = node->id<acre::TextureID>();
     light->enable = true;
+
     m_scene->setHDRLight(light);
 }
 
 void Loader::loadLutGGX(const std::string& fileName)
 {
-    auto texture   = acre::createTexture();
-    texture->image = m_scene->createExt(createImage(fileName));
-    auto textureID = m_scene->createExt(texture);
+    auto node    = m_scene->create<acre::TextureID>(std::hash<std::string>{}(fileName));
+    auto texture = node->ptr<acre::TextureID>();
 
-    m_scene->setLutGGX(textureID);
+    auto imageR    = createImage(fileName);
+    texture->image = imageR->id<acre::ImageID>();
+
+    m_scene->setLutGGX(node->id<acre::TextureID>());
 }
 
 void Loader::loadLutCharlie(const std::string& fileName)
 {
-    auto texture   = acre::createTexture();
-    texture->image = m_scene->createExt(createImage(fileName));
-    auto textureID = m_scene->createExt(texture);
+    auto node    = m_scene->create<acre::TextureID>(std::hash<std::string>{}(fileName));
+    auto texture = node->ptr<acre::TextureID>();
 
-    m_scene->setLutCharlie(textureID);
+    auto imageR    = createImage(fileName);
+    texture->image = {imageR->ptr<acre::ImageID>(), imageR->idx()};
+
+    m_scene->setLutCharlie(node->id<acre::TextureID>());
 }
 
 void Loader::loadLutSheenAlbedoScale(const std::string& fileName)
 {
-    auto texture   = acre::createTexture();
-    texture->image = m_scene->createExt(createImage(fileName));
-    auto textureID = m_scene->createExt(texture);
+    auto node    = m_scene->create<acre::TextureID>(std::hash<std::string>{}(fileName));
+    auto texture = node->ptr<acre::TextureID>();
 
-    m_scene->setLutSheenAlbedoScale(textureID);
+    auto image     = createImage(fileName);
+    texture->image = image->id<acre::ImageID>();
+
+    m_scene->setLutSheenAlbedoScale(node->id<acre::TextureID>());
 }
 
 void Loader::loadCamera(const std::string& fileName)
 {
-    auto camera = m_scene->getMainCamera();
+    auto node   = m_scene->getMainCamera();
+    auto camera = node->ptr<acre::CameraID>();
     if (!camera) return;
 
     std::ifstream file(fileName);

@@ -74,7 +74,7 @@ std::vector<std::vector<uint32_t>> g_index;
 std::map<std::string, int>         g_geometry;
 
 template <typename Type>
-static void appendIndex(acre::UintBufferPtr         indexBuffer,
+static void appendIndex(acre::VIndex*               indexBuffer,
                         const tinygltf::Accessor&   accessor,
                         const tinygltf::BufferView& bufferView,
                         uint32_t                    index,
@@ -148,45 +148,77 @@ void GLTFLoader::loadScene(const std::string& fileName)
     createComponent();
 }
 
+acre::TextureID GLTFLoader::_get_texture(uint32_t uuid)
+{
+    if (uuid == -1) return acre::TextureID();
+
+    auto node = m_scene->find<acre::TextureID>(uuid);
+    return node->id<acre::TextureID>();
+}
+
+acre::TransformID GLTFLoader::_get_transform(uint32_t uuid)
+{
+    if (uuid == -1) return acre::TransformID();
+
+    auto node = m_scene->find<acre::TransformID>(uuid);
+    return node->id<acre::TransformID>();
+}
+
+acre::GeometryID GLTFLoader::_get_geometry(uint32_t uuid)
+{
+    if (uuid == -1) return acre::GeometryID();
+
+    auto node = m_scene->find<acre::GeometryID>(uuid);
+    return node->id<acre::GeometryID>();
+}
+
+acre::MaterialID GLTFLoader::_get_material(uint32_t uuid)
+{
+    if (uuid == -1) return acre::MaterialID();
+
+    auto node = m_scene->find<acre::MaterialID>(uuid);
+    return node->id<acre::MaterialID>();
+}
+
 void GLTFLoader::createMaterial()
 {
+    uint32_t uuid = 0;
     for (const auto& img : m_model->images)
     {
-        auto image    = acre::createImage();
+        auto node     = m_scene->create<acre::ImageID>(uuid++);
+        auto image    = node->id<acre::ImageID>().ptr;
         image->data   = (void*)img.image.data();
         image->width  = img.width;
         image->height = img.height;
         image->name   = img.name.c_str();
         image->format = toImageFormat(img.component, img.bits);
-        auto imageID  = m_scene->create(image);
     }
 
+    uuid = 0;
     for (auto& tex : m_model->textures)
     {
-        auto texture   = acre::createTexture();
-        texture->image = m_scene->findImage(tex.source);
-        auto textureID = m_scene->create(texture);
+        auto node      = m_scene->create<acre::TextureID>(uuid++);
+        auto texture   = node->id<acre::TextureID>().ptr;
+        texture->image = m_scene->find<acre::ImageID>(tex.source)->id<acre::ImageID>();
     }
 
+    uuid = 0;
     for (const auto& mat : m_model->materials)
     {
-        auto material  = acre::createMaterial();
+        auto node      = m_scene->create<acre::MaterialID>(uuid++);
+        auto material  = node->id<acre::MaterialID>().ptr;
         material->type = acre::MaterialModel::mStandard;
         acre::StandardModel model;
         auto                baseColor = vec4ToFloat4(mat.pbrMetallicRoughness.baseColorFactor);
         model.baseColor               = baseColor.xyz();
         material->alpha               = baseColor.w;
-        model.baseColorIndex          = mat.pbrMetallicRoughness.baseColorTexture.index != -1 ?
-                     m_scene->findTexture(mat.pbrMetallicRoughness.baseColorTexture.index) :
-                     -1;
+        model.baseColorIndex          = _get_texture(mat.pbrMetallicRoughness.baseColorTexture.index);
         model.roughness               = mat.pbrMetallicRoughness.roughnessFactor;
         model.metallic                = mat.pbrMetallicRoughness.metallicFactor;
-        model.metalRoughIndex         = mat.pbrMetallicRoughness.metallicRoughnessTexture.index != -1 ?
-                    m_scene->findTexture(mat.pbrMetallicRoughness.metallicRoughnessTexture.index) :
-                    -1;
-        model.normalIndex             = mat.normalTexture.index != -1 ? m_scene->findTexture(mat.normalTexture.index) : -1;
+        model.metalRoughIndex         = _get_texture(mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+        model.normalIndex             = _get_texture(mat.normalTexture.index);
         model.emission                = vec3ToFloat3(mat.emissiveFactor);
-        model.emissionIndex           = mat.emissiveTexture.index != -1 ? m_scene->findTexture(mat.emissiveTexture.index) : -1;
+        model.emissionIndex           = _get_texture(mat.emissiveTexture.index);
 
         createTextureTransform(mat.pbrMetallicRoughness.baseColorTexture.extensions, model.baseColorIndex);
         createTextureTransform(mat.pbrMetallicRoughness.metallicRoughnessTexture.extensions, model.metalRoughIndex);
@@ -212,19 +244,19 @@ void GLTFLoader::createMaterial()
             if (clearcoat->second.Has("clearcoatTexture"))
             {
                 const auto& clearcoatTexture = clearcoat->second.Get("clearcoatTexture");
-                model.clearcoatIndex         = m_scene->findTexture(clearcoatTexture.Get("index").GetNumberAsInt());
+                model.clearcoatIndex         = _get_texture(clearcoatTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(clearcoatTexture, model.clearcoatIndex);
             }
             if (clearcoat->second.Has("clearcoatRoughnessTexture"))
             {
                 const auto& clearcoatRoughnessTexture = clearcoat->second.Get("clearcoatRoughnessTexture");
-                model.clearcoatRoughnessIndex         = m_scene->findTexture(clearcoatRoughnessTexture.Get("index").GetNumberAsInt());
+                model.clearcoatRoughnessIndex         = _get_texture(clearcoatRoughnessTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(clearcoatRoughnessTexture, model.clearcoatRoughnessIndex);
             }
             if (clearcoat->second.Has("clearcoatNormalTexture"))
             {
                 const auto& clearcoatNormalTexture = clearcoat->second.Get("clearcoatNormalTexture");
-                model.clearcoatNormalIndex         = m_scene->findTexture(clearcoatNormalTexture.Get("index").GetNumberAsInt());
+                model.clearcoatNormalIndex         = _get_texture(clearcoatNormalTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(clearcoatNormalTexture, model.clearcoatNormalIndex);
             }
         }
@@ -243,13 +275,13 @@ void GLTFLoader::createMaterial()
             if (sheen->second.Has("sheenColorTexture"))
             {
                 const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
-                model.sheenColorIndex         = m_scene->findTexture(sheenColorTexture.Get("index").GetNumberAsInt());
+                model.sheenColorIndex         = _get_texture(sheenColorTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(sheenColorTexture, model.sheenColorIndex);
             }
             if (sheen->second.Has("sheenRoughnessTexture"))
             {
                 const auto& sheenRoughnessTexture = sheen->second.Get("sheenRoughnessTexture");
-                model.sheenRoughnessIndex         = m_scene->findTexture(sheenRoughnessTexture.Get("index").GetNumberAsInt());
+                model.sheenRoughnessIndex         = _get_texture(sheenRoughnessTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(sheenRoughnessTexture, model.sheenRoughnessIndex);
             }
         }
@@ -270,7 +302,7 @@ void GLTFLoader::createMaterial()
             if (anisotropy->second.Has("anisotropyTexture"))
             {
                 const auto& anisotropyTexture = anisotropy->second.Get("anisotropyTexture");
-                model.anisotropyIndex         = m_scene->findTexture(anisotropyTexture.Get("index").GetNumberAsInt());
+                model.anisotropyIndex         = _get_texture(anisotropyTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(anisotropyTexture, model.anisotropyIndex);
             }
         }
@@ -285,7 +317,7 @@ void GLTFLoader::createMaterial()
             if (iridescence->second.Has("iridescenceTexture"))
             {
                 const auto& iridescenceTexture = iridescence->second.Get("iridescenceTexture");
-                model.iridescenceIndex         = m_scene->findTexture(iridescenceTexture.Get("index").GetNumberAsInt());
+                model.iridescenceIndex         = _get_texture(iridescenceTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(iridescenceTexture, model.iridescenceIndex);
             }
             if (iridescence->second.Has("iridescenceIor"))
@@ -306,7 +338,7 @@ void GLTFLoader::createMaterial()
             if (iridescence->second.Has("iridescenceThicknessTexture"))
             {
                 const auto& iridescenceThicknessTexture = iridescence->second.Get("iridescenceThicknessTexture");
-                model.iridescenceThicknessIndex         = m_scene->findTexture(iridescenceThicknessTexture.Get("index").GetNumberAsInt());
+                model.iridescenceThicknessIndex         = _get_texture(iridescenceThicknessTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(iridescenceThicknessTexture, model.iridescenceThicknessIndex);
             }
         }
@@ -320,15 +352,12 @@ void GLTFLoader::createMaterial()
             const auto& value = transmissionFactor.GetNumberAsDouble();
             material->alpha   = value;
             // TODO: test code, complete it later
-            material->alphaIndex = mat.pbrMetallicRoughness.baseColorTexture.index != -1 ?
-                m_scene->findTexture(mat.pbrMetallicRoughness.baseColorTexture.index) :
-                -1;
-
-            model.transmission = transmissionFactor.GetNumberAsDouble();
+            material->alphaIndex = _get_texture(mat.pbrMetallicRoughness.baseColorTexture.index);
+            model.transmission   = transmissionFactor.GetNumberAsDouble();
             if (transmission->second.Has("transmissionTexture"))
             {
                 const auto& transmissionTexture = transmission->second.Get("transmissionTexture");
-                model.transmissionIndex         = m_scene->findTexture(transmissionTexture.Get("index").GetNumberAsInt());
+                model.transmissionIndex         = _get_texture(transmissionTexture.Get("index").GetNumberAsInt());
                 checkCreateTextureTransform(transmissionTexture, model.transmissionIndex);
             }
 
@@ -341,7 +370,7 @@ void GLTFLoader::createMaterial()
                 if (volumeExt->second.Has("thicknessTexture"))
                 {
                     const auto& thicknessTexture = volumeExt->second.Get("thicknessTexture");
-                    model.thicknessIndex         = m_scene->findTexture(thicknessTexture.Get("index").GetNumberAsInt());
+                    model.thicknessIndex         = _get_texture(thicknessTexture.Get("index").GetNumberAsInt());
                     checkCreateTextureTransform(thicknessTexture, model.thicknessIndex);
                 }
 
@@ -367,7 +396,6 @@ void GLTFLoader::createMaterial()
         }
 
         material->model = model;
-        auto materialID = m_scene->create(material);
     }
 }
 
@@ -384,7 +412,8 @@ void GLTFLoader::createGeometry()
         for (int primitiveIndex = 0; primitiveIndex < mesh.primitives.size(); ++primitiveIndex)
         {
             const auto& primitive = mesh.primitives[primitiveIndex];
-            auto        geometry  = acre::createGeometry();
+            auto        geometryR = m_scene->create<acre::GeometryID>(geometryIndex);
+            auto        geometry  = geometryR->id<acre::GeometryID>().ptr;
 
             if (primitive.indices > -1)
             {
@@ -392,7 +421,10 @@ void GLTFLoader::createGeometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                auto indexBuffer = acre::createVIndex();
+                auto node          = m_scene->create<acre::VIndexID>(geometryIndex);
+                auto indexBuffer   = node->id<acre::VIndexID>().ptr;
+                indexBuffer->count = accessor.count;
+                geometry->index    = node->id<acre::VIndexID>();
 
                 switch (accessor.componentType)
                 {
@@ -424,9 +456,6 @@ void GLTFLoader::createGeometry()
                         indexBuffer->data = addr + bufferView.byteOffset + accessor.byteOffset;
                         break;
                 }
-
-                indexBuffer->count = accessor.count;
-                geometry->index    = m_scene->createVIndex(indexBuffer);
             }
             if (primitive.attributes.find("POSITION") != primitive.attributes.end())
             {
@@ -439,16 +468,17 @@ void GLTFLoader::createGeometry()
                     printf("Undo!\n");
                 }
 
-                auto position      = acre::createVPosition();
+                auto node          = m_scene->create<acre::VPositionID>(geometryIndex);
+                auto position      = node->id<acre::VPositionID>().ptr;
                 position->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 position->count    = accessor.count;
-                geometry->position = m_scene->createVPosition(position);
+                geometry->position = node->id<acre::VPositionID>();
 
                 // Evaluate object objBox and scene objBox
                 acre::math::box3 box = acre::math::box3::empty();
-                for (auto geometryIndex = 0; geometryIndex < accessor.count; geometryIndex += 3)
+                for (auto i = 0; i < accessor.count; i += 3)
                 {
-                    acre::math::float3* pos = (acre::math::float3*)(position->data) + geometryIndex;
+                    acre::math::float3* pos = (acre::math::float3*)(position->data) + i;
                     box |= *pos;
                 }
                 geometry->box = box;
@@ -464,10 +494,11 @@ void GLTFLoader::createGeometry()
                     printf("Undo!\n");
                 }
 
-                auto uv      = acre::createVUV();
+                auto node    = m_scene->create<acre::VUVID>(geometryIndex);
+                auto uv      = node->id<acre::VUVID>().ptr;
                 uv->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 uv->count    = accessor.count;
-                geometry->uv = m_scene->createVUV(uv);
+                geometry->uv = node->id<acre::VUVID>();
             }
             if (primitive.attributes.find("NORMAL") != primitive.attributes.end())
             {
@@ -479,10 +510,12 @@ void GLTFLoader::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                auto normal      = acre::createVNormal();
+
+                auto node        = m_scene->create<acre::VNormalID>(geometryIndex);
+                auto normal      = node->id<acre::VNormalID>().ptr;
                 normal->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 normal->count    = accessor.count;
-                geometry->normal = m_scene->createVNormal(normal);
+                geometry->normal = node->id<acre::VNormalID>();
             }
             if (primitive.attributes.find("TANGENT") != primitive.attributes.end())
             {
@@ -494,13 +527,13 @@ void GLTFLoader::createGeometry()
                 {
                     printf("Undo!\n");
                 }
-                auto tangent      = acre::createVTangent();
+
+                auto node         = m_scene->create<acre::VTangentID>(geometryIndex);
+                auto tangent      = node->id<acre::VTangentID>().ptr;
                 tangent->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 tangent->count    = accessor.count;
-                geometry->tangent = m_scene->createVTangent(tangent);
+                geometry->tangent = node->id<acre::VTangentID>();
             }
-
-            auto geometryID = m_scene->create(geometry);
 
             auto key = std::to_string(meshIndex) + "_" + std::to_string(primitiveIndex);
             g_geometry.emplace(key, geometryIndex++);
@@ -529,7 +562,8 @@ void GLTFLoader::createTransform()
             affine *= acre::math::translation(vec3ToFloat3(node.translation));
         }
 
-        auto transform = acre::createTransform();
+        auto transformR = m_scene->create<acre::TransformID>(nodeIndex);
+        auto transform  = transformR->id<acre::TransformID>().ptr;
         if (!node.matrix.empty())
         {
             transform->matrix = vec16ToFloat4x4(node.matrix);
@@ -540,16 +574,15 @@ void GLTFLoader::createTransform()
             transform->affine = affine;
             transform->matrix = acre::math::affineToHomogeneous(affine);
         }
-        m_scene->create(transform);
     }
 
     for (int nodeIndex = 0; nodeIndex < m_model->nodes.size(); ++nodeIndex)
     {
         auto node      = m_model->nodes[nodeIndex];
-        auto transform = m_scene->getTransform(m_scene->findTransform(nodeIndex));
+        auto transform = _get_transform(nodeIndex).ptr;
         for (auto childIndex : node.children)
         {
-            auto childTransform = m_scene->getTransform(m_scene->findTransform(childIndex));
+            auto childTransform = _get_transform(childIndex).ptr;
             childTransform->matrix *= transform->matrix;
             childTransform->affine *= transform->affine;
         }
@@ -564,26 +597,25 @@ void GLTFLoader::createComponent()
         const auto& node = m_model->nodes[nodeIndex];
         if (node.mesh == -1) continue;
 
-        const auto& transformID = m_scene->findTransform(nodeIndex);
-        const auto& transform   = m_scene->getTransform(transformID);
+        const auto& transformID = _get_transform(nodeIndex);
+        const auto& transform   = transformID.ptr;
         const auto& mesh        = m_model->meshes[node.mesh];
         for (int primitiveIndex = 0; primitiveIndex < mesh.primitives.size(); ++primitiveIndex)
         {
             auto key = std::to_string(node.mesh) + "_" + std::to_string(primitiveIndex);
 
-            auto entity   = acre::createEntity(key.c_str());
-            auto entityID = m_scene->create(entity);
+            auto entity   = m_scene->create<acre::EntityID>(std::hash<std::string>{}(key));
+            auto entityID = entity->id<acre::EntityID>();
 
             auto geometryIndex = g_geometry[key];
-            auto geometryID    = m_scene->findGeometry(geometryIndex);
-            auto geometry      = m_scene->getGeometry(geometryID);
+            auto geometryID    = _get_geometry(geometryIndex);
 
             const auto& primitive  = mesh.primitives[primitiveIndex];
-            auto        materialID = m_scene->findMaterial(primitive.material);
+            auto        materialID = _get_material(primitive.material);
 
             m_scene->create(acre::component::createDraw(entityID, geometryID, materialID, transformID));
 
-            auto& objBox = geometry->box;
+            auto& objBox = geometryID.ptr->box;
             objBox       = objBox * transform->affine;
             sceneBox |= objBox;
         }
@@ -653,11 +685,10 @@ void GLTFLoader::createTextureTransform(const tinygltf::Value& value, acre::Text
         transformMat *= translation;
     }
 
-    auto acreTransform    = acre::createTransform();
+    auto acreTransformR   = m_scene->create<acre::TransformID>(textureID.idx + 1 << 16);
+    auto acreTransform    = acreTransformR->id<acre::TransformID>().ptr;
     acreTransform->matrix = transformMat;
     acreTransform->affine = acre::math::homogeneousToAffine(transformMat);
-    auto transformID      = m_scene->createExt(acreTransform);
 
-    auto texture       = m_scene->getTexture(textureID);
-    texture->transform = transformID;
+    textureID.ptr->transform = acreTransformR->id<acre::TransformID>();
 }

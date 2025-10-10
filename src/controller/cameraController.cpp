@@ -46,7 +46,9 @@ void CameraController::reset()
     auto fov    = g_fov;
     auto radius = acre::math::length(m_scene->getBox().diagonal()) * 0.5f;
 
-    auto mainCamera = m_scene->getMainCamera();
+    auto node       = m_scene->getMainCamera();
+    auto mainCamera = node->ptr<acre::CameraID>();
+
     if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
     {
         m_camera->setFOV(fov);
@@ -161,7 +163,9 @@ void CameraController::bottomView()
 
 void CameraController::syncCamera()
 {
-    auto mainCamera      = m_scene->getMainCamera();
+    auto node       = m_scene->getMainCamera();
+    auto mainCamera = node->ptr<acre::CameraID>();
+
     mainCamera->position = m_camera->getPosition();
     mainCamera->target   = m_camera->getTarget();
     mainCamera->up       = m_camera->getUp();

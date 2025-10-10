@@ -14,16 +14,12 @@ end
 
 import("core.project.config")
 
-function get_build_dir()
-    return config.get("buildir") .. "/bin"
-end
-
 function get_include_dir()
     return os.scriptdir() .. "/include"
 end
 
 -- setup config.h
-function setup_config(use_vulkan)
+function setup_config(target, use_vulkan)
     local config_h_in_path = get_include_dir() .. "/config.h.in"
     find_path(config_h_in_path, "config.h.in")
     
@@ -32,17 +28,17 @@ function setup_config(use_vulkan)
     file:close()
     
     local new_content = content
-
+    
     if use_vulkan then
         new_content = string.gsub(new_content, "$USE_VULKAN", "1")
     else
         new_content = string.gsub(new_content, "$USE_VULKAN", "0")
     end
     
-    local src_dir = string.gsub(os.scriptdir().."/ext/acre", "\\", "/")
+    local src_dir = string.gsub(os.scriptdir() .. "/ext/acre", "\\", "/")
     new_content = string.gsub(new_content, "$SRC_DIR", src_dir)
     
-    local dst_dir = string.gsub(get_build_dir(), "\\", "/")
+    local dst_dir = string.gsub(target:targetdir(), "\\", "/")
     new_content = string.gsub(new_content, "$DST_DIR", dst_dir)
     
     -- cache: build problem
@@ -55,7 +51,7 @@ function setup_config(use_vulkan)
             return
         end
     end
-
+    
     print("Refresh editor config.h...")
     
     local outfile = io.open(config_h_path, "w")

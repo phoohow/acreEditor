@@ -12,6 +12,10 @@
 #include <functional>
 
 class SceneMgr;
+namespace acre
+{
+struct Resource;
+}
 class LightWidget : public QWidget
 {
     enum LightType
@@ -25,11 +29,11 @@ class LightWidget : public QWidget
 
     std::function<void()> m_renderFrameFunc;
 
-    acre::LightPtr m_light   = nullptr;
-    acre::LightID  m_lightID = -1;
-    LightType     m_type;
-    bool          m_useSun = false;
-    bool          m_useHDR = false;
+    acre::Resource* m_lightR = nullptr;
+    acre::Light*    m_light  = nullptr;
+    LightType       m_type;
+    bool            m_useSun = false;
+    bool            m_useHDR = false;
 
     QVBoxLayout* m_layout;
 
@@ -68,7 +72,7 @@ public:
 
     void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
 
-    void setLight(acre::LightID id);
+    void setLight(uint32_t uuid);
 
     void enableSun();
     void disableSun();

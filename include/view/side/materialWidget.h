@@ -11,14 +11,18 @@
 #include <functional>
 
 class SceneMgr;
+namespace acre
+{
+struct Resource;
+}
 class MaterialWidget : public QWidget
 {
     SceneMgr* m_scene;
 
     std::function<void()> m_renderFrameFunc;
 
-    acre::MaterialID  m_materialID = -1;
-    acre::MaterialPtr m_material;
+    acre::Resource* m_materialR = nullptr;
+    acre::Material* m_material  = nullptr;
 
     QVBoxLayout* m_layout;
 
@@ -64,7 +68,7 @@ public:
 
     void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
 
-    void setMaterial(acre::MaterialID id);
+    void setMaterial(uint32_t uuid);
 
     void updateProperties();
 

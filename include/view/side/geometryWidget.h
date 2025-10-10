@@ -9,11 +9,16 @@
 #include <QVBoxLayout>
 
 class SceneMgr;
+namespace acre
+{
+struct Resource;
+}
 class GeometryWidget : public QWidget
 {
-    SceneMgr*       m_scene;
-    acre::GeometryID  m_geometryID = -1;
-    acre::GeometryPtr m_geometry;
+    SceneMgr* m_scene;
+
+    acre::Resource* m_geometryR = nullptr;
+    acre::Geometry* m_geometry  = nullptr;
 
     QVBoxLayout* m_layout;
     QCheckBox*   m_checkbox_index;
@@ -32,7 +37,7 @@ public:
 
     ~GeometryWidget();
 
-    void setGeometry(acre::GeometryID id);
+    void setGeometry(uint32_t uuid);
 
     void updateProperties();
 

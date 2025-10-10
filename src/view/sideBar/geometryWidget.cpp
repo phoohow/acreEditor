@@ -65,28 +65,30 @@ void GeometryWidget::initUI()
     m_layout->addStretch();
 }
 
-void GeometryWidget::setGeometry(acre::GeometryID id)
+void GeometryWidget::setGeometry(uint32_t uuid)
 {
-    if (m_geometryID != -1)
-        m_scene->unhighlightGeometry(m_geometryID);
+    m_geometryR = m_scene->find<acre::GeometryID>(uuid);
+    m_geometry  = m_geometryR->ptr<acre::GeometryID>();
 
-    m_geometryID = id;
-    m_geometry   = m_scene->getGeometry(id);
+    if (!m_geometryR || m_geometryR->idx() == RESOURCE_ID_VALID) return;
+
+    m_scene->unhighlightGeometry(m_geometryR->id<acre::GeometryID>());
 }
 
 void GeometryWidget::updateProperties()
 {
-    if (!m_geometry) return;
-    m_checkbox_index->setChecked(m_geometry->index != RESOURCE_ID_VALID);
-    m_checkbox_position->setChecked(m_geometry->position != RESOURCE_ID_VALID);
-    m_checkbox_uv->setChecked(m_geometry->uv != RESOURCE_ID_VALID);
-    m_checkbox_normal->setChecked(m_geometry->normal != RESOURCE_ID_VALID);
-    m_checkbox_tangent->setChecked(m_geometry->tangent != RESOURCE_ID_VALID);
-    m_checkbox_color->setChecked(m_geometry->color != RESOURCE_ID_VALID);
+    if (!m_geometryR) return;
 
-    auto indexCount = m_scene->getVIndexBuffer(m_geometry->index)->count;
+    m_checkbox_index->setChecked(m_geometry->index.idx != RESOURCE_ID_VALID);
+    m_checkbox_position->setChecked(m_geometry->position.idx != RESOURCE_ID_VALID);
+    m_checkbox_uv->setChecked(m_geometry->uv.idx != RESOURCE_ID_VALID);
+    m_checkbox_normal->setChecked(m_geometry->normal.idx != RESOURCE_ID_VALID);
+    m_checkbox_tangent->setChecked(m_geometry->tangent.idx != RESOURCE_ID_VALID);
+    m_checkbox_color->setChecked(m_geometry->color.idx != RESOURCE_ID_VALID);
+
+    auto indexCount = m_geometry->index.ptr->count;
     m_lineEdit_indexCount->setText(QString::number(indexCount));
 
-    auto vertexCount = m_scene->getVPositionBuffer(m_geometry->position)->count;
+    auto vertexCount = m_geometry->position.ptr->count;
     m_lineEdit_vertexCount->setText(QString::number(vertexCount));
 }

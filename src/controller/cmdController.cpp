@@ -166,7 +166,7 @@ CmdController::CmdStatus CmdController::clear(const std::vector<std::string>& pa
     }
     else if (params[0] == "hdr")
     {
-        m_scene->clearHDR();
+        // m_scene->clearHDR();
     }
     else if (params[0] == "sunlight")
     {
@@ -195,15 +195,18 @@ CmdController::CmdStatus CmdController::hightlight(const std::vector<std::string
 
     if (params[0] == "entity")
     {
-        m_scene->setHighlightEntity(id);
+        auto node = m_scene->find<acre::EntityID>(id);
+        m_scene->highlightEntity(node->id<acre::EntityID>());
     }
     else if (params[0] == "geometry")
     {
-        m_scene->setHighlightGeometry(id);
+        auto node = m_scene->find<acre::GeometryID>(id);
+        m_scene->highlightGeometry(node->id<acre::GeometryID>());
     }
     else if (params[0] == "material")
     {
-        m_scene->setHighlightMaterial(id);
+        auto node = m_scene->find<acre::MaterialID>(id);
+        m_scene->highlightMaterial(node->id<acre::MaterialID>());
     }
     else
     {
@@ -222,15 +225,18 @@ CmdController::CmdStatus CmdController::unhighlight(const std::vector<std::strin
 
     if (params[0] == "entity")
     {
-        m_scene->unhighlightEntity(id);
+        auto node = m_scene->find<acre::EntityID>(id);
+        m_scene->unhighlightEntity(node->id<acre::EntityID>());
     }
     else if (params[0] == "geometry")
     {
-        m_scene->unhighlightGeometry(id);
+        auto node = m_scene->find<acre::GeometryID>(id);
+        m_scene->unhighlightGeometry(node->id<acre::GeometryID>());
     }
     else if (params[0] == "material")
     {
-        m_scene->unhighlightMaterial(id);
+        auto node = m_scene->find<acre::MaterialID>(id);
+        m_scene->unhighlightMaterial(node->id<acre::MaterialID>());
     }
     else
     {
@@ -249,15 +255,18 @@ CmdController::CmdStatus CmdController::remove(const std::vector<std::string>& p
 
     if (params[0] == "entity")
     {
-        m_scene->removeEntity(id);
+        auto node = m_scene->find<acre::EntityID>(id);
+        m_scene->remove(node);
     }
     else if (params[0] == "geometry")
     {
-        m_scene->removeGeometry(id);
+        auto node = m_scene->find<acre::GeometryID>(id);
+        m_scene->remove(node);
     }
     else if (params[0] == "material")
     {
-        m_scene->removeMaterial(id);
+        auto node = m_scene->find<acre::MaterialID>(id);
+        m_scene->remove(node);
     }
     else
     {
@@ -324,7 +333,8 @@ CmdController::CmdStatus CmdController::active(const std::vector<std::string>& p
 
     if (params[0] == "entity")
     {
-        m_scene->aliveEntity(id);
+        auto node = m_scene->find<acre::EntityID>(id);
+        m_scene->aliveEntity(node->id<acre::EntityID>());
     }
     else
     {
@@ -343,7 +353,8 @@ CmdController::CmdStatus CmdController::unAlive(const std::vector<std::string>& 
 
     if (params[0] == "entity")
     {
-        m_scene->unAliveEntity(id);
+        auto node = m_scene->find<acre::EntityID>(id);
+        m_scene->unAliveEntity(node->id<acre::EntityID>());
     }
     else
     {

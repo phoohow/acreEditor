@@ -36,4 +36,7 @@ public:
      *      far: 1000
      */
     void loadCamera(const std::string& fileName);
+
+private:
+    acre::Resource* createImage(const std::string& fileName);
 };

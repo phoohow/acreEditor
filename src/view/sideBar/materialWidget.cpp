@@ -151,13 +151,14 @@ void MaterialWidget::initUI()
     m_layout->addStretch();
 }
 
-void MaterialWidget::setMaterial(acre::MaterialID id)
+void MaterialWidget::setMaterial(uint32_t uuid)
 {
-    if (m_materialID != -1)
-        m_scene->unhighlightMaterial(m_materialID);
+    m_materialR = m_scene->find<acre::MaterialID>(uuid);
+    if (!m_materialR || m_materialR->idx() == RESOURCE_ID_VALID) return;
 
-    m_materialID = id;
-    m_material   = m_scene->getMaterial(id);
+    m_material = m_materialR->ptr<acre::MaterialID>();
+
+    m_scene->unhighlightMaterial(m_materialR->id<acre::MaterialID>());
 }
 
 void MaterialWidget::updateProperties()
@@ -168,8 +169,8 @@ void MaterialWidget::updateProperties()
     auto& model = std::get<acre::StandardModel>(m_material->model);
 
     // Common
-    if (model.normalIndex != -1)
-        m_lineEdit_normalMap->setText(QString::number(model.normalIndex));
+    if (model.normalIndex.idx != -1)
+        m_lineEdit_normalMap->setText(QString::number(model.normalIndex.idx));
     else
         m_lineEdit_normalMap->setText("-1");
 
@@ -177,8 +178,8 @@ void MaterialWidget::updateProperties()
     m_lineEdit_emissive_r->setText(QString::number(emission.x));
     m_lineEdit_emissive_g->setText(QString::number(emission.y));
     m_lineEdit_emissive_b->setText(QString::number(emission.z));
-    if (model.emissionIndex != -1)
-        m_lineEdit_emissiveMap->setText(QString::number(model.emissionIndex));
+    if (model.emissionIndex.idx != -1)
+        m_lineEdit_emissiveMap->setText(QString::number(model.emissionIndex.idx));
     else
         m_lineEdit_emissiveMap->setText("-1");
 
@@ -195,10 +196,10 @@ void MaterialWidget::updateProperties()
         {
             auto& model     = std::get<acre::StandardModel>(m_material->model);
             baseColor       = model.baseColor;
-            baseColorIndex  = model.baseColorIndex;
+            baseColorIndex  = model.baseColorIndex.idx;
             roughness       = model.roughness;
             metallic        = model.metallic;
-            metalRoughIndex = model.metalRoughIndex;
+            metalRoughIndex = model.metalRoughIndex.idx;
             break;
         }
     }
@@ -229,7 +230,7 @@ void MaterialWidget::onUpdateAlpha()
 
     updateType();
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
@@ -247,7 +248,7 @@ void MaterialWidget::onUpdateEmissive()
     model.emission.y  = g.toFloat();
     model.emission.z  = b.toFloat();
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
@@ -257,20 +258,20 @@ void MaterialWidget::onUpdateNormalMap()
     auto  value = m_lineEdit_normalMap->text();
     auto& model = std::get<acre::StandardModel>(m_material->model);
     // model.normalMapScale    = 1.0f;
-    model.normalIndex = value.toFloat();
+    model.normalIndex.idx = value.toFloat();
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
 void MaterialWidget::onUpdateEmissiveMap()
 {
     if (!m_material) return;
-    auto  value         = m_lineEdit_emissiveMap->text();
-    auto& model         = std::get<acre::StandardModel>(m_material->model);
-    model.emissionIndex = value.toFloat();
+    auto  value             = m_lineEdit_emissiveMap->text();
+    auto& model             = std::get<acre::StandardModel>(m_material->model);
+    model.emissionIndex.idx = value.toFloat();
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
@@ -306,7 +307,7 @@ void MaterialWidget::onUpdateBaseColor()
         }
     }
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
@@ -324,7 +325,7 @@ void MaterialWidget::onUpdateRoughness()
         }
     }
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
@@ -342,7 +343,7 @@ void MaterialWidget::onUpdateMetallic()
         }
     }
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
@@ -354,13 +355,13 @@ void MaterialWidget::onUpdateBaseColorMap()
     {
         case acre::MaterialModel::mStandard:
         {
-            auto& model          = std::get<acre::StandardModel>(m_material->model);
-            model.baseColorIndex = value.toFloat();
+            auto& model              = std::get<acre::StandardModel>(m_material->model);
+            model.baseColorIndex.idx = value.toFloat();
             break;
         }
     }
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }
 
@@ -372,12 +373,12 @@ void MaterialWidget::onUpdateMetalRoughMap()
     {
         case acre::MaterialModel::mStandard:
         {
-            auto& model           = std::get<acre::StandardModel>(m_material->model);
-            model.metalRoughIndex = value.toFloat();
+            auto& model               = std::get<acre::StandardModel>(m_material->model);
+            model.metalRoughIndex.idx = value.toFloat();
             break;
         }
     }
 
-    m_scene->updateMaterial(m_materialID);
+    m_scene->update(m_materialR);
     m_renderFrameFunc();
 }

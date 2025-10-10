@@ -8,11 +8,15 @@
 #include <QVBoxLayout>
 
 class SceneMgr;
+namespace acre
+{
+struct Resource;
+}
 class TransformWidget : public QWidget
 {
     SceneMgr*        m_scene;
-    acre::TransformPtr m_transform;
-    acre::TransformID  m_transformID;
+    acre::Resource*  m_transformR;
+    acre::Transform* m_transform;
 
     QVBoxLayout* m_layout;
     QLabel*      m_label_translation;
@@ -33,7 +37,7 @@ public:
 
     ~TransformWidget();
 
-    void setTransform(acre::TransformID id);
+    void setTransform(uint32_t uuid);
 
     void updateProperties();
 

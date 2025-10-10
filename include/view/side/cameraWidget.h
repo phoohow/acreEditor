@@ -9,9 +9,15 @@
 
 #include <functional>
 
+namespace acre
+{
+struct Resource;
+}
+
 class CameraWidget : public QWidget
 {
-    acre::CameraPtr m_camera = nullptr;
+    acre::Resource* m_cameraR = nullptr;
+    acre::Camera*   m_camera  = nullptr;
 
     std::function<void()> m_renderFrameFunc;
 
@@ -38,7 +44,7 @@ public:
 
     void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
 
-    void setCamera(acre::CameraPtr camera) { m_camera = camera; }
+    void setCamera(acre::Resource* camera);
 
     void updateProperties();
 

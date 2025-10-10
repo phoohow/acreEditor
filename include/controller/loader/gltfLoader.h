@@ -37,4 +37,9 @@ private:
     void checkCreateTextureTransform(const tinygltf::Value& value, acre::TextureID textureID);
 
     void createTextureTransform(const tinygltf::Value& value, acre::TextureID textureID);
+
+    acre::TextureID   _get_texture(uint32_t uuid);
+    acre::TransformID _get_transform(uint32_t uuid);
+    acre::GeometryID  _get_geometry(uint32_t uuid);
+    acre::MaterialID  _get_material(uint32_t uuid);
 };

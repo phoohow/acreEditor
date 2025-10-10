@@ -1,4 +1,5 @@
 #include <view/side/cameraWidget.h>
+#include <model/wrapper/resource.h>
 #include <QDoubleValidator>
 
 CameraWidget::CameraWidget(QWidget* parent) :
@@ -90,6 +91,12 @@ void CameraWidget::initUI()
 
     // Adjust the layout to fit the widget
     m_layout->addStretch();
+}
+
+void CameraWidget::setCamera(acre::Resource* camera)
+{
+    m_cameraR = camera;
+    m_camera  = m_cameraR->ptr<acre::CameraID>();
 }
 
 void CameraWidget::updateProperties()

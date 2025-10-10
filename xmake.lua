@@ -1,37 +1,48 @@
 set_languages("c++20")
 add_rules("mode.debug", "mode.release")
 
-add_includedirs("ext/stb/include")
-add_includedirs("ext/tinygltf/include")
 includes("ext/acre")
 
-target("acreEditor")
-    if get_config("buildir") ~= nil then
-        set_targetdir(get_config("buildir") .. "/bin")
+-- Global config: 
+-- Set default target
+-- For each target, set targetdir and installdir
+on_load(function(target)
+    local buildir = get_config("buildir")
+    if is_mode("debug") then
+        target:set("targetdir", buildir .. "/debug")
+    elseif is_mode("release") then
+        target:set("targetdir", buildir .. "/release")
     end
-    if get_config("buildir") then
-        set_installdir(get_config("buildir") .. "/acreEditor")
+    target:set("installdir", buildir .. "/acreEditor")
+    
+    if target:name() == "acreEditor" then
+        target:set("default", true)
+    else
+        target:set("default", false)
     end
-    --
-    before_build(function(target)
-        local use_vulkan = false 
-        import("config")
-        config.setup_config(use_vulkan)
-    end)
-    --
+end)
+
+target("acreEditor", function()
     add_rules("qt.widgetapp")
     add_deps("acre")
     add_includedirs("include")
-    add_files("src/*.cpp", "src/*/*.cpp", "src/*/*/*.cpp")
-
-    after_install(function (target)
-        os.cp(os.projectdir().."/ext/acre/tools/dxc/bin/x64/*.dll", get_config("buildir") .. "/acreEditor/bin")
-        if is_mode("release") then 
-            os.cp(os.projectdir().."/ext/acre/src/shaders/*.hlsl", get_config("buildir") .. "/acreEditor/bin/shaders/")
-            os.cp(os.projectdir().."/ext/acre/tools/dxc/bin/x64/dxc.exe", get_config("buildir") .. "/acreEditor/bin")
-
-            -- copy shaderMake not from build dir, copy directly
-            os.cp(get_config("buildir") .. "/bin/ShaderMake.exe", get_config("buildir") .. "/acreEditor/bin")
-        end 
+    add_includedirs("ext/stb/include")
+    add_includedirs("ext/tinygltf/include")
+    add_files("src/**.cpp")
+    
+    before_build(function(target)
+        local use_vulkan = false
+        import("config")
+        config.setup_config(target, use_vulkan)
     end)
-target_end()
+    
+    after_install(function(target)
+        os.cp(os.scriptdir() .. "/tools/dxc/bin/x64/*", target:targetdir())
+        if is_mode("release") then
+            os.cp(os.scriptdir() .. "/src/shaders/*.hlsl", target:targetdir() .. "/shaders/")
+            
+            -- copy executables to installdir
+            os.cp(target:targetdir() .. "/*.exe", target:installdir())
+        end
+    end)
+end)

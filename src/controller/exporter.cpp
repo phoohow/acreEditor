@@ -33,7 +33,8 @@ void Exporter::saveFrame(const std::string& fileName, void* data, int width, int
 
 void Exporter::exportCamera(const std::string& fileName)
 {
-    auto camera = m_scene->getMainCamera();
+    auto node   = m_scene->getMainCamera();
+    auto camera = node->ptr<acre::CameraID>();
 
     std::string cameraInfo;
     cameraInfo += "position: " + std::to_string(camera->position.x) + ", " + std::to_string(camera->position.y) + ", " + std::to_string(camera->position.z) + "\n";

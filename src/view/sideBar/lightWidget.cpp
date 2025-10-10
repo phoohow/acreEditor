@@ -23,10 +23,10 @@ void LightWidget::onUpdateType(int index)
     }
 }
 
-void LightWidget::setLight(acre::LightID id)
+void LightWidget::setLight(uint32_t uuid)
 {
-    m_lightID = id;
-    m_light   = m_scene->getLight(id);
+    m_lightR = m_scene->find<acre::LightID>(uuid);
+    m_light  = m_lightR->ptr<acre::LightID>();
 }
 
 void LightWidget::enableSun()
@@ -269,7 +269,7 @@ void LightWidget::showHDRUI()
 
         m_lineEdit_intensity->setText(QString::number(factor));
 
-        m_lineEdit_texture->setText(QString::number(id));
+        m_lineEdit_texture->setText(QString::number(id.idx));
     }
 }
 
@@ -347,7 +347,7 @@ void LightWidget::onUpdateColor()
             {
                 auto& light = std::get<acre::PointLight>(m_light->light);
                 light.color = rgb;
-                m_scene->updateLight(m_lightID);
+                m_scene->updateLight(m_lightR);
             }
         }
     }
@@ -380,7 +380,7 @@ void LightWidget::onUpdateIntensity()
             {
                 auto& light  = std::get<acre::PointLight>(m_light->light);
                 light.factor = value.toFloat();
-                m_scene->updateLight(m_lightID);
+                m_scene->updateLight(m_lightR);
             }
         }
     }
@@ -406,8 +406,8 @@ void LightWidget::onUpdateTexture()
     auto light = m_scene->getHDRLight();
     if (!light) return;
 
-    auto value = m_lineEdit_texture->text();
-    light->id  = value.toInt();
+    auto value    = m_lineEdit_texture->text();
+    light->id.idx = value.toInt();
     m_renderFrameFunc();
 }
 
@@ -428,6 +428,6 @@ void LightWidget::onUpdatePosition()
         }
     }
 
-    m_scene->updateLight(m_lightID);
+    m_scene->updateLight(m_lightR);
     m_renderFrameFunc();
 }
