@@ -199,64 +199,64 @@ void SceneWidget::updateWidget(QTreeWidgetItem* current, TabWidget tab)
 {
     switch (tab)
     {
-        // case TabWidget::wCamera:
-        // {
-        //     current->takeChildren();
-        //     auto cameras = m_scene->getCameraList();
-        //     for (auto index : cameras)
-        //     {
-        //         QTreeWidgetItem* item = new QTreeWidgetItem(current);
-        //         item->setText(0, QString::number(index));
-        //     }
-        //     break;
-        // }
-        // case TabWidget::wLight:
-        // {
-        //     current->takeChildren();
-        //     QTreeWidgetItem* hdrItem = new QTreeWidgetItem(current);
-        //     hdrItem->setText(0, "HDR");
-        //     QTreeWidgetItem* sunItem = new QTreeWidgetItem(current);
-        //     sunItem->setText(0, "Sun");
-        //     auto lights = m_scene->getLightList();
-        //     for (auto index : lights)
-        //     {
-        //         QTreeWidgetItem* item = new QTreeWidgetItem(current);
-        //         item->setText(0, QString::number(index));
-        //     }
-        //     break;
-        // }
-        // case TabWidget::wGeometry:
-        // {
-        //     current->takeChildren();
-        //     auto geometrys = m_scene->getGeometryList();
-        //     for (auto index : geometrys)
-        //     {
-        //         QTreeWidgetItem* item = new QTreeWidgetItem(current);
-        //         item->setText(0, QString::number(index));
-        //     }
-        //     break;
-        // }
-        // case TabWidget::wMaterial:
-        // {
-        //     current->takeChildren();
-        //     auto materials = m_scene->getMaterialList();
-        //     for (auto index : materials)
-        //     {
-        //         QTreeWidgetItem* item = new QTreeWidgetItem(current);
-        //         item->setText(0, QString::number(index));
-        //     }
-        //     break;
-        // }
-        // case TabWidget::wTransform:
-        // {
-        //     current->takeChildren();
-        //     auto transforms = m_scene->getTransformList();
-        //     for (auto index : transforms)
-        //     {
-        //         QTreeWidgetItem* item = new QTreeWidgetItem(current);
-        //         item->setText(0, QString::number(index));
-        //     }
-        //     break;
-        // }
+        case TabWidget::wCamera:
+        {
+            current->takeChildren();
+            const auto& cameras = m_scene->getCameraList();
+            for (const auto& index : cameras)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index.first));
+            }
+            break;
+        }
+        case TabWidget::wLight:
+        {
+            current->takeChildren();
+            QTreeWidgetItem* hdrItem = new QTreeWidgetItem(current);
+            hdrItem->setText(0, "HDR");
+            QTreeWidgetItem* sunItem = new QTreeWidgetItem(current);
+            sunItem->setText(0, "Sun");
+            const auto& lights = m_scene->getLightList();
+            for (const auto& index : lights)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index.first));
+            }
+            break;
+        }
+        case TabWidget::wGeometry:
+        {
+            current->takeChildren();
+            const auto& geometrys = m_scene->getGeometryList();
+            for (const auto& index : geometrys)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index.first));
+            }
+            break;
+        }
+        case TabWidget::wMaterial:
+        {
+            current->takeChildren();
+            const auto& materials = m_scene->getMaterialList();
+            for (const auto& index : materials)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index.first));
+            }
+            break;
+        }
+        case TabWidget::wTransform:
+        {
+            current->takeChildren();
+            const auto& transforms = m_scene->getTransformList();
+            for (const auto& index : transforms)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(current);
+                item->setText(0, QString::number(index.first));
+            }
+            break;
+        }
     }
 }
