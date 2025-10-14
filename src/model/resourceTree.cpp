@@ -78,6 +78,12 @@ void ResourceTree::update(Resource* hold, std::unordered_set<Resource*>&& refs)
     updateLeaf(hold);
 }
 
+void ResourceTree::incRefs(Resource* hold, std::unordered_set<Resource*>&& refs)
+{
+    hold->refs.insert(refs.begin(), refs.end());
+    updateLeaf(hold);
+}
+
 void ResourceTree::updateLeaf(Resource* node)
 {
     _updateID(node);
@@ -90,15 +96,15 @@ void ResourceTree::remove(Resource* node)
 {
     if (!node->holds.empty()) return;
 
-    auto& mgr = m_mgrs[node->rid.index()];
-    for (auto ref : node->refs)
+    while (!node->refs.empty())
     {
+        auto ref = *node->refs.begin();
         _unlink(node, ref);
         remove(ref);
     }
 
-    std::visit([](auto p) { delete p.ptr; }, node->rid);
     _removeID(node->rid);
+    auto& mgr = m_mgrs[node->rid.index()];
     mgr.erase(node->uid);
 }
 
@@ -111,6 +117,16 @@ void ResourceTree::clear()
         auto node = iter->second.get();
         remove(node);
     }
+
+    // Note: some transform maybe not atexture or a entity, but a group of entities
+    // so need clear it
+    auto& trans = m_mgrs[index_of_rid<TransformID>()];
+    while (!trans.empty())
+    {
+        auto iter = trans.begin();
+        auto node = iter->second.get();
+        remove(node);
+    }
 }
 
 // clang-format off
@@ -118,12 +134,12 @@ RID ResourceTree::_createID(size_t index)
 {
     switch (index)
     {
-        case index_of_rid<VIndexID>():    {  auto id = VIndexID{new VIndex};       m_scene->create(id); return id; }
-        case index_of_rid<VPositionID>(): {  auto id = VPositionID{new VPosition}; m_scene->create(id); return id; }
-        case index_of_rid<VUVID>():       {  auto id = VUVID{new VUV};             m_scene->create(id); return id; }
-        case index_of_rid<VNormalID>():   {  auto id = VNormalID{new VNormal};     m_scene->create(id); return id; }
-        case index_of_rid<VTangentID>():  {  auto id = VTangentID{new VTangent};   m_scene->create(id); return id; }
-        case index_of_rid<VColorID>():    {  auto id = VColorID{new VColor};       m_scene->create(id); return id; }
+        case index_of_rid<VIndexID>():    {  auto id = VIndexID{};    m_scene->create(id); return id; }
+        case index_of_rid<VPositionID>(): {  auto id = VPositionID{}; m_scene->create(id); return id; }
+        case index_of_rid<VUVID>():       {  auto id = VUVID{};       m_scene->create(id); return id; }
+        case index_of_rid<VNormalID>():   {  auto id = VNormalID{};   m_scene->create(id); return id; }
+        case index_of_rid<VTangentID>():  {  auto id = VTangentID{};  m_scene->create(id); return id; }
+        case index_of_rid<VColorID>():    {  auto id = VColorID{};    m_scene->create(id); return id; }
         case index_of_rid<GeometryID>():  {  auto id = GeometryID{new Geometry};   m_scene->create(id); return id; }
         case index_of_rid<ImageID>():     {  auto id = ImageID{new Image};         m_scene->create(id); return id; }
         case index_of_rid<TextureID>():   {  auto id = TextureID{new Texture};     m_scene->create(id); return id; }
@@ -169,31 +185,31 @@ void ResourceTree::_updateID(Resource* node)
 
 void ResourceTree::_removeID(RID rid)
 {
-    auto vistor = [this](auto id)
-    {
-        m_scene->remove(id);
-        delete id.ptr;
-    };
-    std::visit(std::move(vistor), rid);
-
-    // switch (rid.index())
+    // auto vistor = [this](auto id)
     // {
-    //     case index_of_rid<VIndexID>():    { auto id = std::get<VIndexID>(rid);    m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<VPositionID>(): { auto id = std::get<VPositionID>(rid); m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<VUVID>():       { auto id = std::get<VUVID>(rid);       m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<VNormalID>():   { auto id = std::get<VNormalID>(rid);   m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<VTangentID>():  { auto id = std::get<VTangentID>(rid);  m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<VColorID>():    { auto id = std::get<VColorID>(rid);    m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<GeometryID>():  { auto id = std::get<GeometryID>(rid);  m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<ImageID>():     { auto id = std::get<ImageID>(rid);     m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<TextureID>():   { auto id = std::get<TextureID>(rid);   m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<SamplerID>():   { auto id = std::get<SamplerID>(rid);   m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<MaterialID>():  { auto id = std::get<MaterialID>(rid);  m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<TransformID>(): { auto id = std::get<TransformID>(rid); m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<EntityID>():    { auto id = std::get<EntityID>(rid);    m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<LightID>():     { auto id = std::get<LightID>(rid);     m_scene->remove(id); delete id.ptr; break; }
-    //     case index_of_rid<CameraID>():    { auto id = std::get<CameraID>(rid);    m_scene->remove(id); delete id.ptr; break; }
-    // }
+    //     m_scene->remove(id);
+    //     delete id.ptr;
+    // };
+    // std::visit(std::move(vistor), rid);
+
+    switch (rid.index())
+    {
+        case index_of_rid<VIndexID>():    { auto id = std::get<VIndexID>(rid);    m_scene->remove(id); break; }
+        case index_of_rid<VPositionID>(): { auto id = std::get<VPositionID>(rid); m_scene->remove(id); break; }
+        case index_of_rid<VUVID>():       { auto id = std::get<VUVID>(rid);       m_scene->remove(id); break; }
+        case index_of_rid<VNormalID>():   { auto id = std::get<VNormalID>(rid);   m_scene->remove(id); break; }
+        case index_of_rid<VTangentID>():  { auto id = std::get<VTangentID>(rid);  m_scene->remove(id); break; }
+        case index_of_rid<VColorID>():    { auto id = std::get<VColorID>(rid);    m_scene->remove(id); break; }
+        case index_of_rid<GeometryID>():  { auto id = std::get<GeometryID>(rid);  m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<ImageID>():     { auto id = std::get<ImageID>(rid);     m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<TextureID>():   { auto id = std::get<TextureID>(rid);   m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<SamplerID>():   { auto id = std::get<SamplerID>(rid);   m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<MaterialID>():  { auto id = std::get<MaterialID>(rid);  m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<TransformID>(): { auto id = std::get<TransformID>(rid); m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<EntityID>():    { auto id = std::get<EntityID>(rid);    m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<LightID>():     { auto id = std::get<LightID>(rid);     m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<CameraID>():    { auto id = std::get<CameraID>(rid);    m_scene->remove(id); delete id.ptr; break; }
+    }
 }
 
 // clang-format on

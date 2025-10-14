@@ -38,6 +38,7 @@ public:
     }
 
     void update(acre::Resource* node, std::unordered_set<acre::Resource*>&& refs);
+    void incRefs(acre::Resource* node, std::unordered_set<acre::Resource*>&& refs);
     void update(acre::Resource* node);
     template <typename ID>
     void update(acre::UUID uuid)

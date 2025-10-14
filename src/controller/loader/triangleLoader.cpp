@@ -146,22 +146,23 @@ void TriangleLoader::createTransform()
 void TriangleLoader::createComponent()
 {
     // Note: from createGeometry
-    auto geo = m_scene->find<acre::GeometryID>(0);
+    auto geo = m_scene->find<acre::GeometryID>(0)->id<acre::GeometryID>();
 
     // Note: from createMaterial
-    auto mat = m_scene->find<acre::MaterialID>(0);
+    auto mat = m_scene->find<acre::MaterialID>(0)->id<acre::MaterialID>();
 
     // Note: from createTransform
-    auto trans = m_scene->find<acre::TransformID>(0);
+    auto trans = m_scene->find<acre::TransformID>(0)->id<acre::TransformID>();
 
     auto entity = m_scene->create<acre::EntityID>(0);
 
     // create components
     auto draw       = acre::component::createDraw();
-    draw->entity    = {entity->ptr<acre::EntityID>(), entity->idx()};
-    draw->geometry  = {};
-    draw->material  = {};
-    draw->transform = {};
+    draw->entity    = entity->id<acre::EntityID>();
+    draw->geometry  = geo;
+    draw->material  = mat;
+    draw->transform = trans;
+    m_scene->create(draw);
 
     auto sceneBox   = acre::math::box3::empty();
     sceneBox.m_maxs = {1, 1, 1};

@@ -28,6 +28,8 @@ public:
 
     void update(Resource* hold, std::unordered_set<Resource*>&& refs);
 
+    void incRefs(Resource* hold, std::unordered_set<Resource*>&& refs);
+
     void updateLeaf(Resource* hold);
 
     void remove(Resource* node);

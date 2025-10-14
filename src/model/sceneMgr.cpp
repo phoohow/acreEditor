@@ -44,6 +44,7 @@ void SceneMgr::initPointLight()
 void SceneMgr::clearScene()
 {
     m_tree->clear();
+    m_scene->clear();
     initCamera();
     initDirectionLight();
 }
@@ -96,6 +97,13 @@ void SceneMgr::update(acre::Resource* node, std::unordered_set<acre::Resource*>&
     if (!node || node->idx() == RESOURCE_ID_VALID) return;
 
     m_tree->update(node, std::move(refs));
+}
+
+void SceneMgr::incRefs(acre::Resource* node, std::unordered_set<acre::Resource*>&& refs)
+{
+    if (!node || node->idx() == RESOURCE_ID_VALID) return;
+
+    m_tree->incRefs(node, std::move(refs));
 }
 
 void SceneMgr::update(acre::Resource* node)

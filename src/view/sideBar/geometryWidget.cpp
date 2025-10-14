@@ -42,8 +42,8 @@ void GeometryWidget::initUI()
     m_layout->addWidget(m_checkbox_tangent);
     m_layout->addWidget(m_checkbox_color);
 
-    // Labels and line edits for indexCount and vertexCount
-    QLabel* label_indexCount = new QLabel("indexCount:");
+    // Labels and line edits for index_count and vertex_count
+    QLabel* label_indexCount = new QLabel("index_count:");
     label_indexCount->setFixedWidth(90);
     m_lineEdit_indexCount = new QLineEdit();
     m_lineEdit_indexCount->setReadOnly(true);
@@ -52,7 +52,7 @@ void GeometryWidget::initUI()
     hbox_indexCount->addWidget(m_lineEdit_indexCount);
     m_layout->addLayout(hbox_indexCount);
 
-    QLabel* label_vertexCount = new QLabel("vertexCount:");
+    QLabel* label_vertexCount = new QLabel("vertex_count:");
     label_vertexCount->setFixedWidth(90);
     m_lineEdit_vertexCount = new QLineEdit();
     m_lineEdit_vertexCount->setReadOnly(true);
@@ -86,9 +86,9 @@ void GeometryWidget::updateProperties()
     m_checkbox_tangent->setChecked(m_geometry->tangent.idx != RESOURCE_ID_VALID);
     m_checkbox_color->setChecked(m_geometry->color.idx != RESOURCE_ID_VALID);
 
-    auto indexCount = m_geometry->index.ptr->count;
-    m_lineEdit_indexCount->setText(QString::number(indexCount));
+    auto index_count = m_geometry->index.ptr->count;
+    m_lineEdit_indexCount->setText(QString::number(index_count));
 
-    auto vertexCount = m_geometry->position.ptr->count;
-    m_lineEdit_vertexCount->setText(QString::number(vertexCount));
+    auto vertex_count = m_geometry->position.ptr->count;
+    m_lineEdit_vertexCount->setText(QString::number(vertex_count));
 }
