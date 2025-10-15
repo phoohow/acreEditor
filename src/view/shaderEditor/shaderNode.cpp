@@ -79,17 +79,17 @@ QPointF ShaderNode::getPosition() const
     return m_position;
 }
 
-QString ShaderNode::getName() const
+QString ShaderNode::name() const
 {
     return m_name;
 }
 
-ShaderNode::Type ShaderNode::getType() const
+ShaderNode::Type ShaderNode::type() const
 {
     return m_type;
 }
 
-void ShaderNode::setType(Type type)
+void ShaderNode::set_type(Type type)
 {
     m_type = type;
     switch (type)

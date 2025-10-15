@@ -73,7 +73,7 @@ void TriangleLoader::loadScene(const std::string& fileName)
     createGeometry();
     createMaterial();
     createTransform();
-    createComponent();
+    create_component_draw();
 }
 
 void TriangleLoader::createGeometry()
@@ -143,7 +143,7 @@ void TriangleLoader::createTransform()
     transform->affine = acre::math::affine3::identity();
 }
 
-void TriangleLoader::createComponent()
+void TriangleLoader::create_component_draw()
 {
     // Note: from createGeometry
     auto geo = m_scene->find<acre::GeometryID>(0)->id<acre::GeometryID>();

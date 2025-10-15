@@ -34,17 +34,17 @@ RenderWindow::RenderWindow() :
     QWindow()
 {
 #if USE_VULKAN
-    m_deviceMgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rVulkan);
+    m_device_mgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rVulkan);
 #else
-    m_deviceMgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rDX12);
+    m_device_mgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rDX12);
 #endif
 
 #ifndef _DEBUG
-    m_renderScene = std::make_unique<acre::Scene>(m_deviceMgr.get(), QDir::currentPath().toStdString().c_str());
+    m_renderScene = std::make_unique<acre::Scene>(m_device_mgr.get(), QDir::currentPath().toStdString().c_str());
 #else
-    auto srcDir   = SRC_DIR;
-    auto dstDir   = DST_DIR;
-    m_renderScene = std::make_unique<acre::Scene>(m_deviceMgr.get(), srcDir, dstDir);
+    auto src_dir   = SRC_DIR;
+    auto dst_dir   = DST_DIR;
+    m_renderScene = std::make_unique<acre::Scene>(m_device_mgr.get(), src_dir, dst_dir);
 #endif
 
     m_rasterConfig = std::make_unique<acre::config::Raster>();
@@ -175,8 +175,8 @@ void RenderWindow::keyPressEvent(QKeyEvent* event)
         case Qt::Key_6: m_cameraController->rightView(); break;
         case Qt::Key_5: m_cameraController->topView(); break;
         case Qt::Key_0: m_cameraController->bottomView(); break;
-        case Qt::Key_R: m_renderer->markShaderDirty(); break;
-        case Qt::Key_P: std::cout << getProfiler(); break;
+        case Qt::Key_R: m_renderer->mark_shader_dirty(); break;
+        case Qt::Key_P: std::cout << profiler_info(); break;
         default: break;
     }
 
@@ -191,7 +191,7 @@ void RenderWindow::renderFrame()
 {
     if (width() == 0 || height() == 0) return;
 
-    m_renderer->setupTarget(m_swapchain.get());
+    m_renderer->setup_target(m_swapchain.get());
 
     switch (g_renderPath)
     {
@@ -205,18 +205,18 @@ void RenderWindow::renderFrame()
     m_swapchain->present();
 }
 
-std::string RenderWindow::getProfiler()
+std::string RenderWindow::profiler_info()
 {
     if (!m_renderer) return "";
 
     if (!m_profiler)
     {
-        m_renderer->getProfilerCount(m_profilerCount);
+        m_renderer->profiler_count(m_profilerCount);
         m_profiler = new acre::Profiler[m_profilerCount];
     }
 
     renderFrame();
-    m_renderer->getProfiler(m_profiler);
+    m_renderer->profiler_info(m_profiler);
 
     std::string profiler  = "";
     auto        totalTime = 0.0;
@@ -240,7 +240,7 @@ std::string RenderWindow::pickPixel(uint32_t x, uint32_t y)
     acre::PickUnit info;
     info.input.xPos = x;
     info.input.yPos = y;
-    m_renderer->pickTo(&info);
+    m_renderer->pick_to(&info);
 
     std::string result = "";
     result += "Entity: " + std::to_string(info.entityID) + "\n";
@@ -268,7 +268,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
     pixels.desc.format = acre::Image::Format::RGBA8_UNORM;
     pixels.data        = new uint32_t[pixels.desc.width * pixels.desc.height];
 
-    m_renderer->setupTarget(&pixels.desc);
+    m_renderer->setup_target(&pixels.desc);
 
     m_cameraController->resize(pixels.desc.width, pixels.desc.height);
     switch (g_renderPath)
@@ -278,7 +278,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
         case acre::RenderPath::rPathGLTF: m_renderer->render((void*)m_pathConfig.get(), 2048); break;
     }
 
-    m_renderer->copyTo(&pixels);
+    m_renderer->copy_to(&pixels);
     m_exporter->saveFrame(fileName, pixels.data, pixels.desc.width, pixels.desc.height, 4);
 
     delete[] pixels.data;
@@ -295,7 +295,7 @@ void RenderWindow::resetView()
 
 void RenderWindow::createRenderer()
 {
-    m_swapchain = std::make_unique<acre::Swapchain>(m_deviceMgr.get(), (void*)(winId()), g_pixelRatio * width(), g_pixelRatio * height());
+    m_swapchain = std::make_unique<acre::Swapchain>(m_device_mgr.get(), (void*)(winId()), g_pixelRatio * width(), g_pixelRatio * height());
     m_renderer  = std::make_unique<acre::Renderer>(m_renderScene.get(), g_renderPath);
 }
 

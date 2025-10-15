@@ -19,14 +19,14 @@ static void setView(Camera* camera, acre::math::box3 box, acre::math::float3 dir
 CameraController::CameraController(SceneMgr* sceneMgr) :
     m_scene(sceneMgr)
 {
-    init();
+    _init();
 }
 
 CameraController::~CameraController()
 {
 }
 
-void CameraController::init()
+void CameraController::_init()
 {
     m_camera = new Camera;
     m_camera->setPosition(acre::math::float3(0.0f, 0.0f, 1.0f));
@@ -89,13 +89,13 @@ void CameraController::move(float x, float y, float z)
 
 void CameraController::moveForward()
 {
-    auto dir = acre::math::normalize(m_camera->getTarget() - m_camera->getPosition());
+    auto dir = acre::math::normalize(m_camera->get_target() - m_camera->getPosition());
     move(dir.x, dir.y, dir.z);
 }
 
 void CameraController::moveBack()
 {
-    auto dir = acre::math::normalize(m_camera->getTarget() - m_camera->getPosition());
+    auto dir = acre::math::normalize(m_camera->get_target() - m_camera->getPosition());
     move(-dir.x, -dir.y, -dir.z);
 }
 
@@ -167,7 +167,7 @@ void CameraController::syncCamera()
     auto mainCamera = node->ptr<acre::CameraID>();
 
     mainCamera->position = m_camera->getPosition();
-    mainCamera->target   = m_camera->getTarget();
+    mainCamera->target   = m_camera->get_target();
     mainCamera->up       = m_camera->getUp();
 
     if (mainCamera->type == acre::Camera::ProjectType::tPerspective)

@@ -82,12 +82,12 @@ public:
     auto getLight(acre::LightID id) { return m_tree->get<acre::LightID>(id.idx); }
     void updateLight(acre::Resource* node) { m_tree->updateLeaf(node); }
 
-    auto getSunLight() { return m_scene->getSunLight(); }
-    void setHDRLight(acre::HDRLight* light) { m_scene->setHDRLight(light); }
-    auto getHDRLight() { return m_scene->getHDRLight(); }
-    void setLutGGX(acre::TextureID texture) { m_scene->setLutGGX(texture); }
-    void setLutCharlie(acre::TextureID texture) { m_scene->setLutCharlie(texture); }
-    void setLutSheenAlbedoScale(acre::TextureID texture) { m_scene->setLutSheenAlbedoScale(texture); }
+    auto get_sun_light() { return m_scene->get_sun_light(); }
+    void set_hdr_light(acre::HDRLight* light) { m_scene->set_hdr_light(light); }
+    auto get_hdr_light() { return m_scene->get_hdr_light(); }
+    void set_lut_ggx(acre::TextureID texture) { m_scene->set_lut_ggx(texture); }
+    void set_lut_charlie(acre::TextureID texture) { m_scene->set_lut_charlie(texture); }
+    void set_lut_sheen_albedo_scale(acre::TextureID texture) { m_scene->set_lut_sheen_albedo_scale(texture); }
 
     auto getVIndexBuffer(acre::VIndexID id) { return m_tree->get<acre::VIndexID>(id.idx); }
     auto getVPositionBuffer(acre::VPositionID id) { return m_tree->get<acre::VPositionID>(id.idx); }
@@ -113,7 +113,7 @@ public:
     auto getImageCount() { return m_tree->_getMgr<acre::ImageID>().size(); }
 
 private:
-    void init();
+    void _init();
 
     void initCamera();
     void initDirectionLight();

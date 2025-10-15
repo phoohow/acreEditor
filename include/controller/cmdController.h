@@ -88,6 +88,6 @@ private:
     CmdStatus move(const std::vector<std::string>& params);
     CmdStatus rotate(const std::vector<std::string>& params);
     CmdStatus active(const std::vector<std::string>& params);
-    CmdStatus unAlive(const std::vector<std::string>& params);
+    CmdStatus reset_alive(const std::vector<std::string>& params);
     CmdStatus load(const std::vector<std::string>& params);
 };

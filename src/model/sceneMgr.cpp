@@ -27,7 +27,7 @@ void SceneMgr::initDirectionLight()
     light->direction = acre::math::normalize(acre::math::float3(0, -1, -1));
     light->factor    = 1.0;
     light->enable    = true;
-    m_scene->setSunLight(light);
+    m_scene->set_sun_light(light);
 }
 
 void SceneMgr::initPointLight()
@@ -68,7 +68,7 @@ void SceneMgr::clearScene()
 
 void SceneMgr::create(acre::component::DrawPtr draw)
 {
-    m_scene->createComponentDraw(draw);
+    m_scene->create_component_draw(draw);
 }
 
 void SceneMgr::remove(acre::Resource* node)
@@ -82,14 +82,14 @@ void SceneMgr::aliveEntity(acre::EntityID id)
 {
     auto node   = find<acre::EntityID>(id.idx);
     auto entity = (acre::Entity*)(id.ptr);
-    entity->markAlive();
+    entity->mark_alive();
 }
 
 void SceneMgr::unAliveEntity(acre::EntityID id)
 {
     auto node   = find<acre::EntityID>(id.idx);
     auto entity = node->ptr<acre::EntityID>();
-    entity->unAlive();
+    entity->reset_alive();
 }
 
 void SceneMgr::update(acre::Resource* node, std::unordered_set<acre::Resource*>&& refs)

@@ -18,5 +18,5 @@ private:
 
     void createTransform();
 
-    void createComponent();
+    void create_component_draw();
 };

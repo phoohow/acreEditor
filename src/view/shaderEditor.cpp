@@ -60,7 +60,7 @@ void ShaderEditor::drawNodes(QPainter& painter)
         painter.setBrush(Qt::lightGray);
         painter.setPen(Qt::black);
         painter.drawRect(rect);
-        painter.drawText(node->getPosition() + QPointF(10, 20), node->getName());
+        painter.drawText(node->getPosition() + QPointF(10, 20), node->name());
 
         int idx = 0;
         for (const auto& param : node->getParameters())
@@ -82,7 +82,7 @@ void ShaderEditor::drawNodes(QPainter& painter)
             painter.drawText(textPos, param.name);
             ++idx;
         }
-        if (node->getType() != ShaderNode::Type::Output)
+        if (node->type() != ShaderNode::Type::Output)
         {
             QPointF outPin = node->getOutputPinPos();
             painter.setBrush(Qt::blue);
@@ -148,7 +148,7 @@ void ShaderEditor::handleLeftClick(const QPointF& pos)
     // Check if clicking on output pin
     for (auto& node : m_nodes)
     {
-        if (node->getType() == ShaderNode::Type::Output) continue;
+        if (node->type() == ShaderNode::Type::Output) continue;
         QPointF outPin = node->getOutputPinPos();
         if (QLineF(pos, outPin).length() < 10)
         {
@@ -217,7 +217,7 @@ void ShaderEditor::handleRightClick(QMouseEvent* event, const QPointF& pos)
     // Output pin
     for (auto& node : m_nodes)
     {
-        if (node->getType() == ShaderNode::Type::Output) continue;
+        if (node->type() == ShaderNode::Type::Output) continue;
         QPointF outPin = node->getOutputPinPos();
         if (QLineF(pos, outPin).length() < 10)
         {
@@ -410,7 +410,7 @@ void ShaderEditor::handleConnectionRelease(const QPointF& pos)
     {
         for (auto& node : m_nodes)
         {
-            if (node->getType() == ShaderNode::Type::Output) continue;
+            if (node->type() == ShaderNode::Type::Output) continue;
             QPointF outPin = node->getOutputPinPos();
             if (QLineF(pos, outPin).length() < 10)
             {
@@ -468,15 +468,15 @@ void ShaderEditor::showNodeTypeMenu(ShaderNode* node, const QPoint& globalPos)
     QAction* outputAct   = menu.addAction("Output");
     QAction* selected    = menu.exec(globalPos);
     if (!selected) return;
-    if (selected == standardAct) node->setType(ShaderNode::Type::Standard);
+    if (selected == standardAct) node->set_type(ShaderNode::Type::Standard);
     else if (selected == simpleAct)
-        node->setType(ShaderNode::Type::Simple);
+        node->set_type(ShaderNode::Type::Simple);
     else if (selected == clothAct)
-        node->setType(ShaderNode::Type::Cloth);
+        node->set_type(ShaderNode::Type::Cloth);
     else if (selected == hairAct)
-        node->setType(ShaderNode::Type::Hair);
+        node->set_type(ShaderNode::Type::Hair);
     else if (selected == outputAct)
-        node->setType(ShaderNode::Type::Output);
+        node->set_type(ShaderNode::Type::Output);
     update();
 }
 

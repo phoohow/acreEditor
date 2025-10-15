@@ -23,7 +23,7 @@ static std::map<std::string, CmdController::CmdType> g_cmdTypeMap = {
     {"remove", CmdController::CmdType::cRemove},
     {"move", CmdController::CmdType::cMove},
     {"rotate", CmdController::CmdType::cRotate},
-    {"unAlive", CmdController::CmdType::cUnAlive},
+    {"reset_alive", CmdController::CmdType::cUnAlive},
     {"load", CmdController::CmdType::cLoad},
 };
 
@@ -90,7 +90,7 @@ CmdController::CmdStatus CmdController::execute(const std::string& command)
         case CmdController::CmdType::cRemove: status = remove(params); break;
         case CmdController::CmdType::cMove: status = move(params); break;
         case CmdController::CmdType::cRotate: status = rotate(params); break;
-        case CmdController::CmdType::cUnAlive: status = unAlive(params); break;
+        case CmdController::CmdType::cUnAlive: status = reset_alive(params); break;
         case CmdController::CmdType::cLoad: status = load(params); break;
     }
 
@@ -344,7 +344,7 @@ CmdController::CmdStatus CmdController::active(const std::vector<std::string>& p
     return CmdStatus::eSuccess;
 }
 
-CmdController::CmdStatus CmdController::unAlive(const std::vector<std::string>& params)
+CmdController::CmdStatus CmdController::reset_alive(const std::vector<std::string>& params)
 {
     if (params.size() != 2) return CmdStatus::eInvalidParam;
 

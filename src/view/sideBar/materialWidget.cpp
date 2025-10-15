@@ -280,7 +280,7 @@ void MaterialWidget::updateType()
     switch (m_material->type)
     {
         case acre::MaterialModel::mStandard:
-            if (m_material->useAlpha())
+            if (m_material->use_alpha())
                 m_comboBox_type->setCurrentIndex(3);
             else
                 m_comboBox_type->setCurrentIndex(0);

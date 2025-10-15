@@ -33,7 +33,7 @@ static QStringList g_cmdList = {
     "rotate geometry",
     "rotate camera",
     "active entity",
-    "unAlive entity",
+    "reset_alive entity",
     "load image",
     "load scene",
 };

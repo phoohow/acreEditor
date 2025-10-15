@@ -145,7 +145,7 @@ void GLTFLoader::loadScene(const std::string& fileName)
     createMaterial();
     createGeometry();
     createTransform();
-    createComponent();
+    create_component_draw();
 }
 
 void GLTFLoader::createMaterial()
@@ -581,7 +581,7 @@ void GLTFLoader::createTransform()
     }
 }
 
-void GLTFLoader::createComponent()
+void GLTFLoader::create_component_draw()
 {
     auto     sceneBox     = acre::math::box3::empty();
     uint32_t entity_index = 0;

@@ -37,7 +37,7 @@ public:
     void backView();
 
 private:
-    void init();
+    void _init();
 
     void syncCamera();
 };

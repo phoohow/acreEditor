@@ -48,7 +48,7 @@ public:
 
     const auto& getProjectType() const { return m_type; }
     const auto& getPosition() const { return m_position; }
-    const auto& getTarget() const { return m_target; }
+    const auto& get_target() const { return m_target; }
     const auto& getUp() const { return m_upDir; }
     const auto& getFront() const { return m_front; }
     const auto& getFOV() const { return m_fov; }

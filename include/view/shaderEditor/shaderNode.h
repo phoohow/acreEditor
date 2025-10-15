@@ -33,9 +33,9 @@ public:
 
     void    setPosition(const QPointF& pos);
     QPointF getPosition() const;
-    QString getName() const;
-    Type    getType() const;
-    void    setType(Type type);
+    QString name() const;
+    Type    type() const;
+    void    set_type(Type type);
 
     // Parameters
     const std::vector<Parameter>& getParameters() const;

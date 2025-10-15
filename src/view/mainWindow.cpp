@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent) :
 {
     this->resize(900, 900);
 
-    init();
+    _init();
 
     setupMainLayout();
     setupPagesLayout();
@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 MainWindow::~MainWindow() = default;
 
-void MainWindow::init()
+void MainWindow::_init()
 {
     m_topBar    = new QWidget(this);
     m_topLayout = new QHBoxLayout();
@@ -123,6 +123,6 @@ void MainWindow::setupCallbacks()
 
     m_bottomBar->setRenderFrameCallBack(renderFrameFunc);
     m_bottomBar->setSaveFrameCallBack([this]() { m_menuBar->saveFrame(); });
-    m_bottomBar->setShowProfilerCallBack([this]() { m_bottomBar->showProfiler(m_renderWindow->getProfiler()); });
+    m_bottomBar->setShowProfilerCallBack([this]() { m_bottomBar->showProfiler(m_renderWindow->profiler_info()); });
     m_bottomBar->setPickPixelCallBack([this](uint32_t x, uint32_t y) { m_bottomBar->showPickInfo(m_renderWindow->pickPixel(x, y)); });
 }

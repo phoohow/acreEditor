@@ -42,7 +42,7 @@ public:
     ~MainWindow();
 
 private:
-    void init();
+    void _init();
 
     void setupMainLayout();
 

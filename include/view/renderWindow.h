@@ -24,7 +24,7 @@ class CameraController;
 class Exporter;
 class RenderWindow : public QWindow
 {
-    std::unique_ptr<acre::DeviceMgr>           m_deviceMgr    = nullptr;
+    std::unique_ptr<acre::DeviceMgr>           m_device_mgr    = nullptr;
     std::unique_ptr<acre::Swapchain>           m_swapchain    = nullptr;
     std::unique_ptr<acre::Scene>               m_renderScene  = nullptr;
     std::unique_ptr<acre::Renderer>            m_renderer     = nullptr;
@@ -62,7 +62,7 @@ public:
 
     void renderFrame();
 
-    std::string getProfiler();
+    std::string profiler_info();
 
     std::string pickPixel(uint32_t x, uint32_t y);
 

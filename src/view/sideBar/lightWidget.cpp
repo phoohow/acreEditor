@@ -210,7 +210,7 @@ void LightWidget::showSunUI()
     m_lineEdit_direction_y->show();
     m_lineEdit_direction_z->show();
 
-    auto light = m_scene->getSunLight();
+    auto light = m_scene->get_sun_light();
     if (!light)
     {
         m_lineEdit_color_r->setText(QString::number(0));
@@ -246,7 +246,7 @@ void LightWidget::showHDRUI()
     m_label_texture->show();
     m_lineEdit_texture->show();
 
-    auto light = m_scene->getHDRLight();
+    auto light = m_scene->get_hdr_light();
     if (!light)
     {
         m_lineEdit_color_r->setText(QString::number(0));
@@ -328,13 +328,13 @@ void LightWidget::onUpdateColor()
 
     if (m_useSun)
     {
-        auto light = m_scene->getSunLight();
+        auto light = m_scene->get_sun_light();
         if (!light) return;
         light->color = rgb;
     }
     else if (m_useHDR)
     {
-        auto light = m_scene->getHDRLight();
+        auto light = m_scene->get_hdr_light();
         if (!light) return;
         light->color = rgb;
     }
@@ -361,13 +361,13 @@ void LightWidget::onUpdateIntensity()
 
     if (m_useSun)
     {
-        auto light = m_scene->getSunLight();
+        auto light = m_scene->get_sun_light();
         if (!light) return;
         light->factor = value.toFloat();
     }
     else if (m_useHDR)
     {
-        auto light = m_scene->getHDRLight();
+        auto light = m_scene->get_hdr_light();
         if (!light) return;
         light->factor = value.toFloat();
     }
@@ -390,7 +390,7 @@ void LightWidget::onUpdateIntensity()
 
 void LightWidget::onUpdateDirection()
 {
-    auto light = m_scene->getSunLight();
+    auto light = m_scene->get_sun_light();
     if (!light) return;
 
     auto x = m_lineEdit_direction_x->text();
@@ -403,7 +403,7 @@ void LightWidget::onUpdateDirection()
 
 void LightWidget::onUpdateTexture()
 {
-    auto light = m_scene->getHDRLight();
+    auto light = m_scene->get_hdr_light();
     if (!light) return;
 
     auto value    = m_lineEdit_texture->text();

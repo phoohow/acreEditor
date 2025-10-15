@@ -74,7 +74,7 @@ void Loader::loadHDR(const std::string& fileName)
     light->id     = node->id<acre::TextureID>();
     light->enable = true;
 
-    m_scene->setHDRLight(light);
+    m_scene->set_hdr_light(light);
 }
 
 void Loader::loadLutGGX(const std::string& fileName)
@@ -85,7 +85,7 @@ void Loader::loadLutGGX(const std::string& fileName)
     auto imageR    = createImage(fileName);
     texture->image = imageR->id<acre::ImageID>();
 
-    m_scene->setLutGGX(node->id<acre::TextureID>());
+    m_scene->set_lut_ggx(node->id<acre::TextureID>());
 }
 
 void Loader::loadLutCharlie(const std::string& fileName)
@@ -96,7 +96,7 @@ void Loader::loadLutCharlie(const std::string& fileName)
     auto imageR    = createImage(fileName);
     texture->image = {imageR->ptr<acre::ImageID>(), imageR->idx()};
 
-    m_scene->setLutCharlie(node->id<acre::TextureID>());
+    m_scene->set_lut_charlie(node->id<acre::TextureID>());
 }
 
 void Loader::loadLutSheenAlbedoScale(const std::string& fileName)
@@ -107,7 +107,7 @@ void Loader::loadLutSheenAlbedoScale(const std::string& fileName)
     auto image     = createImage(fileName);
     texture->image = image->id<acre::ImageID>();
 
-    m_scene->setLutSheenAlbedoScale(node->id<acre::TextureID>());
+    m_scene->set_lut_sheen_albedo_scale(node->id<acre::TextureID>());
 }
 
 void Loader::loadCamera(const std::string& fileName)

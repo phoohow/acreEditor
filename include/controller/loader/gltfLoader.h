@@ -30,7 +30,7 @@ private:
 
     void createTransform();
 
-    void createComponent();
+    void create_component_draw();
 
     void createTextureTransform(const std::map<std::string, tinygltf::Value>& map, uint32_t uuid);
 
