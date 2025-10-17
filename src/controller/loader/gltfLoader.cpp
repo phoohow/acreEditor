@@ -32,6 +32,36 @@ static auto vec4ToQuat(T& vec)
     return acre::math::quat(vec[3], vec[0], vec[1], vec[2]);
 }
 
+// clang-format off
+static auto bufToFloat4x4(unsigned char* buf)
+{
+    acre::math::float4x4 mat;
+    memcpy(mat.m_data, buf, sizeof(mat));
+
+    // mat.m00 = float(*buf); buf += 4;
+    // mat.m01 = float(*buf); buf += 4;
+    // mat.m02 = float(*buf); buf += 4;
+    // mat.m03 = float(*buf); buf += 4;
+
+    // mat.m10 = float(*buf); buf += 4;
+    // mat.m11 = float(*buf); buf += 4;
+    // mat.m12 = float(*buf); buf += 4;
+    // mat.m13 = float(*buf); buf += 4;
+
+    // mat.m20 = float(*buf); buf += 4;
+    // mat.m21 = float(*buf); buf += 4;
+    // mat.m22 = float(*buf); buf += 4;
+    // mat.m23 = float(*buf); buf += 4;
+
+    // mat.m30 = float(*buf); buf += 4;
+    // mat.m31 = float(*buf); buf += 4;
+    // mat.m32 = float(*buf); buf += 4;
+    // mat.m33 = float(*buf); 
+
+    return mat;
+}
+// clang-format on
+
 static auto toImageFormat(int component, int bits)
 {
     if (component == 3)
@@ -71,6 +101,7 @@ static auto toImageFormat(int component, int bits)
 
 using namespace tinygltf;
 std::vector<std::vector<uint32_t>> g_index;
+std::vector<std::vector<uint32_t>> g_joint;
 std::map<std::string, int>         g_geometry;
 
 template <typename Type>
@@ -89,6 +120,24 @@ static void appendIndex(acre::VIndex*               indexBuffer,
         g_index[index][i] = (uint32_t)(tempVec[i]);
 
     indexBuffer->data = g_index[index].data();
+}
+
+template <typename Type>
+static void appendJoint(acre::VJoint*               indexBuffer,
+                        const tinygltf::Accessor&   accessor,
+                        const tinygltf::BufferView& bufferView,
+                        uint32_t                    index,
+                        unsigned char*              addr)
+{
+    std::vector<Type> tempVec;
+    tempVec.resize(accessor.count * 4);
+    memcpy(tempVec.data(), (void*)(addr + bufferView.byteOffset + accessor.byteOffset), sizeof(Type) * accessor.count * 4);
+
+    g_joint[index].resize(accessor.count * 4);
+    for (auto i = 0; i < accessor.count * 4; ++i)
+        g_joint[index][i] = (uint32_t)(tempVec[i]);
+
+    indexBuffer->data = g_joint[index].data();
 }
 
 GLTFLoader::GLTFLoader(SceneMgr* scene) :
@@ -142,13 +191,14 @@ void GLTFLoader::loadScene(const std::string& fileName)
         printf("Failed to parse glTF\n");
     }
 
-    createMaterial();
-    createGeometry();
-    createTransform();
-    create_component_draw();
+    _create_material();
+    _create_geometry();
+    _create_transform();
+    _create_skin();
+    _create_component_draw();
 }
 
-void GLTFLoader::createMaterial()
+void GLTFLoader::_create_material()
 {
     uint32_t uuid = 0;
     for (const auto& img : m_model->images)
@@ -193,10 +243,10 @@ void GLTFLoader::createMaterial()
         model.emissionIndex           = _get_texture_id(refs, mat.emissiveTexture.index);
         model.emission                = vec3ToFloat3(mat.emissiveFactor);
 
-        createTextureTransform(mat.pbrMetallicRoughness.baseColorTexture.extensions, mat.pbrMetallicRoughness.baseColorTexture.index);
-        createTextureTransform(mat.pbrMetallicRoughness.metallicRoughnessTexture.extensions, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
-        createTextureTransform(mat.normalTexture.extensions, mat.normalTexture.index);
-        createTextureTransform(mat.emissiveTexture.extensions, mat.emissiveTexture.index);
+        _create_texture_transform(mat.pbrMetallicRoughness.baseColorTexture.extensions, mat.pbrMetallicRoughness.baseColorTexture.index);
+        _create_texture_transform(mat.pbrMetallicRoughness.metallicRoughnessTexture.extensions, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+        _create_texture_transform(mat.normalTexture.extensions, mat.normalTexture.index);
+        _create_texture_transform(mat.emissiveTexture.extensions, mat.emissiveTexture.index);
 
         const auto& exts = mat.extensions;
         if (exts.find("KHR_materials_ior") != exts.end())
@@ -219,21 +269,21 @@ void GLTFLoader::createMaterial()
                 const auto& clearcoatTexture = clearcoat->second.Get("clearcoatTexture");
                 auto        index            = clearcoatTexture.Get("index").GetNumberAsInt();
                 model.clearcoatIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(clearcoatTexture, index);
+                _try_create_texture_transform(clearcoatTexture, index);
             }
             if (clearcoat->second.Has("clearcoatRoughnessTexture"))
             {
                 const auto& clearcoatRoughnessTexture = clearcoat->second.Get("clearcoatRoughnessTexture");
                 auto        index                     = clearcoatRoughnessTexture.Get("index").GetNumberAsInt();
                 model.clearcoatRoughnessIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(clearcoatRoughnessTexture, index);
+                _try_create_texture_transform(clearcoatRoughnessTexture, index);
             }
             if (clearcoat->second.Has("clearcoatNormalTexture"))
             {
                 const auto& clearcoatNormalTexture = clearcoat->second.Get("clearcoatNormalTexture");
                 auto        index                  = clearcoatNormalTexture.Get("index").GetNumberAsInt();
                 model.clearcoatNormalIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(clearcoatNormalTexture, index);
+                _try_create_texture_transform(clearcoatNormalTexture, index);
             }
         }
 
@@ -253,14 +303,14 @@ void GLTFLoader::createMaterial()
                 const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
                 auto        index             = sheenColorTexture.Get("index").GetNumberAsInt();
                 model.sheenColorIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(sheenColorTexture, index);
+                _try_create_texture_transform(sheenColorTexture, index);
             }
             if (sheen->second.Has("sheenRoughnessTexture"))
             {
                 const auto& sheenRoughnessTexture = sheen->second.Get("sheenRoughnessTexture");
                 auto        index                 = sheenRoughnessTexture.Get("index").GetNumberAsInt();
                 model.sheenRoughnessIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(sheenRoughnessTexture, index);
+                _try_create_texture_transform(sheenRoughnessTexture, index);
             }
         }
 
@@ -282,7 +332,7 @@ void GLTFLoader::createMaterial()
                 const auto& anisotropyTexture = anisotropy->second.Get("anisotropyTexture");
                 auto        index             = anisotropyTexture.Get("index").GetNumberAsInt();
                 model.anisotropyIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(anisotropyTexture, index);
+                _try_create_texture_transform(anisotropyTexture, index);
             }
         }
 
@@ -298,7 +348,7 @@ void GLTFLoader::createMaterial()
                 const auto& iridescenceTexture = iridescence->second.Get("iridescenceTexture");
                 auto        index              = iridescenceTexture.Get("index").GetNumberAsInt();
                 model.iridescenceIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(iridescenceTexture, index);
+                _try_create_texture_transform(iridescenceTexture, index);
             }
             if (iridescence->second.Has("iridescenceIor"))
             {
@@ -320,7 +370,7 @@ void GLTFLoader::createMaterial()
                 const auto& iridescenceThicknessTexture = iridescence->second.Get("iridescenceThicknessTexture");
                 auto        index                       = iridescenceThicknessTexture.Get("index").GetNumberAsInt();
                 model.iridescenceThicknessIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(iridescenceThicknessTexture, index);
+                _try_create_texture_transform(iridescenceThicknessTexture, index);
             }
         }
 
@@ -340,7 +390,7 @@ void GLTFLoader::createMaterial()
                 const auto& transmissionTexture = transmission->second.Get("transmissionTexture");
                 auto        index               = transmissionTexture.Get("index").GetNumberAsInt();
                 model.transmissionIndex         = _get_texture_id(refs, index);
-                checkCreateTextureTransform(transmissionTexture, index);
+                _try_create_texture_transform(transmissionTexture, index);
             }
 
             const auto& volumeExt = exts.find("KHR_materials_volume");
@@ -354,7 +404,7 @@ void GLTFLoader::createMaterial()
                     const auto& thicknessTexture = volumeExt->second.Get("thicknessTexture");
                     auto        index            = thicknessTexture.Get("index").GetNumberAsInt();
                     model.thicknessIndex         = _get_texture_id(refs, index);
-                    checkCreateTextureTransform(thicknessTexture, index);
+                    _try_create_texture_transform(thicknessTexture, index);
                 }
 
                 if (volumeExt->second.Has("attenuationDistance"))
@@ -383,7 +433,7 @@ void GLTFLoader::createMaterial()
     }
 }
 
-void GLTFLoader::createGeometry()
+void GLTFLoader::_create_geometry()
 {
     g_geometry.clear();
 
@@ -392,6 +442,7 @@ void GLTFLoader::createGeometry()
     {
         const auto& mesh = m_model->meshes[meshIndex];
         g_index.resize(g_index.size() + mesh.primitives.size());
+        g_joint.resize(g_joint.size() + mesh.primitives.size());
 
         for (int primitiveIndex = 0; primitiveIndex < mesh.primitives.size(); ++primitiveIndex)
         {
@@ -415,33 +466,15 @@ void GLTFLoader::createGeometry()
 
                 switch (accessor.componentType)
                 {
-                    case TINYGLTF_COMPONENT_TYPE_BYTE:
-                        appendIndex<int8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-                        appendIndex<uint8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    case TINYGLTF_COMPONENT_TYPE_SHORT:
-                        appendIndex<int16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-                        appendIndex<uint16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    case TINYGLTF_COMPONENT_TYPE_INT:
-                        appendIndex<int32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-                        appendIndex<uint32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    case TINYGLTF_COMPONENT_TYPE_FLOAT:
-                        appendIndex<float>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    case TINYGLTF_COMPONENT_TYPE_DOUBLE:
-                        appendIndex<double>(indexBuffer, accessor, bufferView, geometryIndex, addr);
-                        break;
-                    default:
-                        indexBuffer->data = addr + bufferView.byteOffset + accessor.byteOffset;
-                        break;
+                    case TINYGLTF_COMPONENT_TYPE_BYTE: appendIndex<int8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: appendIndex<uint8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_SHORT: appendIndex<int16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: appendIndex<uint16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_INT: appendIndex<int32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: appendIndex<uint32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_FLOAT: appendIndex<float>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_DOUBLE: appendIndex<double>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
+                    default: indexBuffer->data = addr + bufferView.byteOffset + accessor.byteOffset; break;
                 }
             }
             if (primitive.attributes.find("POSITION") != primitive.attributes.end())
@@ -525,6 +558,49 @@ void GLTFLoader::createGeometry()
                 tangent->count    = accessor.count;
                 geometry->tangent = node->id<acre::VTangentID>();
             }
+            if (primitive.attributes.find("JOINTS_0") != primitive.attributes.end())
+            {
+                const auto& accessor   = m_model->accessors[primitive.attributes.find("JOINTS_0")->second];
+                const auto& bufferView = m_model->bufferViews[accessor.bufferView];
+                const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
+
+                auto node = m_scene->create<acre::VJointID>(geometryIndex);
+                refs.emplace(node);
+                auto joint      = node->ptr<acre::VJointID>();
+                joint->count    = accessor.count;
+                geometry->joint = node->id<acre::VJointID>();
+
+                switch (accessor.componentType)
+                {
+                    case TINYGLTF_COMPONENT_TYPE_BYTE: appendJoint<int8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: appendJoint<uint8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_SHORT: appendJoint<int16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: appendJoint<uint16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_INT: appendJoint<int32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: appendJoint<uint32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_FLOAT: appendJoint<float>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    case TINYGLTF_COMPONENT_TYPE_DOUBLE: appendJoint<double>(joint, accessor, bufferView, geometryIndex, addr); break;
+                    default: joint->data = addr + bufferView.byteOffset + accessor.byteOffset; break;
+                }
+            }
+            if (primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end())
+            {
+                const auto& accessor   = m_model->accessors[primitive.attributes.find("WEIGHTS_0")->second];
+                const auto& bufferView = m_model->bufferViews[accessor.bufferView];
+                const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
+
+                if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
+                {
+                    printf("Undo!\n");
+                }
+
+                auto node = m_scene->create<acre::VWeightID>(geometryIndex);
+                refs.emplace(node);
+                auto weight      = node->ptr<acre::VWeightID>();
+                weight->data     = addr + bufferView.byteOffset + accessor.byteOffset;
+                weight->count    = accessor.count;
+                geometry->weight = node->id<acre::VWeightID>();
+            }
 
             auto key = std::to_string(meshIndex) + "_" + std::to_string(primitiveIndex);
             g_geometry.emplace(key, geometryIndex++);
@@ -533,7 +609,7 @@ void GLTFLoader::createGeometry()
     }
 }
 
-void GLTFLoader::createTransform()
+void GLTFLoader::_create_transform()
 {
     for (int nodeIndex = 0; nodeIndex < m_model->nodes.size(); ++nodeIndex)
     {
@@ -581,7 +657,36 @@ void GLTFLoader::createTransform()
     }
 }
 
-void GLTFLoader::create_component_draw()
+void GLTFLoader::_create_skin()
+{
+    for (int node_idx = 0; node_idx < m_model->nodes.size(); ++node_idx)
+    {
+        auto node = m_model->nodes[node_idx];
+        if (node.mesh == -1 || node.skin == -1) continue;
+
+        auto node_transform      = _get_transform_id(node_idx).ptr;
+        auto inverse_node_matrix = acre::math::inverse(node_transform->matrix);
+
+        auto skin     = m_model->skins[node.skin];
+        auto accessor = m_model->accessors[skin.inverseBindMatrices];
+        auto view     = m_model->bufferViews[accessor.bufferView];
+        auto buffer   = m_model->buffers[view.buffer].data;
+
+        for (int joint_idx = 0; joint_idx < skin.joints.size(); ++joint_idx)
+        {
+            auto addr                = buffer.data() + accessor.byteOffset + view.byteOffset + joint_idx * 64;
+            auto inverse_bind_matrix = bufToFloat4x4(addr);
+
+            auto joint_node_idx    = skin.joints[joint_idx];
+            auto joint_node_matrix = _get_transform(joint_node_idx)->ptr<acre::TransformID>()->matrix;
+
+            auto skinR                               = m_scene->create<acre::SkinID>(joint_idx);
+            skinR->ptr<acre::SkinID>()->joint_matrix = inverse_bind_matrix * joint_node_matrix * inverse_node_matrix;
+        }
+    }
+}
+
+void GLTFLoader::_create_component_draw()
 {
     auto     sceneBox     = acre::math::box3::empty();
     uint32_t entity_index = 0;
@@ -608,6 +713,16 @@ void GLTFLoader::create_component_draw()
 
             const auto& primitive = mesh.primitives[primitiveIndex];
             auto        materialR = _get_material(primitive.material);
+            if (!materialR)
+            {
+                materialR       = m_scene->create<acre::MaterialID>(10086);
+                auto material   = materialR->ptr<acre::MaterialID>();
+                material->type  = acre::MaterialModel::mStandard;
+                auto model      = acre::StandardModel();
+                model.baseColor = acre::math::float3(1.0, 0.0, 0.0);
+                material->model = model;
+                m_scene->update(materialR);
+            }
 
             m_scene->create(acre::component::createDraw(entityID,
                                                         geometryR->id<acre::GeometryID>(),
@@ -629,25 +744,25 @@ void GLTFLoader::create_component_draw()
     m_scene->mergeBox(sceneBox);
 }
 
-void GLTFLoader::createTextureTransform(const tinygltf::ExtensionMap& ext, uint32_t uuid)
+void GLTFLoader::_create_texture_transform(const tinygltf::ExtensionMap& ext, uint32_t uuid)
 {
     if (ext.find("KHR_texture_transform") == ext.end()) return;
 
     const auto& transform = ext.find("KHR_texture_transform")->second;
-    createTextureTransform(transform, uuid);
+    _create_texture_transform(transform, uuid);
 }
 
-void GLTFLoader::checkCreateTextureTransform(const tinygltf::Value& value, uint32_t uuid)
+void GLTFLoader::_try_create_texture_transform(const tinygltf::Value& value, uint32_t uuid)
 {
     if (!value.Has("extensions")) return;
 
     const auto& extensions = value.Get("extensions");
     if (!extensions.Has("KHR_texture_transform")) return;
 
-    createTextureTransform(extensions.Get("KHR_texture_transform"), uuid);
+    _create_texture_transform(extensions.Get("KHR_texture_transform"), uuid);
 }
 
-void GLTFLoader::createTextureTransform(const tinygltf::Value& value, uint32_t uuid)
+void GLTFLoader::_create_texture_transform(const tinygltf::Value& value, uint32_t uuid)
 {
     acre::math::float4x4 transformMat = acre::math::float4x4::identity();
     if (value.Has("scale"))

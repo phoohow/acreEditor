@@ -24,19 +24,21 @@ public:
     virtual void loadScene(const std::string& fileName) override;
 
 private:
-    void createGeometry();
+    void _create_geometry();
 
-    void createMaterial();
+    void _create_material();
 
-    void createTransform();
+    void _create_transform();
 
-    void create_component_draw();
+    void _create_skin();
 
-    void createTextureTransform(const std::map<std::string, tinygltf::Value>& map, uint32_t uuid);
+    void _create_component_draw();
 
-    void checkCreateTextureTransform(const tinygltf::Value& value, uint32_t uuid);
+    void _create_texture_transform(const std::map<std::string, tinygltf::Value>& map, uint32_t uuid);
 
-    void createTextureTransform(const tinygltf::Value& value, uint32_t uuid);
+    void _try_create_texture_transform(const tinygltf::Value& value, uint32_t uuid);
+
+    void _create_texture_transform(const tinygltf::Value& value, uint32_t uuid);
 
     acre::Resource* _get_image(std::unordered_set<acre::Resource*>& refs, uint32_t uuid);
     acre::Resource* _get_texture(std::unordered_set<acre::Resource*>& refs, uint32_t uuid);

@@ -140,6 +140,8 @@ RID ResourceTree::_createID(size_t index)
         case index_of_rid<VNormalID>():   {  auto id = VNormalID{};   m_scene->create(id); return id; }
         case index_of_rid<VTangentID>():  {  auto id = VTangentID{};  m_scene->create(id); return id; }
         case index_of_rid<VColorID>():    {  auto id = VColorID{};    m_scene->create(id); return id; }
+        case index_of_rid<VJointID>():    {  auto id = VJointID{};    m_scene->create(id); return id; }
+        case index_of_rid<VWeightID>():   {  auto id = VWeightID{};   m_scene->create(id); return id; }
         case index_of_rid<GeometryID>():  {  auto id = GeometryID{new Geometry};   m_scene->create(id); return id; }
         case index_of_rid<ImageID>():     {  auto id = ImageID{new Image};         m_scene->create(id); return id; }
         case index_of_rid<TextureID>():   {  auto id = TextureID{new Texture};     m_scene->create(id); return id; }
@@ -149,6 +151,7 @@ RID ResourceTree::_createID(size_t index)
         case index_of_rid<EntityID>():    {  auto id = EntityID{new Entity};       m_scene->create(id); return id; }
         case index_of_rid<LightID>():     {  auto id = LightID{new Light};         m_scene->create(id); return id; }
         case index_of_rid<CameraID>():    {  auto id = CameraID{new Camera};       m_scene->create(id); return id; }
+        case index_of_rid<SkinID>():      {  auto id = SkinID{new Skin};           m_scene->create(id); return id; }
     }
 
     return EntityID();
@@ -200,6 +203,8 @@ void ResourceTree::_removeID(RID rid)
         case index_of_rid<VNormalID>():   { auto id = std::get<VNormalID>(rid);   m_scene->remove(id); break; }
         case index_of_rid<VTangentID>():  { auto id = std::get<VTangentID>(rid);  m_scene->remove(id); break; }
         case index_of_rid<VColorID>():    { auto id = std::get<VColorID>(rid);    m_scene->remove(id); break; }
+        case index_of_rid<VJointID>():    { auto id = std::get<VJointID>(rid);    m_scene->remove(id); break; }
+        case index_of_rid<VWeightID>():   { auto id = std::get<VWeightID>(rid);   m_scene->remove(id); break; }
         case index_of_rid<GeometryID>():  { auto id = std::get<GeometryID>(rid);  m_scene->remove(id); delete id.ptr; break; }
         case index_of_rid<ImageID>():     { auto id = std::get<ImageID>(rid);     m_scene->remove(id); delete id.ptr; break; }
         case index_of_rid<TextureID>():   { auto id = std::get<TextureID>(rid);   m_scene->remove(id); delete id.ptr; break; }
@@ -209,6 +214,7 @@ void ResourceTree::_removeID(RID rid)
         case index_of_rid<EntityID>():    { auto id = std::get<EntityID>(rid);    m_scene->remove(id); delete id.ptr; break; }
         case index_of_rid<LightID>():     { auto id = std::get<LightID>(rid);     m_scene->remove(id); delete id.ptr; break; }
         case index_of_rid<CameraID>():    { auto id = std::get<CameraID>(rid);    m_scene->remove(id); delete id.ptr; break; }
+        case index_of_rid<SkinID>():      { auto id = std::get<SkinID>(rid);      m_scene->remove(id); delete id.ptr; break; }
     }
 }
 

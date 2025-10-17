@@ -15,6 +15,8 @@ using RID = std::variant<VIndexID,
                          VNormalID,
                          VTangentID,
                          VColorID,
+                         VJointID,
+                         VWeightID,
                          GeometryID,
                          ImageID,
                          SamplerID,
@@ -23,7 +25,8 @@ using RID = std::variant<VIndexID,
                          MaterialID,
                          EntityID,
                          LightID,
-                         CameraID>;
+                         CameraID,
+                         SkinID>;
 
 template <typename T, size_t N = std::variant_size_v<RID> - 1>
 constexpr auto is_one_of_rid()
