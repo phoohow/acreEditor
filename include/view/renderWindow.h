@@ -3,6 +3,7 @@
 
 #include <QWindow>
 #include <QPoint>
+#include <QTimer>
 
 namespace acre
 {
@@ -24,7 +25,7 @@ class CameraController;
 class Exporter;
 class RenderWindow : public QWindow
 {
-    std::unique_ptr<acre::DeviceMgr>           m_device_mgr    = nullptr;
+    std::unique_ptr<acre::DeviceMgr>           m_device_mgr   = nullptr;
     std::unique_ptr<acre::Swapchain>           m_swapchain    = nullptr;
     std::unique_ptr<acre::Scene>               m_renderScene  = nullptr;
     std::unique_ptr<acre::Renderer>            m_renderer     = nullptr;
@@ -37,6 +38,9 @@ class RenderWindow : public QWindow
 
     QPointF m_mousePosition;
     bool    m_enableRotate = false;
+
+    QTimer*                               m_timer = nullptr;
+    std::chrono::steady_clock::time_point m_lastFrameTime;
 
     SceneMgr*         m_scene            = nullptr;
     CameraController* m_cameraController = nullptr;

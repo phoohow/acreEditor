@@ -32,12 +32,14 @@ class SceneWidget : public QWidget
     QWidget* m_geometryWidget;
     QWidget* m_materialWidget;
     QWidget* m_transformWidget;
+    QWidget* m_animationWidget;
 
     QTreeWidgetItem* m_cameraRoot    = nullptr;
     QTreeWidgetItem* m_lightRoot     = nullptr;
     QTreeWidgetItem* m_geometryRoot  = nullptr;
     QTreeWidgetItem* m_materialRoot  = nullptr;
     QTreeWidgetItem* m_transformRoot = nullptr;
+    QTreeWidgetItem* m_animationRoot = nullptr;
 
 public:
     explicit SceneWidget(SceneMgr* scene, QWidget* parent = nullptr);
@@ -52,6 +54,7 @@ private:
     void initGeometry();
     void initMaterial();
     void initTransform();
+    void initAnimation();
 
     void onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* prev);
 

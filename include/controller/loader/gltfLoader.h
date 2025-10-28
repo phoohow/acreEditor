@@ -34,6 +34,8 @@ private:
 
     void _create_component_draw();
 
+    void _create_animation();
+
     void _create_texture_transform(const std::map<std::string, tinygltf::Value>& map, uint32_t uuid);
 
     void _try_create_texture_transform(const tinygltf::Value& value, uint32_t uuid);

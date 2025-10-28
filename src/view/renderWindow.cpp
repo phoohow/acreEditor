@@ -42,8 +42,8 @@ RenderWindow::RenderWindow() :
 #ifndef _DEBUG
     m_renderScene = std::make_unique<acre::Scene>(m_device_mgr.get(), QDir::currentPath().toStdString().c_str());
 #else
-    auto src_dir   = SRC_DIR;
-    auto dst_dir   = DST_DIR;
+    auto src_dir  = SRC_DIR;
+    auto dst_dir  = DST_DIR;
     m_renderScene = std::make_unique<acre::Scene>(m_device_mgr.get(), src_dir, dst_dir);
 #endif
 
@@ -52,6 +52,18 @@ RenderWindow::RenderWindow() :
     m_pathConfig   = std::make_unique<acre::config::PathTracing>();
 
     initScene();
+
+    // Recommended: use QTimer to drive animation and rendering
+    m_lastFrameTime = std::chrono::steady_clock::now();
+    m_timer         = new QTimer(this);
+    connect(m_timer, &QTimer::timeout, this, [this]() {
+        auto  now       = std::chrono::steady_clock::now();
+        float deltaTime = std::chrono::duration<float>(now - m_lastFrameTime).count();
+        m_lastFrameTime = now;
+        if (m_scene) m_scene->updateAnimation(deltaTime);
+        renderFrame();
+    });
+    m_timer->start(16); // About 60FPS
 }
 
 RenderWindow::~RenderWindow() = default;
@@ -252,7 +264,7 @@ std::string RenderWindow::pickPixel(uint32_t x, uint32_t y)
 
 void RenderWindow::saveFrame(const std::string& fileName)
 {
-    // Note: Debug code, it cost more time than only render
+    // Debug code: this costs more time than only rendering
     // auto start = std::chrono::high_resolution_clock::now();
     // for (auto index = 0; index < 4096; ++index)
     // {
@@ -283,7 +295,7 @@ void RenderWindow::saveFrame(const std::string& fileName)
 
     delete[] pixels.data;
 
-    // Note: need refrash to swapchain after render
+    // Note: need refresh to swapchain after render
     m_cameraController->resize(width(), height());
     renderFrame();
 }

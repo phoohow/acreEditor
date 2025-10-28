@@ -9,6 +9,9 @@ SceneMgr::SceneMgr(acre::Scene* scene) :
     initCamera();
     initDirectionLight();
     // initPointLight();
+
+    m_animationSet   = new acre::AnimationSet();
+    m_animController = new AnimationController(m_animationSet);
 }
 
 SceneMgr::~SceneMgr()
@@ -128,4 +131,41 @@ void SceneMgr::highlightMaterial(uint32_t uuid)
 {
     auto node = find<acre::MaterialID>(uuid);
     m_scene->highlight(node->id<acre::MaterialID>());
+}
+
+void SceneMgr::setAnimationController(AnimationController* controller)
+{
+    m_animController = controller;
+}
+
+void SceneMgr::updateAnimation(float deltaTime)
+{
+    if (m_animController)
+    {
+        // Sample animation and apply to Transform nodes
+        // Assume AnimationController::update already samples each channel value
+        // Iterate current animation channels, find corresponding Transform node and set property
+        m_animController->update(deltaTime);
+
+        const auto animation = m_animController->getCurrentAnimation();
+        if (animation)
+        {
+            const auto& channels = animation->channels;
+            for (size_t i = 0; i < channels.size(); ++i)
+            {
+                const auto& channel = channels[i];
+                auto        node    = m_tree->get<acre::TransformID>(channel.targetNode);
+                if (!node) continue;
+                auto transform = static_cast<acre::Transform*>(node->ptr<acre::TransformID>());
+                if (!transform) continue;
+                const auto& value = m_animController->getSampledValue(i);
+                if (channel.targetPath == "translation" && value.size() >= 3)
+                    transform->translation = acre::math::float3(value[0], value[1], value[2]);
+                else if (channel.targetPath == "rotation" && value.size() >= 4)
+                    transform->ratation = acre::math::float4(value[0], value[1], value[2], value[3]);
+                else if (channel.targetPath == "scale" && value.size() >= 3)
+                    transform->scale = acre::math::float3(value[0], value[1], value[2]);
+            }
+        }
+    }
 }

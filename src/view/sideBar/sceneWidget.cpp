@@ -14,6 +14,7 @@
 #include <QDoubleValidator>
 #include <QBrush>
 #include <QColor>
+#include <QPushButton>
 
 #include <stdint.h>
 #include <unordered_map>
@@ -47,6 +48,50 @@ SceneWidget::SceneWidget(SceneMgr* scene, QWidget* parent) :
     initGeometry();
     initMaterial();
     initTransform();
+    initAnimation();
+}
+
+void SceneWidget::initAnimation()
+{
+    m_animationWidget   = new QWidget(this);
+    QVBoxLayout* layout = new QVBoxLayout(m_animationWidget);
+    QLabel*      label  = new QLabel("Animation Control", m_animationWidget);
+    layout->addWidget(label);
+    QPushButton* playBtn = new QPushButton("Play", m_animationWidget);
+    layout->addWidget(playBtn);
+    QPushButton* pauseBtn = new QPushButton("Pause", m_animationWidget);
+    layout->addWidget(pauseBtn);
+    QPushButton* stopBtn = new QPushButton("Stop", m_animationWidget);
+    layout->addWidget(stopBtn);
+
+    // Connect buttons to animation controller
+    connect(playBtn, &QPushButton::clicked, this, [this]() {
+        if (m_scene && m_scene->getAnimationController())
+        {
+            // Play the first animation by default
+            const auto* animSet = m_scene->getAnimationController()->getAnimationSet();
+            if (animSet && !animSet->animations.empty())
+            {
+                m_scene->getAnimationController()->play(animSet->animations[0].name);
+            }
+        }
+    });
+    connect(pauseBtn, &QPushButton::clicked, this, [this]() {
+        if (m_scene && m_scene->getAnimationController())
+        {
+            m_scene->getAnimationController()->pause();
+        }
+    });
+    connect(stopBtn, &QPushButton::clicked, this, [this]() {
+        if (m_scene && m_scene->getAnimationController())
+        {
+            m_scene->getAnimationController()->stop();
+        }
+    });
+    m_editorStack->addWidget(m_animationWidget);
+    m_animationRoot = new QTreeWidgetItem(m_selector);
+    m_animationRoot->setText(0, "Animation");
+    m_selector->addTopLevelItem(m_animationRoot);
 }
 
 void SceneWidget::initCamera()
@@ -110,19 +155,27 @@ void SceneWidget::onUpdate()
 
 void SceneWidget::onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* prev)
 {
-    static const std::unordered_map<QString, TabWidget> kTabNameToEnum =
-        {
-            {"Camera", TabWidget::wCamera},
-            {"Light", TabWidget::wLight},
-            {"Geometry", TabWidget::wGeometry},
-            {"Material", TabWidget::wMaterial},
-            {"Transform", TabWidget::wTransform},
-        };
+    static const std::unordered_map<QString, TabWidget> kTabNameToEnum = {
+        {"Camera", TabWidget::wCamera},
+        {"Light", TabWidget::wLight},
+        {"Geometry", TabWidget::wGeometry},
+        {"Material", TabWidget::wMaterial},
+        {"Transform", TabWidget::wTransform},
+    };
 
     if (!current) return;
     QTreeWidgetItem* parent = current->parent();
     const QString    name   = parent ? parent->text(0) : current->text(0);
-    const auto       it     = kTabNameToEnum.find(name);
+
+    // Animation selection handling
+    if (name == "Animation")
+    {
+        // Show animation widget
+        m_editorStack->setCurrentWidget(m_animationWidget);
+        return;
+    }
+
+    const auto it = kTabNameToEnum.find(name);
     if (it == kTabNameToEnum.end()) return;
 
     TabWidget tab = it->second;
@@ -182,7 +235,6 @@ void SceneWidget::onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* 
     {
         // updateWidget(current, tab);
         // current->setExpanded(true);
-
         onUpdate();
     }
 }

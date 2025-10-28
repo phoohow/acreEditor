@@ -1,5 +1,4 @@
 #include <controller/loader/gltfLoader.h>
-
 #include <acre/render/renderer.h>
 
 #define TINYGLTF_IMPLEMENTATION
@@ -196,6 +195,61 @@ void GLTFLoader::loadScene(const std::string& fileName)
     _create_transform();
     _create_skin();
     _create_component_draw();
+    _create_animation();
+}
+
+void GLTFLoader::_create_animation()
+{
+    auto animationSet = m_scene->getAnimationSet();
+    for (const auto& animation : m_model->animations)
+    {
+        acre::Animation acre_animation;
+        acre_animation.name     = animation.name;
+        acre_animation.duration = 0.0f;
+
+        // samplers
+        for (const auto& sampler : animation.samplers)
+        {
+            acre::AnimationSampler acre_sampler;
+            acre_sampler.interpolation = sampler.interpolation;
+
+            // input
+            const auto&  inputAccessor   = m_model->accessors[sampler.input];
+            const auto&  inputBufferView = m_model->bufferViews[inputAccessor.bufferView];
+            const auto&  inputBuffer     = m_model->buffers[inputBufferView.buffer].data;
+            const float* inputData       = reinterpret_cast<const float*>(&inputBuffer[inputBufferView.byteOffset + inputAccessor.byteOffset]);
+            acre_sampler.input.assign(inputData, inputData + inputAccessor.count);
+
+            // output
+            const auto&  outputAccessor   = m_model->accessors[sampler.output];
+            const auto&  outputBufferView = m_model->bufferViews[outputAccessor.bufferView];
+            const auto&  outputBuffer     = m_model->buffers[outputBufferView.buffer].data;
+            const float* outputData       = reinterpret_cast<const float*>(&outputBuffer[outputBufferView.byteOffset + outputAccessor.byteOffset]);
+            int          elemSize         = 1;
+            if (outputAccessor.type == TINYGLTF_TYPE_VEC3) elemSize = 3;
+            else if (outputAccessor.type == TINYGLTF_TYPE_VEC4)
+                elemSize = 4;
+            for (size_t i = 0; i < outputAccessor.count; ++i)
+            {
+                std::vector<float> value(outputData + i * elemSize, outputData + (i + 1) * elemSize);
+                acre_sampler.output.push_back(value);
+            }
+            acre_animation.samplers.push_back(acre_sampler);
+            if (!acre_sampler.input.empty() && acre_sampler.input.back() > acre_animation.duration) acre_animation.duration = acre_sampler.input.back();
+        }
+
+        // channels
+        for (const auto& channel : animation.channels)
+        {
+            acre::AnimationChannel acre_channel;
+            acre_channel.targetNode   = channel.target_node;
+            acre_channel.targetPath   = channel.target_path;
+            acre_channel.samplerIndex = channel.sampler;
+            acre_animation.channels.push_back(acre_channel);
+        }
+
+        animationSet->animations.push_back(acre_animation);
+    }
 }
 
 void GLTFLoader::_create_material()
