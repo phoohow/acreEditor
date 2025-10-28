@@ -118,7 +118,6 @@ public:
     auto getImageCount() { return m_tree->_getMgr<acre::ImageID>().size(); }
 
     void updateAnimation(float deltaTime);
-    void setAnimationController(AnimationController* controller);
     auto getAnimationController() const { return m_animController; }
     auto getAnimationSet() const { return m_animationSet; }
 

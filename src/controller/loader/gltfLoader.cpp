@@ -128,13 +128,19 @@ static void appendJoint(acre::VJoint*               indexBuffer,
                         uint32_t                    index,
                         unsigned char*              addr)
 {
-    std::vector<Type> tempVec;
-    tempVec.resize(accessor.count * 4);
-    memcpy(tempVec.data(), (void*)(addr + bufferView.byteOffset + accessor.byteOffset), sizeof(Type) * accessor.count * 4);
+    if (accessor.type != TINYGLTF_TYPE_VEC4)
+    {
+        printf("JOINTS_0 accessor.type is not VEC4!\n");
+        return;
+    }
+    size_t               jointCount = accessor.count * 4;
+    const unsigned char* src        = addr + bufferView.byteOffset + accessor.byteOffset;
+    std::vector<Type>    tempVec(jointCount);
+    memcpy(tempVec.data(), src, sizeof(Type) * jointCount);
 
-    g_joint[index].resize(accessor.count * 4);
-    for (auto i = 0; i < accessor.count * 4; ++i)
-        g_joint[index][i] = (uint32_t)(tempVec[i]);
+    g_joint[index].resize(jointCount);
+    for (size_t i = 0; i < jointCount; ++i)
+        g_joint[index][i] = static_cast<uint32_t>(tempVec[i]);
 
     indexBuffer->data = g_joint[index].data();
 }
@@ -196,60 +202,6 @@ void GLTFLoader::loadScene(const std::string& fileName)
     _create_skin();
     _create_component_draw();
     _create_animation();
-}
-
-void GLTFLoader::_create_animation()
-{
-    auto animationSet = m_scene->getAnimationSet();
-    for (const auto& animation : m_model->animations)
-    {
-        acre::Animation acre_animation;
-        acre_animation.name     = animation.name;
-        acre_animation.duration = 0.0f;
-
-        // samplers
-        for (const auto& sampler : animation.samplers)
-        {
-            acre::AnimationSampler acre_sampler;
-            acre_sampler.interpolation = sampler.interpolation;
-
-            // input
-            const auto&  inputAccessor   = m_model->accessors[sampler.input];
-            const auto&  inputBufferView = m_model->bufferViews[inputAccessor.bufferView];
-            const auto&  inputBuffer     = m_model->buffers[inputBufferView.buffer].data;
-            const float* inputData       = reinterpret_cast<const float*>(&inputBuffer[inputBufferView.byteOffset + inputAccessor.byteOffset]);
-            acre_sampler.input.assign(inputData, inputData + inputAccessor.count);
-
-            // output
-            const auto&  outputAccessor   = m_model->accessors[sampler.output];
-            const auto&  outputBufferView = m_model->bufferViews[outputAccessor.bufferView];
-            const auto&  outputBuffer     = m_model->buffers[outputBufferView.buffer].data;
-            const float* outputData       = reinterpret_cast<const float*>(&outputBuffer[outputBufferView.byteOffset + outputAccessor.byteOffset]);
-            int          elemSize         = 1;
-            if (outputAccessor.type == TINYGLTF_TYPE_VEC3) elemSize = 3;
-            else if (outputAccessor.type == TINYGLTF_TYPE_VEC4)
-                elemSize = 4;
-            for (size_t i = 0; i < outputAccessor.count; ++i)
-            {
-                std::vector<float> value(outputData + i * elemSize, outputData + (i + 1) * elemSize);
-                acre_sampler.output.push_back(value);
-            }
-            acre_animation.samplers.push_back(acre_sampler);
-            if (!acre_sampler.input.empty() && acre_sampler.input.back() > acre_animation.duration) acre_animation.duration = acre_sampler.input.back();
-        }
-
-        // channels
-        for (const auto& channel : animation.channels)
-        {
-            acre::AnimationChannel acre_channel;
-            acre_channel.targetNode   = channel.target_node;
-            acre_channel.targetPath   = channel.target_path;
-            acre_channel.samplerIndex = channel.sampler;
-            acre_animation.channels.push_back(acre_channel);
-        }
-
-        animationSet->animations.push_back(acre_animation);
-    }
 }
 
 void GLTFLoader::_create_material()
@@ -618,24 +570,30 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
+                if (accessor.type != TINYGLTF_TYPE_VEC4 || accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+                {
+                    printf("Undo!\n");
+                }
+
                 auto node = m_scene->create<acre::VJointID>(geometryIndex);
                 refs.emplace(node);
                 auto joint      = node->ptr<acre::VJointID>();
                 joint->count    = accessor.count;
+                joint->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 geometry->joint = node->id<acre::VJointID>();
 
-                switch (accessor.componentType)
-                {
-                    case TINYGLTF_COMPONENT_TYPE_BYTE: appendJoint<int8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: appendJoint<uint8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_SHORT: appendJoint<int16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: appendJoint<uint16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_INT: appendJoint<int32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: appendJoint<uint32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_FLOAT: appendJoint<float>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_DOUBLE: appendJoint<double>(joint, accessor, bufferView, geometryIndex, addr); break;
-                    default: joint->data = addr + bufferView.byteOffset + accessor.byteOffset; break;
-                }
+                // switch (accessor.componentType)
+                // {
+                //     case TINYGLTF_COMPONENT_TYPE_BYTE: appendJoint<int8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: appendJoint<uint8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     case TINYGLTF_COMPONENT_TYPE_SHORT: appendJoint<int16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: appendJoint<uint16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     case TINYGLTF_COMPONENT_TYPE_INT: appendJoint<int32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: appendJoint<uint32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     case TINYGLTF_COMPONENT_TYPE_FLOAT: appendJoint<float>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     case TINYGLTF_COMPONENT_TYPE_DOUBLE: appendJoint<double>(joint, accessor, bufferView, geometryIndex, addr); break;
+                //     default: joint->data = addr + bufferView.byteOffset + accessor.byteOffset; break;
+                // }
             }
             if (primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end())
             {
@@ -734,8 +692,11 @@ void GLTFLoader::_create_skin()
             auto joint_node_idx    = skin.joints[joint_idx];
             auto joint_node_matrix = _get_transform(joint_node_idx)->ptr<acre::TransformID>()->matrix;
 
-            auto skinR                               = m_scene->create<acre::SkinID>(joint_idx);
-            skinR->ptr<acre::SkinID>()->joint_matrix = inverse_bind_matrix * joint_node_matrix * inverse_node_matrix;
+            auto skinR                                      = m_scene->create<acre::SkinID>(joint_node_idx);
+            skinR->ptr<acre::SkinID>()->inverse_bind_matrix = inverse_bind_matrix;
+            skinR->ptr<acre::SkinID>()->inverse_node_matrix = inverse_node_matrix;
+            skinR->ptr<acre::SkinID>()->joint_matrix        = inverse_bind_matrix * joint_node_matrix * inverse_node_matrix;
+            skinR->ptr<acre::SkinID>()->joint_affine        = acre::math::homogeneousToAffine(skinR->ptr<acre::SkinID>()->joint_matrix);
         }
     }
 }
@@ -796,6 +757,63 @@ void GLTFLoader::_create_component_draw()
     }
 
     m_scene->mergeBox(sceneBox);
+}
+
+
+void GLTFLoader::_create_animation()
+{
+    auto animationSet = m_scene->getAnimationSet();
+    for (const auto& animation : m_model->animations)
+    {
+        acre::Animation acre_animation;
+        acre_animation.name     = animation.name;
+        acre_animation.duration = 0.0f;
+
+        // samplers
+        for (const auto& sampler : animation.samplers)
+        {
+            acre::AnimationSampler acre_sampler;
+            acre_sampler.interpolation = sampler.interpolation;
+
+            // input
+            const auto&  inputAccessor   = m_model->accessors[sampler.input];
+            const auto&  inputBufferView = m_model->bufferViews[inputAccessor.bufferView];
+            const auto&  inputBuffer     = m_model->buffers[inputBufferView.buffer].data;
+            const float* inputData       = reinterpret_cast<const float*>(&inputBuffer[inputBufferView.byteOffset + inputAccessor.byteOffset]);
+            acre_sampler.input.assign(inputData, inputData + inputAccessor.count);
+
+            // output
+            const auto&  outputAccessor   = m_model->accessors[sampler.output];
+            const auto&  outputBufferView = m_model->bufferViews[outputAccessor.bufferView];
+            const auto&  outputBuffer     = m_model->buffers[outputBufferView.buffer].data;
+            const float* outputData       = reinterpret_cast<const float*>(&outputBuffer[outputBufferView.byteOffset + outputAccessor.byteOffset]);
+            int          elemSize         = 1;
+            if (outputAccessor.type == TINYGLTF_TYPE_VEC3)
+                elemSize = 3;
+            else if (outputAccessor.type == TINYGLTF_TYPE_VEC4)
+                elemSize = 4;
+            for (size_t i = 0; i < outputAccessor.count; ++i)
+            {
+                std::vector<float> value(outputData + i * elemSize, outputData + (i + 1) * elemSize);
+                acre_sampler.output.push_back(value);
+            }
+            acre_animation.samplers.push_back(acre_sampler);
+            if (!acre_sampler.input.empty() && acre_sampler.input.back() > acre_animation.duration)
+                acre_animation.duration = acre_sampler.input.back();
+        }
+
+        // channels
+        for (const auto& channel : animation.channels)
+        {
+            acre::AnimationChannel acre_channel;
+            acre_channel.targetNode   = channel.target_node;
+            acre_channel.targetPath   = channel.target_path;
+            acre_channel.samplerIndex = channel.sampler;
+            acre_animation.channels.push_back(acre_channel);
+        }
+
+        animationSet->animations.push_back(acre_animation);
+    }
 }
 
 void GLTFLoader::_create_texture_transform(const tinygltf::ExtensionMap& ext, uint32_t uuid)

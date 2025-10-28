@@ -44,17 +44,22 @@ void AnimationController::update(float deltaTime)
                 m_sampledValues.push_back({});
                 continue;
             }
+
             size_t idx = 0;
-            while (idx + 1 < frameCount && m_time > sampler.input[idx + 1]) ++idx;
+            while (idx + 1 < frameCount && m_time > sampler.input[idx + 1])
+                ++idx;
             if (idx >= frameCount - 1) idx = frameCount - 2;
-            float              t0     = sampler.input[idx];
-            float              t1     = sampler.input[idx + 1];
-            const auto&        v0     = sampler.output[idx];
-            const auto&        v1     = sampler.output[idx + 1];
-            float              localT = (t1 > t0) ? (m_time - t0) / (t1 - t0) : 0.0f;
+
+            float       t0     = sampler.input[idx];
+            float       t1     = sampler.input[idx + 1];
+            const auto& v0     = sampler.output[idx];
+            const auto& v1     = sampler.output[idx + 1];
+            float       localT = (t1 > t0) ? (m_time - t0) / (t1 - t0) : 0.0f;
+
             std::vector<float> value(v0.size());
             for (size_t i = 0; i < v0.size(); ++i)
                 value[i] = v0[i] + (v1[i] - v0[i]) * localT;
+
             m_sampledValues.push_back(value);
         }
     }
