@@ -31,7 +31,9 @@ class AnimationSet
 {
 public:
     std::vector<Animation> animations;
-    Animation*             getAnimation(const std::string& name);
+
+    Animation* animation(const std::string& name);
+    Animation* animation(size_t index) { return &animations[index]; }
 };
 
 } // namespace acre

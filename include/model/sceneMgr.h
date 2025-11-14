@@ -5,8 +5,6 @@
 #include <model/wrapper/resourceTree.h>
 #include <model/animation.h>
 
-#include <controller/animationController.h>
-
 #include <vector>
 
 class SceneMgr
@@ -15,9 +13,8 @@ class SceneMgr
     acre::ResourceTree* m_tree;
     acre::AnimationSet* m_animationSet = nullptr;
 
-    acre::math::box3     m_box = acre::math::box3::empty();
-    acre::Resource*      m_camera;
-    AnimationController* m_animController = nullptr;
+    acre::math::box3 m_box = acre::math::box3::empty();
+    acre::Resource*  m_camera;
 
 public:
     SceneMgr(acre::Scene*);
@@ -117,9 +114,7 @@ public:
     auto getTextureCount() { return m_tree->_getMgr<acre::TextureID>().size(); }
     auto getImageCount() { return m_tree->_getMgr<acre::ImageID>().size(); }
 
-    void updateAnimation(float deltaTime);
-    auto getAnimationController() const { return m_animController; }
-    auto getAnimationSet() const { return m_animationSet; }
+    auto animation_set() const { return m_animationSet; }
 
 private:
     void _init();

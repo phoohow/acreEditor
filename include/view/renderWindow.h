@@ -22,9 +22,12 @@ struct PathTracing;
 
 class SceneMgr;
 class CameraController;
+class AnimationController;
 class Exporter;
 class RenderWindow : public QWindow
 {
+    using TimePoint = std::chrono::steady_clock::time_point;
+
     std::unique_ptr<acre::DeviceMgr>           m_device_mgr   = nullptr;
     std::unique_ptr<acre::Swapchain>           m_swapchain    = nullptr;
     std::unique_ptr<acre::Scene>               m_renderScene  = nullptr;
@@ -39,8 +42,10 @@ class RenderWindow : public QWindow
     QPointF m_mousePosition;
     bool    m_enableRotate = false;
 
-    QTimer*                               m_timer = nullptr;
-    std::chrono::steady_clock::time_point m_lastFrameTime;
+    QTimer*              m_timer = nullptr;
+    TimePoint            m_lastFrameTime;
+    bool                 m_enableAnimate  = false;
+    AnimationController* m_animController = nullptr;
 
     SceneMgr*         m_scene            = nullptr;
     CameraController* m_cameraController = nullptr;
@@ -66,6 +71,8 @@ public:
 
     void renderFrame();
 
+    void animateFrame();
+
     std::string profiler_info();
 
     std::string pickPixel(uint32_t x, uint32_t y);
@@ -75,7 +82,7 @@ public:
     void resetView();
 
 private:
-    void createRenderer();
+    void _createRenderer();
 
-    void initScene();
+    void _initScene();
 };

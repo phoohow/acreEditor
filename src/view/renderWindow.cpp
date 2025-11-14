@@ -2,6 +2,7 @@
 
 #include <view/renderWindow.h>
 #include <controller/cameraController.h>
+#include <controller/animationController.h>
 #include <controller/exporter.h>
 #include <model/sceneMgr.h>
 
@@ -51,16 +52,13 @@ RenderWindow::RenderWindow() :
     m_rayConfig    = std::make_unique<acre::config::RayTracing>();
     m_pathConfig   = std::make_unique<acre::config::PathTracing>();
 
-    initScene();
+    _initScene();
 
     // Recommended: use QTimer to drive animation and rendering
     m_lastFrameTime = std::chrono::steady_clock::now();
     m_timer         = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, [this]() {
-        auto  now       = std::chrono::steady_clock::now();
-        float deltaTime = std::chrono::duration<float>(now - m_lastFrameTime).count();
-        m_lastFrameTime = now;
-        if (m_scene) m_scene->updateAnimation(deltaTime);
+        animateFrame();
         renderFrame();
     });
     m_timer->start(16); // About 60FPS
@@ -73,7 +71,7 @@ void RenderWindow::exposeEvent(QExposeEvent* event)
     // TODO: there is a bug
     // if (!m_swapchain)
     // {
-    //     createRenderer();
+    //     _createRenderer();
     // }
 
     // renderFrame();
@@ -81,7 +79,7 @@ void RenderWindow::exposeEvent(QExposeEvent* event)
 
 void RenderWindow::resizeEvent(QResizeEvent* event)
 {
-    if (!m_swapchain) createRenderer();
+    if (!m_swapchain) _createRenderer();
 
     if (!m_swapchain) return;
 
@@ -98,7 +96,7 @@ void RenderWindow::resizeEvent(QResizeEvent* event)
 
 void RenderWindow::paintEvent(QPaintEvent* event)
 {
-    if (!m_swapchain) createRenderer();
+    if (!m_swapchain) _createRenderer();
 
     if (!m_swapchain) return;
 
@@ -107,7 +105,7 @@ void RenderWindow::paintEvent(QPaintEvent* event)
 
 void RenderWindow::mouseMoveEvent(QMouseEvent* event)
 {
-    if (!m_swapchain) createRenderer();
+    if (!m_swapchain) _createRenderer();
 
     if (m_enableRotate)
     {
@@ -189,6 +187,7 @@ void RenderWindow::keyPressEvent(QKeyEvent* event)
         case Qt::Key_0: m_cameraController->bottomView(); break;
         case Qt::Key_R: m_renderer->mark_shader_dirty(); break;
         case Qt::Key_P: std::cout << profiler_info(); break;
+        case Qt::Key_Space: m_enableAnimate = !m_enableAnimate; break;
         default: break;
     }
 
@@ -197,6 +196,23 @@ void RenderWindow::keyPressEvent(QKeyEvent* event)
 
 void RenderWindow::keyReleaseEvent(QKeyEvent* event)
 {
+}
+
+void RenderWindow::animateFrame()
+{
+    if (!m_scene) return;
+
+    if (!m_enableAnimate)
+    {
+        m_animController->stop();
+    }
+    else
+    {
+        auto  now        = std::chrono::steady_clock::now();
+        float delta_time = std::chrono::duration<float>(now - m_lastFrameTime).count();
+        m_lastFrameTime  = now;
+        m_animController->update(delta_time);
+    }
 }
 
 void RenderWindow::renderFrame()
@@ -305,16 +321,17 @@ void RenderWindow::resetView()
     m_cameraController->reset();
 }
 
-void RenderWindow::createRenderer()
+void RenderWindow::_createRenderer()
 {
     m_swapchain = std::make_unique<acre::Swapchain>(m_device_mgr.get(), (void*)(winId()), g_pixelRatio * width(), g_pixelRatio * height());
     m_renderer  = std::make_unique<acre::Renderer>(m_renderScene.get(), g_renderPath);
 }
 
-void RenderWindow::initScene()
+void RenderWindow::_initScene()
 {
     m_scene            = new SceneMgr(m_renderScene.get());
     m_cameraController = new CameraController(m_scene);
+    m_animController   = new AnimationController(m_scene);
     m_exporter         = new Exporter(m_scene);
 
     switch (g_renderPath)

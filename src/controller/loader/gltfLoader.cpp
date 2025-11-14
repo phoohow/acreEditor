@@ -712,7 +712,7 @@ void GLTFLoader::_create_component_draw()
 
 void GLTFLoader::_create_animation()
 {
-    auto animationSet = m_scene->getAnimationSet();
+    auto animationSet = m_scene->animation_set();
     for (const auto& animation : m_model->animations)
     {
         acre::Animation acre_animation;

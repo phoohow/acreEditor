@@ -3,7 +3,7 @@
 namespace acre
 {
 
-Animation* AnimationSet::getAnimation(const std::string& name)
+Animation* AnimationSet::animation(const std::string& name)
 {
     for (auto& animation : animations)
     {

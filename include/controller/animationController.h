@@ -1,31 +1,34 @@
 #pragma once
 
 #include <model/animation.h>
+#include <model/sceneMgr.h>
 
 #include <string>
 
 class AnimationController
 {
-    acre::AnimationSet* m_set;
-    acre::Animation*    m_current;
-    float               m_time;
-    bool                m_playing;
-    // Sampled results for each channel
-    std::vector<std::vector<float>> m_sampledValues;
+    SceneMgr* m_scene = nullptr;
+
+    acre::Animation* m_current = nullptr;
+    float            m_time    = 0.0f;
+
+    std::vector<std::vector<float>> m_sampled_values;
 
 public:
-    auto getAnimationSet() const { return m_set; }
-    AnimationController(acre::AnimationSet* set);
-    void  play(const std::string& name);
-    void  pause();
-    void  stop();
-    void  update(float deltaTime);
-    float getCurrentTime() const;
-    bool  isPlaying() const;
+    AnimationController(SceneMgr* scene);
 
-    // Get sampled value for a channel
-    const std::vector<float>& getSampledValue(size_t channelIndex) const;
+    void play(const std::string& name);
 
-    // Get current animation
-    const auto getCurrentAnimation() const { return m_current; }
+    void stop();
+
+    void update(float delta_time);
+
+    auto current_time() const { return m_time; }
+
+    const auto current_animation() const { return m_current; }
+
+    const std::vector<float>& sampled_value(size_t channel_idx) const;
+
+private:
+    void _try_play();
 };
