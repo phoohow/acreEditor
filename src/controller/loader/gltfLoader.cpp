@@ -31,35 +31,44 @@ static auto vec4ToQuat(T& vec)
     return acre::math::quat(vec[3], vec[0], vec[1], vec[2]);
 }
 
-// clang-format off
 static auto bufToFloat4x4(unsigned char* buf)
 {
     acre::math::float4x4 mat;
     memcpy(mat.m_data, buf, sizeof(mat));
-
-    // mat.m00 = float(*buf); buf += 4;
-    // mat.m01 = float(*buf); buf += 4;
-    // mat.m02 = float(*buf); buf += 4;
-    // mat.m03 = float(*buf); buf += 4;
-
-    // mat.m10 = float(*buf); buf += 4;
-    // mat.m11 = float(*buf); buf += 4;
-    // mat.m12 = float(*buf); buf += 4;
-    // mat.m13 = float(*buf); buf += 4;
-
-    // mat.m20 = float(*buf); buf += 4;
-    // mat.m21 = float(*buf); buf += 4;
-    // mat.m22 = float(*buf); buf += 4;
-    // mat.m23 = float(*buf); buf += 4;
-
-    // mat.m30 = float(*buf); buf += 4;
-    // mat.m31 = float(*buf); buf += 4;
-    // mat.m32 = float(*buf); buf += 4;
-    // mat.m33 = float(*buf); 
-
     return mat;
 }
-// clang-format on
+
+static auto toStride(int componentType, int type, int stride = 0)
+{
+    int componentCount = 0;
+    switch (type)
+    {
+        case TINYGLTF_TYPE_SCALAR: componentCount = 1; break;
+        case TINYGLTF_TYPE_VEC2: componentCount = 2; break;
+        case TINYGLTF_TYPE_VEC3: componentCount = 3; break;
+        case TINYGLTF_TYPE_VEC4: componentCount = 4; break;
+        case TINYGLTF_TYPE_MAT2: componentCount = 4; break;
+        case TINYGLTF_TYPE_MAT3: componentCount = 9; break;
+        case TINYGLTF_TYPE_MAT4: componentCount = 16; break;
+        default: componentCount = 1; break;
+    }
+
+    int elementSize = 0;
+    switch (componentType)
+    {
+        case TINYGLTF_COMPONENT_TYPE_BYTE:
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: elementSize = 1; break;
+        case TINYGLTF_COMPONENT_TYPE_SHORT:
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: elementSize = 2; break;
+        case TINYGLTF_COMPONENT_TYPE_INT:
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+        case TINYGLTF_COMPONENT_TYPE_FLOAT: elementSize = 4; break;
+        case TINYGLTF_COMPONENT_TYPE_DOUBLE: elementSize = 8; break;
+        default: elementSize = 4; break;
+    }
+
+    return std::max(componentCount * elementSize, stride);
+}
 
 static auto toImageFormat(int component, int bits)
 {
@@ -99,51 +108,7 @@ static auto toImageFormat(int component, int bits)
 
 
 using namespace tinygltf;
-std::vector<std::vector<uint32_t>> g_index;
-std::vector<std::vector<uint32_t>> g_joint;
-std::map<std::string, int>         g_geometry;
-
-template <typename Type>
-static void appendIndex(acre::VIndex*               indexBuffer,
-                        const tinygltf::Accessor&   accessor,
-                        const tinygltf::BufferView& bufferView,
-                        uint32_t                    index,
-                        unsigned char*              addr)
-{
-    std::vector<Type> tempVec;
-    tempVec.resize(accessor.count);
-    memcpy(tempVec.data(), (void*)(addr + bufferView.byteOffset + accessor.byteOffset), sizeof(Type) * accessor.count);
-
-    g_index[index].resize(accessor.count);
-    for (auto i = 0; i < accessor.count; ++i)
-        g_index[index][i] = (uint32_t)(tempVec[i]);
-
-    indexBuffer->data = g_index[index].data();
-}
-
-template <typename Type>
-static void appendJoint(acre::VJoint*               indexBuffer,
-                        const tinygltf::Accessor&   accessor,
-                        const tinygltf::BufferView& bufferView,
-                        uint32_t                    index,
-                        unsigned char*              addr)
-{
-    if (accessor.type != TINYGLTF_TYPE_VEC4)
-    {
-        printf("JOINTS_0 accessor.type is not VEC4!\n");
-        return;
-    }
-    size_t               jointCount = accessor.count * 4;
-    const unsigned char* src        = addr + bufferView.byteOffset + accessor.byteOffset;
-    std::vector<Type>    tempVec(jointCount);
-    memcpy(tempVec.data(), src, sizeof(Type) * jointCount);
-
-    g_joint[index].resize(jointCount);
-    for (size_t i = 0; i < jointCount; ++i)
-        g_joint[index][i] = static_cast<uint32_t>(tempVec[i]);
-
-    indexBuffer->data = g_joint[index].data();
-}
+std::map<std::string, int> g_geometry;
 
 GLTFLoader::GLTFLoader(SceneMgr* scene) :
     Loader(scene)
@@ -447,9 +412,6 @@ void GLTFLoader::_create_geometry()
     for (int meshIndex = 0; meshIndex < m_model->meshes.size(); ++meshIndex)
     {
         const auto& mesh = m_model->meshes[meshIndex];
-        g_index.resize(g_index.size() + mesh.primitives.size());
-        g_joint.resize(g_joint.size() + mesh.primitives.size());
-
         for (int primitiveIndex = 0; primitiveIndex < mesh.primitives.size(); ++primitiveIndex)
         {
             std::unordered_set<acre::Resource*> refs;
@@ -464,24 +426,19 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
+                if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ||
+                    accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
+                {
+                    printf("We only support index with ushort or uint\n");
+                }
+
                 auto node = m_scene->create<acre::VIndexID>(geometryIndex);
                 refs.emplace(node);
-                auto indexBuffer   = node->ptr<acre::VIndexID>();
-                indexBuffer->count = accessor.count;
-                geometry->index    = node->id<acre::VIndexID>();
-
-                switch (accessor.componentType)
-                {
-                    case TINYGLTF_COMPONENT_TYPE_BYTE: appendIndex<int8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: appendIndex<uint8_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_SHORT: appendIndex<int16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: appendIndex<uint16_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_INT: appendIndex<int32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: appendIndex<uint32_t>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_FLOAT: appendIndex<float>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    case TINYGLTF_COMPONENT_TYPE_DOUBLE: appendIndex<double>(indexBuffer, accessor, bufferView, geometryIndex, addr); break;
-                    default: indexBuffer->data = addr + bufferView.byteOffset + accessor.byteOffset; break;
-                }
+                auto indexBuffer    = node->ptr<acre::VIndexID>();
+                indexBuffer->count  = accessor.count;
+                indexBuffer->data   = addr + bufferView.byteOffset + accessor.byteOffset;
+                indexBuffer->stride = toStride(accessor.componentType, accessor.type);
+                geometry->index     = node->id<acre::VIndexID>();
             }
             if (primitive.attributes.find("POSITION") != primitive.attributes.end())
             {
@@ -489,9 +446,9 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
+                if (accessor.type != TINYGLTF_TYPE_VEC3 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("Undo!\n");
+                    printf("We only support position with float3\n");
                 }
 
                 auto node = m_scene->create<acre::VPositionID>(geometryIndex);
@@ -499,6 +456,7 @@ void GLTFLoader::_create_geometry()
                 auto position      = node->ptr<acre::VPositionID>();
                 position->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 position->count    = accessor.count;
+                position->stride   = toStride(accessor.componentType, accessor.type);
                 geometry->position = node->id<acre::VPositionID>();
 
                 // Evaluate object objBox and scene objBox
@@ -516,9 +474,9 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
+                if (accessor.type != TINYGLTF_TYPE_VEC2 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("Undo!\n");
+                    printf("We only support uv with float2\n");
                 }
 
                 auto node = m_scene->create<acre::VUVID>(geometryIndex);
@@ -526,6 +484,7 @@ void GLTFLoader::_create_geometry()
                 auto uv      = node->ptr<acre::VUVID>();
                 uv->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 uv->count    = accessor.count;
+                uv->stride   = toStride(accessor.componentType, accessor.type);
                 geometry->uv = node->id<acre::VUVID>();
             }
             if (primitive.attributes.find("NORMAL") != primitive.attributes.end())
@@ -534,9 +493,9 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
+                if (accessor.type != TINYGLTF_TYPE_VEC3 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("Undo!\n");
+                    printf("We only support normal with float3\n");
                 }
 
                 auto node = m_scene->create<acre::VNormalID>(geometryIndex);
@@ -544,6 +503,7 @@ void GLTFLoader::_create_geometry()
                 auto normal      = node->ptr<acre::VNormalID>();
                 normal->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 normal->count    = accessor.count;
+                normal->stride   = toStride(accessor.componentType, accessor.type);
                 geometry->normal = node->id<acre::VNormalID>();
             }
             if (primitive.attributes.find("TANGENT") != primitive.attributes.end())
@@ -552,9 +512,9 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
+                if (accessor.type != TINYGLTF_TYPE_VEC4 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("Undo!\n");
+                    printf("We only support tangent with float4\n");
                 }
 
                 auto node = m_scene->create<acre::VTangentID>(geometryIndex);
@@ -562,6 +522,7 @@ void GLTFLoader::_create_geometry()
                 auto tangent      = node->ptr<acre::VTangentID>();
                 tangent->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 tangent->count    = accessor.count;
+                tangent->stride   = toStride(accessor.componentType, accessor.type);
                 geometry->tangent = node->id<acre::VTangentID>();
             }
             if (primitive.attributes.find("JOINTS_0") != primitive.attributes.end())
@@ -570,9 +531,9 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                if (accessor.type != TINYGLTF_TYPE_VEC4 || accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+                if (accessor.type != TINYGLTF_TYPE_VEC4 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
                 {
-                    printf("Undo!\n");
+                    printf("We only support joints with ushort4\n");
                 }
 
                 auto node = m_scene->create<acre::VJointID>(geometryIndex);
@@ -580,20 +541,8 @@ void GLTFLoader::_create_geometry()
                 auto joint      = node->ptr<acre::VJointID>();
                 joint->count    = accessor.count;
                 joint->data     = addr + bufferView.byteOffset + accessor.byteOffset;
+                joint->stride   = toStride(accessor.componentType, accessor.type, bufferView.byteStride);
                 geometry->joint = node->id<acre::VJointID>();
-
-                // switch (accessor.componentType)
-                // {
-                //     case TINYGLTF_COMPONENT_TYPE_BYTE: appendJoint<int8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: appendJoint<uint8_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     case TINYGLTF_COMPONENT_TYPE_SHORT: appendJoint<int16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: appendJoint<uint16_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     case TINYGLTF_COMPONENT_TYPE_INT: appendJoint<int32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: appendJoint<uint32_t>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     case TINYGLTF_COMPONENT_TYPE_FLOAT: appendJoint<float>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     case TINYGLTF_COMPONENT_TYPE_DOUBLE: appendJoint<double>(joint, accessor, bufferView, geometryIndex, addr); break;
-                //     default: joint->data = addr + bufferView.byteOffset + accessor.byteOffset; break;
-                // }
             }
             if (primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end())
             {
@@ -601,9 +550,9 @@ void GLTFLoader::_create_geometry()
                 const auto& bufferView = m_model->bufferViews[accessor.bufferView];
                 const auto& addr       = m_model->buffers[bufferView.buffer].data.data();
 
-                if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
+                if (accessor.type != TINYGLTF_TYPE_VEC4 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("Undo!\n");
+                    printf("We only support weights with float4\n");
                 }
 
                 auto node = m_scene->create<acre::VWeightID>(geometryIndex);
@@ -611,6 +560,7 @@ void GLTFLoader::_create_geometry()
                 auto weight      = node->ptr<acre::VWeightID>();
                 weight->data     = addr + bufferView.byteOffset + accessor.byteOffset;
                 weight->count    = accessor.count;
+                weight->stride   = toStride(accessor.componentType, accessor.type);
                 geometry->weight = node->id<acre::VWeightID>();
             }
 
