@@ -27,7 +27,7 @@ class LightWidget : public QWidget
 
     SceneMgr* m_scene;
 
-    std::function<void()> m_renderFrameFunc;
+    std::function<void()> m_renderframe_func;
 
     acre::Resource* m_lightR = nullptr;
     acre::Light*    m_light  = nullptr;
@@ -70,39 +70,39 @@ class LightWidget : public QWidget
 public:
     explicit LightWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
+    void set_renderframe_callback(std::function<void()> func) { m_renderframe_func = func; }
 
-    void setLight(uint32_t uuid);
+    void set_light(uint32_t uuid);
 
-    void enableSun();
-    void disableSun();
+    void enable_sun();
+    void disable_sun();
 
-    void enableHDR();
-    void disableHDR();
+    void enable_hdr();
+    void disable_hdr();
 
-    void updateProperties();
+    void update_properties();
 
-    void updateSunProperties();
+    void update_sun_properties();
 
-    void updateHDRProperties();
+    void update_hdr_properties();
 
 private:
-    void initUI();
-    void initDirectionUI();
-    void initImageUI();
-    void initPointUI();
-    void showSunUI();
-    void showHDRUI();
-    void showPointUI();
-    void hideDirectionUI();
-    void hideHDRUI();
-    void hidePointUI();
+    void _init_ui();
+    void _init_direction_ui();
+    void _init_image_ui();
+    void _init_point_ui();
+    void _show_sun_ui();
+    void _show_hdr_ui();
+    void _show_point_ui();
+    void _hide_direction_ui();
+    void _hide_hdr_ui();
+    void _hide_point_ui();
 
-    void onUpdateType(int index);
+    void _on_update_type(int index);
 
-    void onUpdateColor();
-    void onUpdateIntensity();
-    void onUpdateDirection();
-    void onUpdateTexture();
-    void onUpdatePosition();
+    void _on_update_color();
+    void _on_update_intensity();
+    void _on_update_direction();
+    void _on_update_texture();
+    void _on_update_position();
 };

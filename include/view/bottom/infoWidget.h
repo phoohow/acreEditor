@@ -14,32 +14,32 @@ class InfoWidget : public QWidget
     SceneMgr* m_scene = nullptr;
 
     QTabWidget* m_selector;
-    QLabel*     m_stateLabel;
-    QTextEdit*  m_logTextEdit;
+    QLabel*     m_state_label;
+    QTextEdit*  m_log_text_edit;
 
-    QVBoxLayout* m_mainLayout;
-    QVBoxLayout* m_stateLayout;
-    QWidget*     m_stateTab;
-    QVBoxLayout* m_logLayout;
-    QWidget*     m_logTab;
+    QVBoxLayout* m_main_layout;
+    QVBoxLayout* m_state_layout;
+    QWidget*     m_state_tab;
+    QVBoxLayout* m_log_layout;
+    QWidget*     m_log_tab;
 
 public:
     explicit InfoWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void flushState();
+    void flush_state();
 
-    void showProfiler(const std::string& profiler);
+    void show_profiler(const std::string& profiler);
 
-    void showPickInfo(const std::string& info);
+    void show_pick_info(const std::string& info);
 
 private:
-    void initState();
-    void initLog();
+    void _init_state();
+    void _init_log();
 
-    void onUpdateTab();
+    void _on_update_tab();
 
-    void onStateTabChanged();
-    void onLogTabChanged();
-    void updateStateInfo();
-    void updateLogInfo();
+    void _on_state_tab_change();
+    void _on_log_tab_change();
+    void _update_state_info();
+    void _update_log_info();
 };

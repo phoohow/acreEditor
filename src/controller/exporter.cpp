@@ -26,14 +26,14 @@ void Exporter::exportImage(const std::string& fileName, void* data, int width, i
     }
 }
 
-void Exporter::saveFrame(const std::string& fileName, void* data, int width, int height, int channels)
+void Exporter::save_frame(const std::string& fileName, void* data, int width, int height, int channels)
 {
     stbi_write_bmp(fileName.c_str(), width, height, channels, data);
 }
 
 void Exporter::exportCamera(const std::string& fileName)
 {
-    auto node   = m_scene->getMainCamera();
+    auto node   = m_scene->main_camera();
     auto camera = node->ptr<acre::CameraID>();
 
     std::string cameraInfo;

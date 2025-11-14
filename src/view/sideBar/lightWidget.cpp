@@ -10,46 +10,46 @@ LightWidget::LightWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene),
     m_type(LightType::Sun)
 {
-    initUI();
+    _init_ui();
 }
 
-void LightWidget::onUpdateType(int index)
+void LightWidget::_on_update_type(int index)
 {
     LightWidget::LightType newType = static_cast<LightWidget::LightType>(index);
     if (m_type != newType)
     {
         m_type = newType;
-        updateProperties();
+        update_properties();
     }
 }
 
-void LightWidget::setLight(uint32_t uuid)
+void LightWidget::set_light(uint32_t uuid)
 {
     m_lightR = m_scene->find<acre::LightID>(uuid);
     m_light  = m_lightR->ptr<acre::LightID>();
 }
 
-void LightWidget::enableSun()
+void LightWidget::enable_sun()
 {
     m_useSun = true;
 }
 
-void LightWidget::disableSun()
+void LightWidget::disable_sun()
 {
     m_useSun = false;
 }
 
-void LightWidget::enableHDR()
+void LightWidget::enable_hdr()
 {
     m_useHDR = true;
 }
 
-void LightWidget::disableHDR()
+void LightWidget::disable_hdr()
 {
     m_useHDR = false;
 }
 
-void LightWidget::initUI()
+void LightWidget::_init_ui()
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setSpacing(10);
@@ -64,7 +64,7 @@ void LightWidget::initUI()
     m_layout_type->addWidget(m_label_type);
     m_layout_type->addWidget(m_comboBox_type);
     m_layout->addLayout(m_layout_type);
-    connect(m_comboBox_type, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LightWidget::onUpdateType);
+    connect(m_comboBox_type, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LightWidget::_on_update_type);
 
     m_layout_intensity = new QHBoxLayout();
     m_label_intensity  = new QLabel("factor:");
@@ -74,7 +74,7 @@ void LightWidget::initUI()
     m_layout_intensity->addWidget(m_label_intensity);
     m_layout_intensity->addWidget(m_lineEdit_intensity);
     m_layout->addLayout(m_layout_intensity);
-    connect(m_lineEdit_intensity, &QLineEdit::editingFinished, this, &LightWidget::onUpdateIntensity);
+    connect(m_lineEdit_intensity, &QLineEdit::editingFinished, this, &LightWidget::_on_update_intensity);
 
     m_layout_color = new QHBoxLayout();
     m_label_color  = new QLabel("color:");
@@ -90,25 +90,25 @@ void LightWidget::initUI()
     m_layout_color->addWidget(m_lineEdit_color_g);
     m_layout_color->addWidget(m_lineEdit_color_b);
     m_layout->addLayout(m_layout_color);
-    connect(m_lineEdit_color_r, &QLineEdit::editingFinished, this, &LightWidget::onUpdateColor);
-    connect(m_lineEdit_color_g, &QLineEdit::editingFinished, this, &LightWidget::onUpdateColor);
-    connect(m_lineEdit_color_b, &QLineEdit::editingFinished, this, &LightWidget::onUpdateColor);
+    connect(m_lineEdit_color_r, &QLineEdit::editingFinished, this, &LightWidget::_on_update_color);
+    connect(m_lineEdit_color_g, &QLineEdit::editingFinished, this, &LightWidget::_on_update_color);
+    connect(m_lineEdit_color_b, &QLineEdit::editingFinished, this, &LightWidget::_on_update_color);
 
-    initDirectionUI();
+    _init_direction_ui();
 
-    initImageUI();
+    _init_image_ui();
 
-    initPointUI();
+    _init_point_ui();
 
-    hideHDRUI();
+    _hide_hdr_ui();
 
-    hidePointUI();
+    _hide_point_ui();
 
     // Adjust the layout to fit the widget
     m_layout->addStretch();
 }
 
-void LightWidget::initDirectionUI()
+void LightWidget::_init_direction_ui()
 {
     m_layout_direction = new QHBoxLayout();
     m_label_direction  = new QLabel("direction:");
@@ -125,12 +125,12 @@ void LightWidget::initDirectionUI()
     m_layout_direction->addWidget(m_lineEdit_direction_z);
     m_layout->addLayout(m_layout_direction);
 
-    connect(m_lineEdit_direction_x, &QLineEdit::editingFinished, this, &LightWidget::onUpdateDirection);
-    connect(m_lineEdit_direction_y, &QLineEdit::editingFinished, this, &LightWidget::onUpdateDirection);
-    connect(m_lineEdit_direction_z, &QLineEdit::editingFinished, this, &LightWidget::onUpdateDirection);
+    connect(m_lineEdit_direction_x, &QLineEdit::editingFinished, this, &LightWidget::_on_update_direction);
+    connect(m_lineEdit_direction_y, &QLineEdit::editingFinished, this, &LightWidget::_on_update_direction);
+    connect(m_lineEdit_direction_z, &QLineEdit::editingFinished, this, &LightWidget::_on_update_direction);
 }
 
-void LightWidget::initImageUI()
+void LightWidget::_init_image_ui()
 {
     m_layout_texture = new QHBoxLayout();
     m_label_texture  = new QLabel("texture:");
@@ -141,10 +141,10 @@ void LightWidget::initImageUI()
     m_layout_texture->addWidget(m_lineEdit_texture);
     m_layout->addLayout(m_layout_texture);
 
-    connect(m_lineEdit_texture, &QLineEdit::editingFinished, this, &LightWidget::onUpdateTexture);
+    connect(m_lineEdit_texture, &QLineEdit::editingFinished, this, &LightWidget::_on_update_texture);
 }
 
-void LightWidget::initPointUI()
+void LightWidget::_init_point_ui()
 {
     m_layout_position = new QHBoxLayout();
     m_label_position  = new QLabel("position:");
@@ -161,12 +161,12 @@ void LightWidget::initPointUI()
     m_layout_position->addWidget(m_lineEdit_position_z);
     m_layout->addLayout(m_layout_position);
 
-    connect(m_lineEdit_position_x, &QLineEdit::editingFinished, this, &LightWidget::onUpdatePosition);
-    connect(m_lineEdit_position_y, &QLineEdit::editingFinished, this, &LightWidget::onUpdatePosition);
-    connect(m_lineEdit_position_z, &QLineEdit::editingFinished, this, &LightWidget::onUpdatePosition);
+    connect(m_lineEdit_position_x, &QLineEdit::editingFinished, this, &LightWidget::_on_update_position);
+    connect(m_lineEdit_position_y, &QLineEdit::editingFinished, this, &LightWidget::_on_update_position);
+    connect(m_lineEdit_position_z, &QLineEdit::editingFinished, this, &LightWidget::_on_update_position);
 }
 
-void LightWidget::updateProperties()
+void LightWidget::update_properties()
 {
     if (!m_light) return;
     switch (m_light->type)
@@ -174,36 +174,36 @@ void LightWidget::updateProperties()
         case acre::LightType::Point:
             m_type = LightType::Point;
             m_comboBox_type->setCurrentIndex(Point);
-            showPointUI();
-            hideDirectionUI();
-            hideHDRUI();
+            _show_point_ui();
+            _hide_direction_ui();
+            _hide_hdr_ui();
             break;
         default:
             break;
     }
 }
 
-void LightWidget::updateSunProperties()
+void LightWidget::update_sun_properties()
 {
     m_type = LightType::Sun;
     m_comboBox_type->setCurrentIndex(Sun);
 
-    showSunUI();
-    hideHDRUI();
-    hidePointUI();
+    _show_sun_ui();
+    _hide_hdr_ui();
+    _hide_point_ui();
 }
 
-void LightWidget::updateHDRProperties()
+void LightWidget::update_hdr_properties()
 {
     m_type = LightType::HDR;
     m_comboBox_type->setCurrentIndex(HDR);
 
-    showHDRUI();
-    hideDirectionUI();
-    hidePointUI();
+    _show_hdr_ui();
+    _hide_direction_ui();
+    _hide_point_ui();
 }
 
-void LightWidget::showSunUI()
+void LightWidget::_show_sun_ui()
 {
     m_label_direction->show();
     m_lineEdit_direction_x->show();
@@ -241,7 +241,7 @@ void LightWidget::showSunUI()
     }
 }
 
-void LightWidget::showHDRUI()
+void LightWidget::_show_hdr_ui()
 {
     m_label_texture->show();
     m_lineEdit_texture->show();
@@ -273,7 +273,7 @@ void LightWidget::showHDRUI()
     }
 }
 
-void LightWidget::showPointUI()
+void LightWidget::_show_point_ui()
 {
     m_label_position->show();
     m_lineEdit_position_x->show();
@@ -296,7 +296,7 @@ void LightWidget::showPointUI()
     m_lineEdit_position_z->setText(QString::number(pos.z));
 }
 
-void LightWidget::hideDirectionUI()
+void LightWidget::_hide_direction_ui()
 {
     m_label_direction->hide();
     m_lineEdit_direction_x->hide();
@@ -304,13 +304,13 @@ void LightWidget::hideDirectionUI()
     m_lineEdit_direction_z->hide();
 }
 
-void LightWidget::hideHDRUI()
+void LightWidget::_hide_hdr_ui()
 {
     m_label_texture->hide();
     m_lineEdit_texture->hide();
 }
 
-void LightWidget::hidePointUI()
+void LightWidget::_hide_point_ui()
 {
     m_label_position->hide();
     m_lineEdit_position_x->hide();
@@ -318,7 +318,7 @@ void LightWidget::hidePointUI()
     m_lineEdit_position_z->hide();
 }
 
-void LightWidget::onUpdateColor()
+void LightWidget::_on_update_color()
 {
     auto r = m_lineEdit_color_r->text();
     auto g = m_lineEdit_color_g->text();
@@ -347,15 +347,15 @@ void LightWidget::onUpdateColor()
             {
                 auto& light = std::get<acre::PointLight>(m_light->light);
                 light.color = rgb;
-                m_scene->updateLight(m_lightR);
+                m_scene->update_light(m_lightR);
             }
         }
     }
 
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void LightWidget::onUpdateIntensity()
+void LightWidget::_on_update_intensity()
 {
     auto value = m_lineEdit_intensity->text();
 
@@ -380,15 +380,15 @@ void LightWidget::onUpdateIntensity()
             {
                 auto& light  = std::get<acre::PointLight>(m_light->light);
                 light.factor = value.toFloat();
-                m_scene->updateLight(m_lightR);
+                m_scene->update_light(m_lightR);
             }
         }
     }
 
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void LightWidget::onUpdateDirection()
+void LightWidget::_on_update_direction()
 {
     auto light = m_scene->get_sun_light();
     if (!light) return;
@@ -398,20 +398,20 @@ void LightWidget::onUpdateDirection()
     auto z = m_lineEdit_direction_z->text();
 
     light->direction = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void LightWidget::onUpdateTexture()
+void LightWidget::_on_update_texture()
 {
     auto light = m_scene->get_hdr_light();
     if (!light) return;
 
     auto value    = m_lineEdit_texture->text();
     light->id.idx = value.toInt();
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void LightWidget::onUpdatePosition()
+void LightWidget::_on_update_position()
 {
     if (!m_light) return;
 
@@ -428,6 +428,6 @@ void LightWidget::onUpdatePosition()
         }
     }
 
-    m_scene->updateLight(m_lightR);
-    m_renderFrameFunc();
+    m_scene->update_light(m_lightR);
+    m_renderframe_func();
 }

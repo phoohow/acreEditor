@@ -28,28 +28,28 @@ class RenderWindow : public QWindow
 {
     using TimePoint = std::chrono::steady_clock::time_point;
 
-    std::unique_ptr<acre::DeviceMgr>           m_device_mgr   = nullptr;
-    std::unique_ptr<acre::Swapchain>           m_swapchain    = nullptr;
-    std::unique_ptr<acre::Scene>               m_renderScene  = nullptr;
-    std::unique_ptr<acre::Renderer>            m_renderer     = nullptr;
-    std::unique_ptr<acre::config::Raster>      m_rasterConfig = nullptr;
-    std::unique_ptr<acre::config::RayTracing>  m_rayConfig    = nullptr;
-    std::unique_ptr<acre::config::PathTracing> m_pathConfig   = nullptr;
+    std::unique_ptr<acre::DeviceMgr>           m_device_mgr    = nullptr;
+    std::unique_ptr<acre::Swapchain>           m_swapchain     = nullptr;
+    std::unique_ptr<acre::Scene>               m_render_scene  = nullptr;
+    std::unique_ptr<acre::Renderer>            m_renderer      = nullptr;
+    std::unique_ptr<acre::config::Raster>      m_raster_config = nullptr;
+    std::unique_ptr<acre::config::RayTracing>  m_ray_config    = nullptr;
+    std::unique_ptr<acre::config::PathTracing> m_path_config   = nullptr;
 
-    acre::Profiler* m_profiler      = nullptr;
-    uint32_t        m_profilerCount = 0;
+    acre::Profiler* m_profiler       = nullptr;
+    uint32_t        m_profiler_count = 0;
 
-    QPointF m_mousePosition;
-    bool    m_enableRotate = false;
+    QPointF m_mouse_pos;
+    bool    m_enable_rotate = false;
 
     QTimer*              m_timer = nullptr;
-    TimePoint            m_lastFrameTime;
-    bool                 m_enableAnimate  = false;
-    AnimationController* m_animController = nullptr;
+    TimePoint            m_last_frame_time;
+    bool                 m_enable_animate = false;
+    AnimationController* m_anim_ctrlr     = nullptr;
 
-    SceneMgr*         m_scene            = nullptr;
-    CameraController* m_cameraController = nullptr;
-    Exporter*         m_exporter         = nullptr;
+    SceneMgr*         m_scene      = nullptr;
+    CameraController* m_camr_ctrlr = nullptr;
+    Exporter*         m_exporter   = nullptr;
 
 protected:
     virtual void exposeEvent(QExposeEvent*) override;
@@ -67,22 +67,22 @@ public:
 
     ~RenderWindow();
 
-    auto getScene() { return m_scene; }
+    auto get_scene() { return m_scene; }
 
-    void renderFrame();
+    void render_frame();
 
-    void animateFrame();
+    void animate_frame();
 
     std::string profiler_info();
 
-    std::string pickPixel(uint32_t x, uint32_t y);
+    std::string pick_pixel(uint32_t x, uint32_t y);
 
-    void saveFrame(const std::string& fileName);
+    void save_frame(const std::string& fileName);
 
-    void resetView();
+    void reset_view();
 
 private:
-    void _createRenderer();
+    void _create_renderer();
 
-    void _initScene();
+    void _init_scene();
 };

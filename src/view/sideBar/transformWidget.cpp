@@ -9,7 +9,7 @@ TransformWidget::TransformWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene),
     QWidget(parent)
 {
-    initUI();
+    _init_ui();
 }
 
 TransformWidget::~TransformWidget()
@@ -17,7 +17,7 @@ TransformWidget::~TransformWidget()
     // Clean up if necessary
 }
 
-void TransformWidget::initUI()
+void TransformWidget::_init_ui()
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setSpacing(10);
@@ -38,9 +38,9 @@ void TransformWidget::initUI()
     hbox_translation->addWidget(m_lineEdit_translation_y);
     hbox_translation->addWidget(m_lineEdit_translation_z);
     m_layout->addLayout(hbox_translation);
-    connect(m_lineEdit_translation_x, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateTranslation);
-    connect(m_lineEdit_translation_y, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateTranslation);
-    connect(m_lineEdit_translation_z, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateTranslation);
+    connect(m_lineEdit_translation_x, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_translation);
+    connect(m_lineEdit_translation_y, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_translation);
+    connect(m_lineEdit_translation_z, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_translation);
 
     // Labels and line edits for rotation with validators
     QLabel* label_rotation = new QLabel("rotation:");
@@ -58,9 +58,9 @@ void TransformWidget::initUI()
     hbox_rotation->addWidget(m_lineEdit_rotation_y);
     hbox_rotation->addWidget(m_lineEdit_rotation_z);
     m_layout->addLayout(hbox_rotation);
-    connect(m_lineEdit_rotation_x, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateRotation);
-    connect(m_lineEdit_rotation_y, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateRotation);
-    connect(m_lineEdit_rotation_z, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateRotation);
+    connect(m_lineEdit_rotation_x, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_rotation);
+    connect(m_lineEdit_rotation_y, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_rotation);
+    connect(m_lineEdit_rotation_z, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_rotation);
 
     // Labels and line edits for scale with validators
     QLabel* label_scale = new QLabel("scale:");
@@ -78,21 +78,21 @@ void TransformWidget::initUI()
     hbox_scale->addWidget(m_lineEdit_scale_y);
     hbox_scale->addWidget(m_lineEdit_scale_z);
     m_layout->addLayout(hbox_scale);
-    connect(m_lineEdit_scale_x, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateScale);
-    connect(m_lineEdit_scale_y, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateScale);
-    connect(m_lineEdit_scale_z, &QLineEdit::editingFinished, this, &TransformWidget::onUpdateScale);
+    connect(m_lineEdit_scale_x, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_scale);
+    connect(m_lineEdit_scale_y, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_scale);
+    connect(m_lineEdit_scale_z, &QLineEdit::editingFinished, this, &TransformWidget::_on_update_scale);
 
     // Adjust the layout to fit the widget
     m_layout->addStretch();
 }
 
-void TransformWidget::setTransform(uint32_t uuid)
+void TransformWidget::set_transform(uint32_t uuid)
 {
     m_transformR = m_scene->find<acre::TransformID>(uuid);
     m_transform  = m_transformR->ptr<acre::TransformID>();
 }
 
-void TransformWidget::updateProperties()
+void TransformWidget::update_properties()
 {
     // Example: Assuming there is a 'Transform' object that holds the properties
     // Transform* transform = ...; // Get the transform object from somewhere
@@ -109,7 +109,7 @@ void TransformWidget::updateProperties()
 }
 
 
-void TransformWidget::onUpdateTranslation()
+void TransformWidget::_on_update_translation()
 {
     // Example: Assuming there is a 'Transform' object that holds the properties
     // Transform* transform = ...; // Get the transform object from somewhere
@@ -124,7 +124,7 @@ void TransformWidget::onUpdateTranslation()
     // You would replace this with the actual code to update the transform properties
 }
 
-void TransformWidget::onUpdateRotation()
+void TransformWidget::_on_update_rotation()
 {
     // Example: Assuming there is a 'Transform' object that holds the properties
     // Transform* transform = ...; // Get the transform object from somewhere
@@ -139,7 +139,7 @@ void TransformWidget::onUpdateRotation()
     // You would replace this with the actual code to update the transform properties
 }
 
-void TransformWidget::onUpdateScale()
+void TransformWidget::_on_update_scale()
 {
     // Example: Assuming there is a 'Transform' object that holds the properties
     // Transform* transform = ...; // Get the transform object from somewhere

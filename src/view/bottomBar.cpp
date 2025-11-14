@@ -9,53 +9,53 @@
 BottomBar::BottomBar(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
-    m_mainLayout = new QVBoxLayout(this);
-    this->setLayout(m_mainLayout);
+    m_main_layout = new QVBoxLayout(this);
+    this->setLayout(m_main_layout);
 
-    m_cmdWidget  = new CmdWidget(scene, this);
-    m_infoWidget = new InfoWidget(scene, this);
+    m_cmd_widget  = new CmdWidget(scene, this);
+    m_info_widget = new InfoWidget(scene, this);
 
     auto hSplitter = new QSplitter(Qt::Horizontal);
-    hSplitter->addWidget(m_infoWidget);
-    hSplitter->addWidget(m_cmdWidget);
+    hSplitter->addWidget(m_info_widget);
+    hSplitter->addWidget(m_cmd_widget);
     hSplitter->setSizes({400, 500});
 
-    m_mainLayout->addWidget(hSplitter);
+    m_main_layout->addWidget(hSplitter);
 
-    m_mainLayout->addStretch();
+    m_main_layout->addStretch();
 }
 
-void BottomBar::setRenderFrameCallBack(std::function<void()> func)
+void BottomBar::set_renderframe_callback(std::function<void()> func)
 {
-    m_cmdWidget->setRenderFrameCallBack(func);
+    m_cmd_widget->set_renderframe_callback(func);
 }
 
-void BottomBar::setSaveFrameCallBack(std::function<void()> func)
+void BottomBar::set_saveframe_callback(std::function<void()> func)
 {
-    m_cmdWidget->setSaveFrameCallBack(func);
+    m_cmd_widget->set_saveframe_callback(func);
 }
 
-void BottomBar::setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> func)
+void BottomBar::set_pickpixel_callback(std::function<void(uint32_t, uint32_t)> func)
 {
-    m_cmdWidget->setPickPixelCallBack(func);
+    m_cmd_widget->set_pickpixel_callback(func);
 }
 
-void BottomBar::setShowProfilerCallBack(std::function<void()> func)
+void BottomBar::set_showprofiler_callback(std::function<void()> func)
 {
-    m_cmdWidget->setShowProfilerCallBack(func);
+    m_cmd_widget->set_showprofiler_callback(func);
 }
 
-void BottomBar::flushState()
+void BottomBar::flush_state()
 {
-    m_infoWidget->flushState();
+    m_info_widget->flush_state();
 }
 
-void BottomBar::showProfiler(const std::string& profiler)
+void BottomBar::show_profiler(const std::string& profiler)
 {
-    m_infoWidget->showProfiler(profiler);
+    m_info_widget->show_profiler(profiler);
 }
 
-void BottomBar::showPickInfo(const std::string& info)
+void BottomBar::show_pick_info(const std::string& info)
 {
-    m_infoWidget->showPickInfo(info);
+    m_info_widget->show_pick_info(info);
 }

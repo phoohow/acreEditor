@@ -13,37 +13,37 @@ class SceneMgr;
 class CmdController;
 class CmdWidget : public QWidget
 {
-    SceneMgr*      m_scene         = nullptr;
-    CmdController* m_cmdController = nullptr;
+    SceneMgr*      m_scene     = nullptr;
+    CmdController* m_cmd_ctrlr = nullptr;
 
     QTabWidget* m_selector;
-    QLineEdit*  m_cmdLineEdit;
+    QLineEdit*  m_cmd_line_edit;
     QCompleter* m_completer;
-    QTextEdit*  m_historyTextEdit;
+    QTextEdit*  m_history_text_edit;
 
-    QVBoxLayout* m_mainLayout;
-    QVBoxLayout* m_cmdLayout;
-    QWidget*     m_cmdTab;
+    QVBoxLayout* m_main_layout;
+    QVBoxLayout* m_cmd_layout;
+    QWidget*     m_cmd_tab;
 
 public:
     explicit CmdWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setRenderFrameCallBack(std::function<void()> func);
+    void set_renderframe_callback(std::function<void()> func);
 
-    void setShowProfilerCallBack(std::function<void()> func);
+    void set_showprofiler_callback(std::function<void()> func);
 
-    void setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> func);
+    void set_pickpixel_callback(std::function<void(uint32_t, uint32_t)> func);
 
-    void setSaveFrameCallBack(std::function<void()> func);
+    void set_saveframe_callback(std::function<void()> func);
 
 private:
-    void initCmd();
+    void _init_cmd();
 
-    void onUpdateTab();
+    void _on_update_tab();
 
-    void onCmdTabChanged();
-    void updateCmdInfo();
-    void onCmdSubmitted();
+    void _on_cmd_tab_change();
+    void _update_cmd_info();
+    void _on_cmd_submit();
 
-    void processCommand(QString& command);
+    void _process_cmd(QString& command);
 };

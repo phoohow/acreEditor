@@ -126,8 +126,8 @@ void TriangleLoader::createMaterial()
     texture->image = {image, imageR->idx()};
 
     acre::SimpleModel model;
-    model.color      = {1.0f, 1.0f, 1.0f};
-    model.colorIndex = {texture, textureR->idx()};
+    model.color     = {1.0f, 1.0f, 1.0f};
+    model.color_idx = {texture, textureR->idx()};
 
     auto materialR  = m_scene->create<acre::MaterialID>(0);
     auto material   = materialR->ptr<acre::MaterialID>();
@@ -168,5 +168,5 @@ void TriangleLoader::create_component_draw()
     sceneBox.m_maxs = {1, 1, 1};
     sceneBox.m_mins = {-1, -1, -1};
 
-    m_scene->mergeBox(sceneBox);
+    m_scene->merge_box(sceneBox);
 }

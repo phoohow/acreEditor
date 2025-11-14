@@ -23,5 +23,5 @@ public:
     ~ConfigWidget();
 
 private:
-    void setupUi();
+    void _setup_ui();
 };

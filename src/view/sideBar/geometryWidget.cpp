@@ -8,7 +8,7 @@ GeometryWidget::GeometryWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene),
     QWidget(parent)
 {
-    initUI();
+    _init_ui();
 }
 
 GeometryWidget::~GeometryWidget()
@@ -16,7 +16,7 @@ GeometryWidget::~GeometryWidget()
     // Clean up if necessary
 }
 
-void GeometryWidget::initUI()
+void GeometryWidget::_init_ui()
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setSpacing(10);
@@ -65,17 +65,17 @@ void GeometryWidget::initUI()
     m_layout->addStretch();
 }
 
-void GeometryWidget::setGeometry(uint32_t uuid)
+void GeometryWidget::set_geometry(uint32_t uuid)
 {
     m_geometryR = m_scene->find<acre::GeometryID>(uuid);
     m_geometry  = m_geometryR->ptr<acre::GeometryID>();
 
     if (!m_geometryR || m_geometryR->idx() == RESOURCE_ID_VALID) return;
 
-    m_scene->unhighlightGeometry(m_geometryR->id<acre::GeometryID>());
+    m_scene->unhighlight_geometry(m_geometryR->id<acre::GeometryID>());
 }
 
-void GeometryWidget::updateProperties()
+void GeometryWidget::update_properties()
 {
     if (!m_geometryR) return;
 

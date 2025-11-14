@@ -19,7 +19,7 @@ class MaterialWidget : public QWidget
 {
     SceneMgr* m_scene;
 
-    std::function<void()> m_renderFrameFunc;
+    std::function<void()> m_renderframe_func;
 
     acre::Resource* m_materialR = nullptr;
     acre::Material* m_material  = nullptr;
@@ -49,40 +49,40 @@ class MaterialWidget : public QWidget
     QLineEdit* m_lineEdit_emissive_g;
     QLineEdit* m_lineEdit_emissive_b;
 
-    QLabel*    m_label_baseColorMap;
-    QLineEdit* m_lineEdit_baseColorMap;
+    QLabel*    m_label_basecolor_map;
+    QLineEdit* m_line_edit_basecolor_map;
 
-    QLabel*    m_label_metalRoughMap;
-    QLineEdit* m_lineEdit_metalRoughMap;
+    QLabel*    m_label_metal_rough_map;
+    QLineEdit* m_line_edit_metal_rough_map;
 
-    QLabel*    m_label_emissiveMap;
-    QLineEdit* m_lineEdit_emissiveMap;
+    QLabel*    m_label_emissive_map;
+    QLineEdit* m_line_edit_emissive_map;
 
-    QLabel*    m_label_normalMap;
-    QLineEdit* m_lineEdit_normalMap;
+    QLabel*    m_label_normal_map;
+    QLineEdit* m_line_edit_normal_map;
 
 public:
     explicit MaterialWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
     ~MaterialWidget();
 
-    void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
+    void set_renderframe_callback(std::function<void()> func) { m_renderframe_func = func; }
 
-    void setMaterial(uint32_t uuid);
+    void set_material(uint32_t uuid);
 
-    void updateProperties();
+    void update_properties();
 
 private:
-    void initUI();
-    void updateType();
+    void _init_ui();
+    void _update_type();
 
-    void onUpdateBaseColor();
-    void onUpdateAlpha();
-    void onUpdateRoughness();
-    void onUpdateMetallic();
-    void onUpdateEmissive();
-    void onUpdateBaseColorMap();
-    void onUpdateNormalMap();
-    void onUpdateEmissiveMap();
-    void onUpdateMetalRoughMap();
+    void _on_update_basecolor();
+    void _on_update_alpha();
+    void _on_update_roughness();
+    void _on_update_metallic();
+    void _on_update_emissive();
+    void _on_update_basecolor_map();
+    void _on_update_normal_map();
+    void _on_update_emissivel_map();
+    void _on_update_metal_rough_map();
 };

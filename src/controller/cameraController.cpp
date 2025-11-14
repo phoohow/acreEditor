@@ -44,9 +44,9 @@ void CameraController::_init()
 void CameraController::reset()
 {
     auto fov    = g_fov;
-    auto radius = acre::math::length(m_scene->getBox().diagonal()) * 0.5f;
+    auto radius = acre::math::length(m_scene->get_box().diagonal()) * 0.5f;
 
-    auto node       = m_scene->getMainCamera();
+    auto node       = m_scene->main_camera();
     auto mainCamera = node->ptr<acre::CameraID>();
 
     if (mainCamera->type == acre::Camera::ProjectType::tPerspective)
@@ -81,7 +81,7 @@ void CameraController::resize(float width, float height)
 
 void CameraController::move(float x, float y, float z)
 {
-    auto radius = acre::math::length(m_scene->getBox().diagonal()) * 0.5f;
+    auto radius = acre::math::length(m_scene->get_box().diagonal()) * 0.5f;
     m_camera->translate(acre::math::float3(x, y, z) * radius * 0.02f);
 
     syncCamera();
@@ -115,7 +115,7 @@ void CameraController::rotateX(float degree)
 
 void CameraController::leftView()
 {
-    setView(m_camera, m_scene->getBox(), acre::math::float3(1, 0, 0));
+    setView(m_camera, m_scene->get_box(), acre::math::float3(1, 0, 0));
     m_camera->rotate(0, M_PI * 1.5);
 
     syncCamera();
@@ -123,7 +123,7 @@ void CameraController::leftView()
 
 void CameraController::rightView()
 {
-    setView(m_camera, m_scene->getBox(), acre::math::float3(-1, 0, 0));
+    setView(m_camera, m_scene->get_box(), acre::math::float3(-1, 0, 0));
     m_camera->rotate(0, M_PI * 0.5);
 
     syncCamera();
@@ -131,7 +131,7 @@ void CameraController::rightView()
 
 void CameraController::frontView()
 {
-    setView(m_camera, m_scene->getBox(), acre::math::float3(0, 0, 1));
+    setView(m_camera, m_scene->get_box(), acre::math::float3(0, 0, 1));
     m_camera->rotate(0, M_PI);
 
     syncCamera();
@@ -139,7 +139,7 @@ void CameraController::frontView()
 
 void CameraController::backView()
 {
-    setView(m_camera, m_scene->getBox(), acre::math::float3(0, 0, -1));
+    setView(m_camera, m_scene->get_box(), acre::math::float3(0, 0, -1));
     m_camera->rotate(0, 0);
 
     syncCamera();
@@ -147,7 +147,7 @@ void CameraController::backView()
 
 void CameraController::topView()
 {
-    setView(m_camera, m_scene->getBox(), acre::math::float3(0, 1, 0));
+    setView(m_camera, m_scene->get_box(), acre::math::float3(0, 1, 0));
     m_camera->rotate(M_PI * 0.5, 0);
 
     syncCamera();
@@ -155,7 +155,7 @@ void CameraController::topView()
 
 void CameraController::bottomView()
 {
-    setView(m_camera, m_scene->getBox(), acre::math::float3(0, -1, 0));
+    setView(m_camera, m_scene->get_box(), acre::math::float3(0, -1, 0));
     m_camera->rotate(-M_PI * 0.5, 0);
 
     syncCamera();
@@ -163,7 +163,7 @@ void CameraController::bottomView()
 
 void CameraController::syncCamera()
 {
-    auto node       = m_scene->getMainCamera();
+    auto node       = m_scene->main_camera();
     auto mainCamera = node->ptr<acre::CameraID>();
 
     mainCamera->position = m_camera->getPosition();

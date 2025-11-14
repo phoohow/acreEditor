@@ -5,76 +5,76 @@
 InfoWidget::InfoWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
-    m_mainLayout = new QVBoxLayout(this);
-    this->setLayout(m_mainLayout);
+    m_main_layout = new QVBoxLayout(this);
+    this->setLayout(m_main_layout);
 
     m_selector = new QTabWidget(this);
-    m_mainLayout->addWidget(m_selector);
-    connect(m_selector, &QTabWidget::currentChanged, this, &InfoWidget::onUpdateTab);
+    m_main_layout->addWidget(m_selector);
+    connect(m_selector, &QTabWidget::currentChanged, this, &InfoWidget::_on_update_tab);
 
-    initState();
-    initLog();
+    _init_state();
+    _init_log();
 
-    m_mainLayout->addStretch();
-    updateStateInfo();
+    m_main_layout->addStretch();
+    _update_state_info();
 }
 
-void InfoWidget::initState()
+void InfoWidget::_init_state()
 {
-    m_stateTab    = new QWidget();
-    m_stateLayout = new QVBoxLayout(m_stateTab);
-    m_stateLabel  = new QLabel(m_stateTab);
-    m_stateLayout->addWidget(m_stateLabel);
-    m_selector->addTab(m_stateTab, "State");
-    m_stateLayout->addStretch();
+    m_state_tab    = new QWidget();
+    m_state_layout = new QVBoxLayout(m_state_tab);
+    m_state_label  = new QLabel(m_state_tab);
+    m_state_layout->addWidget(m_state_label);
+    m_selector->addTab(m_state_tab, "State");
+    m_state_layout->addStretch();
 }
 
-void InfoWidget::initLog()
+void InfoWidget::_init_log()
 {
-    m_logTab      = new QWidget();
-    m_logLayout   = new QVBoxLayout(m_logTab);
-    m_logTextEdit = new QTextEdit(m_logTab);
-    m_logTextEdit->setReadOnly(true);
-    m_logLayout->addWidget(m_logTextEdit);
-    m_selector->addTab(m_logTab, "Log");
-    m_logLayout->addStretch();
+    m_log_tab      = new QWidget();
+    m_log_layout   = new QVBoxLayout(m_log_tab);
+    m_log_text_edit = new QTextEdit(m_log_tab);
+    m_log_text_edit->setReadOnly(true);
+    m_log_layout->addWidget(m_log_text_edit);
+    m_selector->addTab(m_log_tab, "Log");
+    m_log_layout->addStretch();
 }
 
-void InfoWidget::onUpdateTab()
+void InfoWidget::_on_update_tab()
 {
     if (m_selector->currentIndex() == 0)
     {
-        onStateTabChanged();
+        _on_state_tab_change();
     }
     else if (m_selector->currentIndex() == 1)
     {
-        onLogTabChanged();
+        _on_log_tab_change();
     }
 }
 
-void InfoWidget::flushState()
+void InfoWidget::flush_state()
 {
-    updateStateInfo();
+    _update_state_info();
 }
 
-void InfoWidget::onStateTabChanged()
+void InfoWidget::_on_state_tab_change()
 {
-    updateStateInfo();
+    _update_state_info();
 }
 
-void InfoWidget::onLogTabChanged()
+void InfoWidget::_on_log_tab_change()
 {
-    updateLogInfo();
+    _update_log_info();
 }
 
-void InfoWidget::updateStateInfo()
+void InfoWidget::_update_state_info()
 {
     QString stateInfo = "Scene Info: \n";
-    stateInfo += "    Entity Count: " + QString::number(m_scene->getEntityCount()) + "\n";
-    stateInfo += "    Geometry Count: " + QString::number(m_scene->getGeometryCount()) + "\n";
-    stateInfo += "    Material Count: " + QString::number(m_scene->getMaterialCount()) + "\n";
-    stateInfo += "    Texture Count: " + QString::number(m_scene->getTextureCount()) + "\n";
-    stateInfo += "    Image Count: " + QString::number(m_scene->getImageCount()) + "\n";
+    stateInfo += "    Entity Count: " + QString::number(m_scene->entity_count()) + "\n";
+    stateInfo += "    Geometry Count: " + QString::number(m_scene->geometry_count()) + "\n";
+    stateInfo += "    Material Count: " + QString::number(m_scene->material_count()) + "\n";
+    stateInfo += "    Texture Count: " + QString::number(m_scene->texture_count()) + "\n";
+    stateInfo += "    Image Count: " + QString::number(m_scene->image_count()) + "\n";
     stateInfo += "\nRendering Info: \n";
     // stateInfo += "    AA: " + (m_scene->isAAEnabled() ? "Enabled" : "Disabled") + "\n";
     // stateInfo += "    HDR: " + (m_scene->isHDREnabled() ? "Enabled" : "Disabled") + "\n";
@@ -83,24 +83,24 @@ void InfoWidget::updateStateInfo()
     // stateInfo += ", GeometryID: " + QString::number(m_scene->getPickedGeometryID());
     // stateInfo += ", MaterialID: " + QString::number(m_scene->getPickedMaterialID()) + "\n";
 
-    m_stateLabel->setText(stateInfo);
+    m_state_label->setText(stateInfo);
 }
 
-void InfoWidget::updateLogInfo()
+void InfoWidget::_update_log_info()
 {
     QString logInfo = "";
     // logInfo += m_scene->getLogEntries();
-    m_logTextEdit->setText(logInfo);
+    m_log_text_edit->setText(logInfo);
 }
 
-void InfoWidget::showProfiler(const std::string& profiler)
+void InfoWidget::show_profiler(const std::string& profiler)
 {
     m_selector->setCurrentIndex(1);
-    m_logTextEdit->setText(profiler.c_str());
+    m_log_text_edit->setText(profiler.c_str());
 }
 
-void InfoWidget::showPickInfo(const std::string& info)
+void InfoWidget::show_pick_info(const std::string& info)
 {
     m_selector->setCurrentIndex(0);
-    m_stateLabel->setText(info.c_str());
+    m_state_label->setText(info.c_str());
 }

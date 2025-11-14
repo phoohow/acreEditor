@@ -6,23 +6,23 @@
 SceneMgr::SceneMgr(acre::Scene* scene) :
     m_scene(scene), m_tree(new acre::ResourceTree(scene))
 {
-    initCamera();
-    initDirectionLight();
-    // initPointLight();
+    _init_camera();
+    _init_direction_light();
+    // _init_point_light();
 
-    m_animationSet = new acre::AnimationSet();
+    m_animation_set = new acre::AnimationSet();
 }
 
 SceneMgr::~SceneMgr()
 {
 }
 
-void SceneMgr::initCamera()
+void SceneMgr::_init_camera()
 {
     m_camera = m_tree->get<acre::CameraID>(0);
 }
 
-void SceneMgr::initDirectionLight()
+void SceneMgr::_init_direction_light()
 {
     auto light       = new acre::SunLight;
     light->color     = acre::math::float3(1.0, 1.0, 1.0);
@@ -32,7 +32,7 @@ void SceneMgr::initDirectionLight()
     m_scene->set_sun_light(light);
 }
 
-void SceneMgr::initPointLight()
+void SceneMgr::_init_point_light()
 {
     acre::PointLight point;
     point.position = acre::math::float3(0, 1, 1);
@@ -43,12 +43,12 @@ void SceneMgr::initPointLight()
     light->type  = acre::LightType::Point;
 }
 
-void SceneMgr::clearScene()
+void SceneMgr::clear_scene()
 {
     m_tree->clear();
     m_scene->clear();
-    initCamera();
-    initDirectionLight();
+    _init_camera();
+    _init_direction_light();
 }
 
 // void SceneMgr::clearHDR()
@@ -80,14 +80,14 @@ void SceneMgr::remove(acre::Resource* node)
     m_tree->remove(node);
 }
 
-void SceneMgr::aliveEntity(acre::EntityID id)
+void SceneMgr::alive_entity(acre::EntityID id)
 {
     auto node   = find<acre::EntityID>(id.idx);
     auto entity = (acre::Entity*)(id.ptr);
     entity->mark_alive();
 }
 
-void SceneMgr::unAliveEntity(acre::EntityID id)
+void SceneMgr::unalive_entity(acre::EntityID id)
 {
     auto node   = find<acre::EntityID>(id.idx);
     auto entity = node->ptr<acre::EntityID>();
@@ -115,18 +115,18 @@ void SceneMgr::update(acre::Resource* node)
     m_tree->updateLeaf(node);
 }
 
-void SceneMgr::setMainCamera(uint32_t uuid)
+void SceneMgr::set_main_camera(uint32_t uuid)
 {
     m_camera = find<acre::CameraID>(uuid);
 }
 
-void SceneMgr::highlightGeometry(uint32_t uuid)
+void SceneMgr::highlight_geometry(uint32_t uuid)
 {
     auto node = find<acre::GeometryID>(uuid);
     m_scene->highlight(node->id<acre::GeometryID>());
 }
 
-void SceneMgr::highlightMaterial(uint32_t uuid)
+void SceneMgr::highlight_material(uint32_t uuid)
 {
     auto node = find<acre::MaterialID>(uuid);
     m_scene->highlight(node->id<acre::MaterialID>());

@@ -14,7 +14,7 @@ class SideBar : public QWidget
 
     QVBoxLayout*    m_layout;
     QTabWidget*     m_selector;
-    QStackedWidget* m_editorStack;
+    QStackedWidget* m_editor_stack;
 
     SceneWidget*  m_sceneWidget;
     ConfigWidget* m_configWidget;
@@ -24,8 +24,8 @@ public:
 
     ~SideBar();
 
-    void setRenderFrameCallBack(std::function<void()> func);
+    void set_renderframe_callback(std::function<void()> func);
 
 private:
-    void onTabChanged(int index);
+    void _on_tab_change(int index);
 };

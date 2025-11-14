@@ -37,10 +37,10 @@ public:
 
     ~GeometryWidget();
 
-    void setGeometry(uint32_t uuid);
+    void set_geometry(uint32_t uuid);
 
-    void updateProperties();
+    void update_properties();
 
 private:
-    void initUI();
+    void _init_ui();
 };

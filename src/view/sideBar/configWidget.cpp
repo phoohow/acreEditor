@@ -18,14 +18,14 @@ ConfigWidget::ConfigWidget(SceneMgr* scene, QWidget* parent) :
     m_layout->addWidget(m_toolBox);
     setLayout(m_layout);
 
-    setupUi();
+    _setup_ui();
 }
 
 ConfigWidget::~ConfigWidget()
 {
 }
 
-void ConfigWidget::setupUi()
+void ConfigWidget::_setup_ui()
 {
     m_eventList->addItem("Event  A");
     m_eventList->addItem("Event  B");

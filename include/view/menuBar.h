@@ -12,26 +12,26 @@ class MenuBar : QMenuBar
     SceneMgr* m_scene  = nullptr;
     Loader*   m_loader = nullptr;
 
-    std::function<void()>                            m_renderFrameFunc;
-    std::function<void()>                            m_flushStateFunc;
-    std::function<void()>                            m_resetViewFunc;
-    std::function<void(const std::string& fileName)> m_saveFrameFunc;
+    std::function<void()>                            m_renderframe_func;
+    std::function<void()>                            m_flushstate_func;
+    std::function<void()>                            m_resetview_func;
+    std::function<void(const std::string& fileName)> m_saveframe_func;
 
     QMenu*   m_menu_file;
     QMenu*   m_menu_file_scene;
     QMenu*   m_menu_file_image;
     QMenu*   m_menu_file_frame;
-    QAction* m_action_openScene;
-    QAction* m_action_closeScene;
-    QAction* m_action_addScene;
-    QAction* m_action_saveScene;
-    QAction* m_action_saveFrame;
-    QAction* m_action_openImage;
-    QAction* m_action_openHDR;
-    QAction* m_action_openLutGGX;
-    QAction* m_action_openLutCharlie;
-    QAction* m_action_openLutSheenAlbedoScale;
-    QAction* m_action_exitApp;
+    QAction* m_action_open_scene;
+    QAction* m_action_close_scene;
+    QAction* m_action_add_scene;
+    QAction* m_action_save_scene;
+    QAction* m_action_save_frame;
+    QAction* m_action_open_image;
+    QAction* m_action_open_hdr;
+    QAction* m_action_open_lut_ggx;
+    QAction* m_action_open_lut_charlie;
+    QAction* m_action_open_lut_sheen_albedo_scale;
+    QAction* m_action_exit_app;
 
     QMenu*   m_menu_edit;
     QMenu*   m_menu_edit_light;
@@ -54,31 +54,31 @@ public:
 
     auto getMenuBar() { return static_cast<QMenuBar*>(this); }
 
-    void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
+    void set_renderframe_callback(std::function<void()> func) { m_renderframe_func = func; }
 
-    void setFlushStateCallBack(std::function<void()> func) { m_flushStateFunc = func; }
+    void set_flushstate_callback(std::function<void()> func) { m_flushstate_func = func; }
 
-    void setResetViewCallBack(std::function<void()> func) { m_resetViewFunc = func; }
+    void set_resetview_callback(std::function<void()> func) { m_resetview_func = func; }
 
-    void setSaveFrameCallBack(std::function<void(const std::string& fileName)> func) { m_saveFrameFunc = func; }
+    void set_saveframe_callback(std::function<void(const std::string& fileName)> func) { m_saveframe_func = func; }
 
-    void saveFrame() { onSaveFrame(); }
+    void save_frame() { _on_save_frame(); }
 
 private:
-    void initFileMenu();
-    void initEditMenu();
-    void initHelpMenu();
+    void _init_file_menu();
+    void _init_edit_menu();
+    void _init_help_menu();
 
-    void onAddScene();
-    void onClearScene();
-    void onOpenScene();
-    void onOpenImage();
-    void onOpenHDR();
-    void onOpenLutGGX();
-    void onOpenLutCharlie();
-    void onOpenLutSheenAlbedoScale();
-    void onSaveScene();
-    void onSaveFrame();
-    void onExit();
-    void onShowHotKey();
+    void _on_add_scene();
+    void _on_clear_scene();
+    void _on_open_scene();
+    void _on_open_image();
+    void _on_open_hdr();
+    void _on_open_lut_ggx();
+    void _on_open_lut_charlie();
+    void _on_open_lut_sheen_albedo_scale();
+    void _on_save_scene();
+    void _on_save_frame();
+    void _on_exit();
+    void _on_show_hotkey();
 };

@@ -22,107 +22,107 @@ MainWindow::MainWindow(QWidget* parent) :
 
     _init();
 
-    setupMainLayout();
-    setupPagesLayout();
+    _setup_main_layout();
+    _setup_pages_layout();
 
-    setupCallbacks();
+    _setup_callbacks();
 }
 
 MainWindow::~MainWindow() = default;
 
 void MainWindow::_init()
 {
-    m_topBar    = new QWidget(this);
-    m_topLayout = new QHBoxLayout();
-    m_pageTab   = new QTabBar(this);
-    m_pageTab->addTab("Viewport");
-    m_pageTab->addTab("ShaderEditor");
-    m_pageTab->setExpanding(false);
+    m_top_bar    = new QWidget(this);
+    m_top_layout = new QHBoxLayout();
+    m_page_tab   = new QTabBar(this);
+    m_page_tab->addTab("Viewport");
+    m_page_tab->addTab("ShaderEditor");
+    m_page_tab->setExpanding(false);
 
-    m_centerLayout = new QVBoxLayout();
-    m_pageStack    = new QStackedWidget(this);
-    m_centerWidget = new QWidget(this);
+    m_center_layout = new QVBoxLayout();
+    m_page_stack    = new QStackedWidget(this);
+    m_center_widget = new QWidget(this);
 
-    m_renderWindow = new RenderWindow;
-    m_renderWidget = QWidget::createWindowContainer(m_renderWindow);
-    m_renderWidget->setStyleSheet("background-color: lightGreen;");
+    m_render_window = new RenderWindow;
+    m_render_widget = QWidget::createWindowContainer(m_render_window);
+    m_render_widget->setStyleSheet("background-color: lightGreen;");
 
-    m_menuBar      = new MenuBar(m_renderWindow->getScene(), this);
-    m_sideBar      = new SideBar(m_renderWindow->getScene(), this);
-    m_bottomBar    = new BottomBar(m_renderWindow->getScene(), this);
-    m_shaderEditor = new ShaderEditor(this);
+    m_menu_bar      = new MenuBar(m_render_window->get_scene(), this);
+    m_side_bar      = new SideBar(m_render_window->get_scene(), this);
+    m_bottom_bar    = new BottomBar(m_render_window->get_scene(), this);
+    m_shader_editor = new ShaderEditor(this);
 
-    m_statusBar = new QStatusBar(this);
+    m_status_bar = new QStatusBar(this);
 }
 
-void MainWindow::setupMainLayout()
+void MainWindow::_setup_main_layout()
 {
-    m_topLayout->setContentsMargins(0, 0, 0, 0);
-    m_topLayout->setSpacing(0);
-    m_topLayout->addWidget(m_menuBar->getMenuBar(), 0);
-    m_topLayout->addStretch(1);
-    m_topLayout->addWidget(m_pageTab, 0);
-    m_topLayout->addStretch(1);
-    m_topBar->setLayout(m_topLayout);
-    this->setMenuWidget(m_topBar);
+    m_top_layout->setContentsMargins(0, 0, 0, 0);
+    m_top_layout->setSpacing(0);
+    m_top_layout->addWidget(m_menu_bar->getMenuBar(), 0);
+    m_top_layout->addStretch(1);
+    m_top_layout->addWidget(m_page_tab, 0);
+    m_top_layout->addStretch(1);
+    m_top_bar->setLayout(m_top_layout);
+    this->setMenuWidget(m_top_bar);
 
-    m_centerLayout->setContentsMargins(0, 0, 0, 0);
-    m_centerLayout->setSpacing(0);
-    m_centerLayout->addWidget(m_pageStack, 1);
-    m_centerWidget->setLayout(m_centerLayout);
-    this->setCentralWidget(m_centerWidget);
+    m_center_layout->setContentsMargins(0, 0, 0, 0);
+    m_center_layout->setSpacing(0);
+    m_center_layout->addWidget(m_page_stack, 1);
+    m_center_widget->setLayout(m_center_layout);
+    this->setCentralWidget(m_center_widget);
 
-    this->setStatusBar(m_statusBar);
+    this->setStatusBar(m_status_bar);
 }
 
-void MainWindow::setupPagesLayout()
+void MainWindow::_setup_pages_layout()
 {
-    setupViewportPage();
-    setupShaderEditorPage();
+    _setup_viewport_page();
+    _setup_shader_editor_page();
 }
 
-void MainWindow::setupViewportPage()
+void MainWindow::_setup_viewport_page()
 {
     auto hSplitter = new QSplitter(Qt::Horizontal);
-    hSplitter->addWidget(m_renderWidget);
-    hSplitter->addWidget(m_sideBar);
+    hSplitter->addWidget(m_render_widget);
+    hSplitter->addWidget(m_side_bar);
     hSplitter->setSizes({700, 200});
 
     auto vSplitter = new QSplitter(Qt::Vertical);
     vSplitter->addWidget(hSplitter);
-    vSplitter->addWidget(m_bottomBar);
+    vSplitter->addWidget(m_bottom_bar);
     vSplitter->setSizes({700, 200});
 
-    m_pageStack->addWidget(vSplitter);
+    m_page_stack->addWidget(vSplitter);
 }
 
-void MainWindow::setupShaderEditorPage()
+void MainWindow::_setup_shader_editor_page()
 {
-    m_pageStack->addWidget(m_shaderEditor);
+    m_page_stack->addWidget(m_shader_editor);
 }
 
-void MainWindow::setupCallbacks()
+void MainWindow::_setup_callbacks()
 {
     auto renderFrameFunc = [this]() {
-        m_renderWindow->renderFrame();
+        m_render_window->render_frame();
     };
     auto saveFrameFunc = [this](const std::string& fileName) {
-        m_statusBar->showMessage("Start saving frame ...", 0);
-        m_renderWindow->saveFrame(fileName);
-        m_statusBar->showMessage((std::string("Saved frame succeed: ") + fileName).c_str(), 10000);
+        m_status_bar->showMessage("Start saving frame ...", 0);
+        m_render_window->save_frame(fileName);
+        m_status_bar->showMessage((std::string("Saved frame succeed: ") + fileName).c_str(), 10000);
     };
 
-    m_menuBar->setRenderFrameCallBack(renderFrameFunc);
-    m_menuBar->setSaveFrameCallBack(saveFrameFunc);
-    m_menuBar->setResetViewCallBack([this]() { m_renderWindow->resetView(); });
-    m_menuBar->setFlushStateCallBack([this]() { m_bottomBar->flushState(); });
+    m_menu_bar->set_renderframe_callback(renderFrameFunc);
+    m_menu_bar->set_saveframe_callback(saveFrameFunc);
+    m_menu_bar->set_resetview_callback([this]() { m_render_window->reset_view(); });
+    m_menu_bar->set_flushstate_callback([this]() { m_bottom_bar->flush_state(); });
 
-    QObject::connect(m_pageTab, &QTabBar::currentChanged, m_pageStack, &QStackedWidget::setCurrentIndex);
+    QObject::connect(m_page_tab, &QTabBar::currentChanged, m_page_stack, &QStackedWidget::setCurrentIndex);
 
-    m_sideBar->setRenderFrameCallBack(renderFrameFunc);
+    m_side_bar->set_renderframe_callback(renderFrameFunc);
 
-    m_bottomBar->setRenderFrameCallBack(renderFrameFunc);
-    m_bottomBar->setSaveFrameCallBack([this]() { m_menuBar->saveFrame(); });
-    m_bottomBar->setShowProfilerCallBack([this]() { m_bottomBar->showProfiler(m_renderWindow->profiler_info()); });
-    m_bottomBar->setPickPixelCallBack([this](uint32_t x, uint32_t y) { m_bottomBar->showPickInfo(m_renderWindow->pickPixel(x, y)); });
+    m_bottom_bar->set_renderframe_callback(renderFrameFunc);
+    m_bottom_bar->set_saveframe_callback([this]() { m_menu_bar->save_frame(); });
+    m_bottom_bar->set_showprofiler_callback([this]() { m_bottom_bar->show_profiler(m_render_window->profiler_info()); });
+    m_bottom_bar->set_pickpixel_callback([this](uint32_t x, uint32_t y) { m_bottom_bar->show_pick_info(m_render_window->pick_pixel(x, y)); });
 }

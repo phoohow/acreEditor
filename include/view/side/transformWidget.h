@@ -37,14 +37,14 @@ public:
 
     ~TransformWidget();
 
-    void setTransform(uint32_t uuid);
+    void set_transform(uint32_t uuid);
 
-    void updateProperties();
+    void update_properties();
 
 private:
-    void initUI();
+    void _init_ui();
 
-    void onUpdateTranslation();
-    void onUpdateRotation();
-    void onUpdateScale();
+    void _on_update_translation();
+    void _on_update_rotation();
+    void _on_update_scale();
 };

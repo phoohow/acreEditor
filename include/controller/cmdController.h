@@ -10,10 +10,10 @@ class CmdController
     SceneMgr*   m_scene;
     std::string m_history;
 
-    std::function<void()>                   m_renderFrameFunc;
+    std::function<void()>                   m_renderframe_func;
     std::function<void()>                   m_showProfilerFunc;
     std::function<void(uint32_t, uint32_t)> m_pickPixelFunc;
-    std::function<void()>                   m_saveFrameFunc;
+    std::function<void()>                   m_saveframe_func;
 
 public:
     enum class CmdType
@@ -61,10 +61,10 @@ public:
 
     ~CmdController() {}
 
-    void setRenderFrameCallBack(std::function<void()> callback) { m_renderFrameFunc = callback; }
-    void setShowProfilerCallBack(std::function<void()> callback) { m_showProfilerFunc = callback; }
-    void setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> callback) { m_pickPixelFunc = callback; }
-    void setSaveFrameCallBack(std::function<void()> callback) { m_saveFrameFunc = callback; }
+    void set_renderframe_callback(std::function<void()> callback) { m_renderframe_func = callback; }
+    void set_showprofiler_callback(std::function<void()> callback) { m_showProfilerFunc = callback; }
+    void set_pickpixel_callback(std::function<void(uint32_t, uint32_t)> callback) { m_pickPixelFunc = callback; }
+    void set_saveframe_callback(std::function<void()> callback) { m_saveframe_func = callback; }
 
     CmdStatus execute(const std::string& command);
 
@@ -73,10 +73,10 @@ public:
 
 private:
     // single cmd
-    CmdStatus renderFrame(const std::vector<std::string>& params);
+    CmdStatus render_frame(const std::vector<std::string>& params);
     CmdStatus profiler(const std::vector<std::string>& params);
-    CmdStatus pickPixel(const std::vector<std::string>& params);
-    CmdStatus saveFrame(const std::vector<std::string>& params);
+    CmdStatus pick_pixel(const std::vector<std::string>& params);
+    CmdStatus save_frame(const std::vector<std::string>& params);
     CmdStatus exit(const std::vector<std::string>& params);
 
     // multi cmd

@@ -12,24 +12,24 @@ class BottomBar : public QWidget
 {
     SceneMgr* m_scene = nullptr;
 
-    QVBoxLayout* m_mainLayout;
-    InfoWidget*  m_infoWidget;
-    CmdWidget*   m_cmdWidget;
+    QVBoxLayout* m_main_layout;
+    InfoWidget*  m_info_widget;
+    CmdWidget*   m_cmd_widget;
 
 public:
     explicit BottomBar(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setRenderFrameCallBack(std::function<void()> func);
+    void set_renderframe_callback(std::function<void()> func);
 
-    void setShowProfilerCallBack(std::function<void()> func);
+    void set_showprofiler_callback(std::function<void()> func);
 
-    void setSaveFrameCallBack(std::function<void()> func);
+    void set_saveframe_callback(std::function<void()> func);
 
-    void setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> func);
+    void set_pickpixel_callback(std::function<void(uint32_t, uint32_t)> func);
 
-    void flushState();
+    void flush_state();
 
-    void showProfiler(const std::string& profiler);
+    void show_profiler(const std::string& profiler);
 
-    void showPickInfo(const std::string& info);
+    void show_pick_info(const std::string& info);
 };

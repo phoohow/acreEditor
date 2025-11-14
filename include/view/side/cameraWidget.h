@@ -19,7 +19,7 @@ class CameraWidget : public QWidget
     acre::Resource* m_cameraR = nullptr;
     acre::Camera*   m_camera  = nullptr;
 
-    std::function<void()> m_renderFrameFunc;
+    std::function<void()> m_renderframe_func;
 
     QVBoxLayout* m_layout;
     QLabel*      m_label_eye;
@@ -42,18 +42,18 @@ public:
 
     ~CameraWidget();
 
-    void setRenderFrameCallBack(std::function<void()> func) { m_renderFrameFunc = func; }
+    void set_renderframe_callback(std::function<void()> func) { m_renderframe_func = func; }
 
-    void setCamera(acre::Resource* camera);
+    void set_camera(acre::Resource* camera);
 
-    void updateProperties();
+    void update_properties();
 
 private:
-    void initUI();
+    void _init_ui();
 
-    void onUpdateEye();
-    void onUpdateTarget();
-    void onUpdateFov();
-    void onUpdateNear();
-    void onUpdateFar();
+    void _on_update_eye();
+    void _on_update_target();
+    void _on_update_fov();
+    void _on_update_near();
+    void _on_update_far();
 };

@@ -19,52 +19,52 @@ MenuBar::MenuBar(SceneMgr* scene, QWidget* parent) :
     // m_loader(new TriangleLoader(m_scene))
     m_loader(new GLTFLoader(m_scene))
 {
-    initFileMenu();
-    initEditMenu();
-    initHelpMenu();
+    _init_file_menu();
+    _init_edit_menu();
+    _init_help_menu();
 }
 
-void MenuBar::initFileMenu()
+void MenuBar::_init_file_menu()
 {
     m_menu_file = this->addMenu("&File");
 
     m_menu_file_scene  = m_menu_file->addMenu("Scene");
-    m_action_openScene = m_menu_file_scene->addAction("Open");
-    m_action_openScene->setShortcut(Qt::CTRL | Qt::Key_O);
-    m_action_closeScene = m_menu_file_scene->addAction("Close");
-    m_action_closeScene->setShortcut(Qt::CTRL | Qt::Key_E);
-    m_action_addScene  = m_menu_file_scene->addAction("Add");
-    m_action_saveScene = m_menu_file_scene->addAction("Save");
-    connect(m_action_openScene, &QAction::triggered, this, [this]() { onOpenScene(); });
-    connect(m_action_closeScene, &QAction::triggered, this, [this]() { onClearScene(); });
+    m_action_open_scene = m_menu_file_scene->addAction("Open");
+    m_action_open_scene->setShortcut(Qt::CTRL | Qt::Key_O);
+    m_action_close_scene = m_menu_file_scene->addAction("Close");
+    m_action_close_scene->setShortcut(Qt::CTRL | Qt::Key_E);
+    m_action_add_scene  = m_menu_file_scene->addAction("Add");
+    m_action_save_scene = m_menu_file_scene->addAction("Save");
+    connect(m_action_open_scene, &QAction::triggered, this, [this]() { _on_open_scene(); });
+    connect(m_action_close_scene, &QAction::triggered, this, [this]() { _on_clear_scene(); });
 
     m_menu_file_image  = m_menu_file->addMenu("Image");
-    m_action_openImage = m_menu_file_image->addAction("Open Image");
-    m_action_openImage->setShortcut(Qt::CTRL | Qt::Key_I);
-    connect(m_action_openImage, &QAction::triggered, this, [this]() { onOpenImage(); });
+    m_action_open_image = m_menu_file_image->addAction("Open Image");
+    m_action_open_image->setShortcut(Qt::CTRL | Qt::Key_I);
+    connect(m_action_open_image, &QAction::triggered, this, [this]() { _on_open_image(); });
 
-    m_action_openHDR = m_menu_file_image->addAction("Open HDR");
-    m_action_openHDR->setShortcut(Qt::CTRL | Qt::Key_H);
-    connect(m_action_openHDR, &QAction::triggered, this, [this]() { onOpenHDR(); });
+    m_action_open_hdr = m_menu_file_image->addAction("Open HDR");
+    m_action_open_hdr->setShortcut(Qt::CTRL | Qt::Key_H);
+    connect(m_action_open_hdr, &QAction::triggered, this, [this]() { _on_open_hdr(); });
 
-    m_action_openLutGGX = m_menu_file_image->addAction("Open LUT GGX");
-    connect(m_action_openLutGGX, &QAction::triggered, this, [this]() { onOpenLutGGX(); });
-    m_action_openLutCharlie = m_menu_file_image->addAction("Open LUT Charlie");
-    connect(m_action_openLutCharlie, &QAction::triggered, this, [this]() { onOpenLutCharlie(); });
-    m_action_openLutSheenAlbedoScale = m_menu_file_image->addAction("Open LUT Sheen Albedo Scale");
-    connect(m_action_openLutSheenAlbedoScale, &QAction::triggered, this, [this]() { onOpenLutSheenAlbedoScale(); });
+    m_action_open_lut_ggx = m_menu_file_image->addAction("Open LUT GGX");
+    connect(m_action_open_lut_ggx, &QAction::triggered, this, [this]() { _on_open_lut_ggx(); });
+    m_action_open_lut_charlie = m_menu_file_image->addAction("Open LUT Charlie");
+    connect(m_action_open_lut_charlie, &QAction::triggered, this, [this]() { _on_open_lut_charlie(); });
+    m_action_open_lut_sheen_albedo_scale = m_menu_file_image->addAction("Open LUT Sheen Albedo Scale");
+    connect(m_action_open_lut_sheen_albedo_scale, &QAction::triggered, this, [this]() { _on_open_lut_sheen_albedo_scale(); });
 
     m_menu_file_frame  = m_menu_file->addMenu("Frame");
-    m_action_saveFrame = m_menu_file_frame->addAction("Save");
-    m_action_saveFrame->setShortcut(Qt::CTRL | Qt::Key_F);
-    connect(m_action_saveFrame, &QAction::triggered, this, [this]() { onSaveFrame(); });
+    m_action_save_frame = m_menu_file_frame->addAction("Save");
+    m_action_save_frame->setShortcut(Qt::CTRL | Qt::Key_F);
+    connect(m_action_save_frame, &QAction::triggered, this, [this]() { _on_save_frame(); });
 
     m_menu_file->addSeparator();
 
-    m_action_exitApp = m_menu_file->addAction("Exit");
+    m_action_exit_app = m_menu_file->addAction("Exit");
 }
 
-void MenuBar::initEditMenu()
+void MenuBar::_init_edit_menu()
 {
     m_menu_edit          = this->addMenu("&Edit");
     m_menu_edit_light    = m_menu_edit->addMenu("&Light");
@@ -80,22 +80,22 @@ void MenuBar::initEditMenu()
     m_action_removeGeometry = m_menu_edit_geometry->addAction("Remove");
 }
 
-void MenuBar::initHelpMenu()
+void MenuBar::_init_help_menu()
 {
     m_menu_help = this->addMenu("&Help");
 
     m_menu_help_tips = m_menu_help->addMenu("&Tips");
     m_action_hotkey  = m_menu_help_tips->addAction("HotKey");
-    connect(m_action_hotkey, &QAction::triggered, this, [this]() { onShowHotKey(); });
+    connect(m_action_hotkey, &QAction::triggered, this, [this]() { _on_show_hotkey(); });
 
     m_action_about = m_menu_help->addAction("About");
 }
 
-void MenuBar::onAddScene()
+void MenuBar::_on_add_scene()
 {
 }
 
-void MenuBar::onOpenScene()
+void MenuBar::_on_open_scene()
 {
     std::string fileName;
 
@@ -115,22 +115,22 @@ void MenuBar::onOpenScene()
 
     if (!fileName.empty())
     {
-        m_scene->clearScene();
+        m_scene->clear_scene();
         m_loader->loadScene(fileName);
 
-        m_resetViewFunc();
-        m_flushStateFunc();
-        m_renderFrameFunc();
+        m_resetview_func();
+        m_flushstate_func();
+        m_renderframe_func();
     }
 }
 
-void MenuBar::onClearScene()
+void MenuBar::_on_clear_scene()
 {
-    m_scene->clearScene();
-    m_renderFrameFunc();
+    m_scene->clear_scene();
+    m_renderframe_func();
 }
 
-void MenuBar::onOpenImage()
+void MenuBar::_on_open_image()
 {
     std::string fileName;
 
@@ -151,11 +151,11 @@ void MenuBar::onOpenImage()
     if (!fileName.empty())
     {
         m_loader->loadImage(fileName);
-        m_renderFrameFunc();
+        m_renderframe_func();
     }
 }
 
-void MenuBar::onOpenHDR()
+void MenuBar::_on_open_hdr()
 {
     std::string fileName;
 
@@ -176,11 +176,11 @@ void MenuBar::onOpenHDR()
     if (!fileName.empty())
     {
         m_loader->loadHDR(fileName);
-        m_renderFrameFunc();
+        m_renderframe_func();
     }
 }
 
-void MenuBar::onOpenLutGGX()
+void MenuBar::_on_open_lut_ggx()
 {
     std::string fileName;
 
@@ -201,11 +201,11 @@ void MenuBar::onOpenLutGGX()
     if (!fileName.empty())
     {
         m_loader->loadLutGGX(fileName);
-        m_renderFrameFunc();
+        m_renderframe_func();
     }
 }
 
-void MenuBar::onOpenLutCharlie()
+void MenuBar::_on_open_lut_charlie()
 {
     std::string fileName;
 
@@ -226,11 +226,11 @@ void MenuBar::onOpenLutCharlie()
     if (!fileName.empty())
     {
         m_loader->loadLutCharlie(fileName);
-        m_renderFrameFunc();
+        m_renderframe_func();
     }
 }
 
-void MenuBar::onOpenLutSheenAlbedoScale()
+void MenuBar::_on_open_lut_sheen_albedo_scale()
 {
     std::string fileName;
 
@@ -251,11 +251,11 @@ void MenuBar::onOpenLutSheenAlbedoScale()
     if (!fileName.empty())
     {
         m_loader->loadLutSheenAlbedoScale(fileName);
-        m_renderFrameFunc();
+        m_renderframe_func();
     }
 }
 
-void MenuBar::onSaveFrame()
+void MenuBar::_on_save_frame()
 {
     auto dirStr = QDir::currentPath() + "/savedFrame/";
     QDir dir(dirStr);
@@ -263,18 +263,18 @@ void MenuBar::onSaveFrame()
 
     auto qFileName = dirStr + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss-zzz") + ".bmp";
     auto fileName  = qFileName.toStdString();
-    if (!fileName.empty()) m_saveFrameFunc(fileName);
+    if (!fileName.empty()) m_saveframe_func(fileName);
 }
 
-void MenuBar::onSaveScene()
+void MenuBar::_on_save_scene()
 {
 }
 
-void MenuBar::onExit()
+void MenuBar::_on_exit()
 {
 }
 
-void MenuBar::onShowHotKey()
+void MenuBar::_on_show_hotkey()
 {
     QDialog infoDialog = QDialog(this);
     infoDialog.setWindowTitle("HotKey");

@@ -9,10 +9,10 @@
 static std::map<std::string, CmdController::CmdType> g_cmdTypeMap = {
     // single cmd
     {"", CmdController::CmdType::cNone},
-    {"renderFrame", CmdController::CmdType::cRenderFrame},
+    {"render_frame", CmdController::CmdType::cRenderFrame},
     {"profiler", CmdController::CmdType::cProfiler},
-    {"pickPixel", CmdController::CmdType::cPickPixel},
-    {"saveFrame", CmdController::CmdType::cSaveFrame},
+    {"pick_pixel", CmdController::CmdType::cPickPixel},
+    {"save_frame", CmdController::CmdType::cSaveFrame},
     {"exit", CmdController::CmdType::cExit},
 
     // multi cmd
@@ -76,10 +76,10 @@ CmdController::CmdStatus CmdController::execute(const std::string& command)
         // single cmd
         case CmdController::CmdType::cInvalid: status = CmdStatus::eInvalidCmd; break;
         case CmdController::CmdType::cNone: status = CmdStatus::eNone; break;
-        case CmdController::CmdType::cRenderFrame: status = renderFrame(params); break;
+        case CmdController::CmdType::cRenderFrame: status = render_frame(params); break;
         case CmdController::CmdType::cProfiler: status = profiler(params); break;
-        case CmdController::CmdType::cPickPixel: status = pickPixel(params); break;
-        case CmdController::CmdType::cSaveFrame: status = saveFrame(params); break;
+        case CmdController::CmdType::cPickPixel: status = pick_pixel(params); break;
+        case CmdController::CmdType::cSaveFrame: status = save_frame(params); break;
         case CmdController::CmdType::cExit: status = exit(params); break;
 
         // multi cmd
@@ -109,15 +109,15 @@ CmdController::CmdStatus CmdController::execute(const std::string& command)
 
     m_history.append(result + "\n");
 
-    m_renderFrameFunc();
+    m_renderframe_func();
 
     return status;
 }
 
 // single cmd
-CmdController::CmdStatus CmdController::renderFrame(const std::vector<std::string>& params)
+CmdController::CmdStatus CmdController::render_frame(const std::vector<std::string>& params)
 {
-    m_renderFrameFunc();
+    m_renderframe_func();
     return CmdStatus::eSuccess;
 }
 
@@ -127,7 +127,7 @@ CmdController::CmdStatus CmdController::profiler(const std::vector<std::string>&
     return CmdStatus::eSuccess;
 }
 
-CmdController::CmdStatus CmdController::pickPixel(const std::vector<std::string>& params)
+CmdController::CmdStatus CmdController::pick_pixel(const std::vector<std::string>& params)
 {
     if (params.size() != 2) return CmdStatus::eInvalidParam;
 
@@ -139,9 +139,9 @@ CmdController::CmdStatus CmdController::pickPixel(const std::vector<std::string>
     return CmdStatus::eSuccess;
 }
 
-CmdController::CmdStatus CmdController::saveFrame(const std::vector<std::string>& params)
+CmdController::CmdStatus CmdController::save_frame(const std::vector<std::string>& params)
 {
-    m_saveFrameFunc();
+    m_saveframe_func();
 
     return CmdStatus::eSuccess;
 }
@@ -162,7 +162,7 @@ CmdController::CmdStatus CmdController::clear(const std::vector<std::string>& pa
     }
     else if (params[0] == "scene")
     {
-        m_scene->clearScene();
+        m_scene->clear_scene();
     }
     else if (params[0] == "hdr")
     {
@@ -196,17 +196,17 @@ CmdController::CmdStatus CmdController::hightlight(const std::vector<std::string
     if (params[0] == "entity")
     {
         auto node = m_scene->find<acre::EntityID>(id);
-        m_scene->highlightEntity(node->id<acre::EntityID>());
+        m_scene->highlight_entity(node->id<acre::EntityID>());
     }
     else if (params[0] == "geometry")
     {
         auto node = m_scene->find<acre::GeometryID>(id);
-        m_scene->highlightGeometry(node->id<acre::GeometryID>());
+        m_scene->highlight_geometry(node->id<acre::GeometryID>());
     }
     else if (params[0] == "material")
     {
         auto node = m_scene->find<acre::MaterialID>(id);
-        m_scene->highlightMaterial(node->id<acre::MaterialID>());
+        m_scene->highlight_material(node->id<acre::MaterialID>());
     }
     else
     {
@@ -226,17 +226,17 @@ CmdController::CmdStatus CmdController::unhighlight(const std::vector<std::strin
     if (params[0] == "entity")
     {
         auto node = m_scene->find<acre::EntityID>(id);
-        m_scene->unhighlightEntity(node->id<acre::EntityID>());
+        m_scene->unhighlight_entity(node->id<acre::EntityID>());
     }
     else if (params[0] == "geometry")
     {
         auto node = m_scene->find<acre::GeometryID>(id);
-        m_scene->unhighlightGeometry(node->id<acre::GeometryID>());
+        m_scene->unhighlight_geometry(node->id<acre::GeometryID>());
     }
     else if (params[0] == "material")
     {
         auto node = m_scene->find<acre::MaterialID>(id);
-        m_scene->unhighlightMaterial(node->id<acre::MaterialID>());
+        m_scene->unhighlight_material(node->id<acre::MaterialID>());
     }
     else
     {
@@ -334,7 +334,7 @@ CmdController::CmdStatus CmdController::active(const std::vector<std::string>& p
     if (params[0] == "entity")
     {
         auto node = m_scene->find<acre::EntityID>(id);
-        m_scene->aliveEntity(node->id<acre::EntityID>());
+        m_scene->alive_entity(node->id<acre::EntityID>());
     }
     else
     {
@@ -354,7 +354,7 @@ CmdController::CmdStatus CmdController::reset_alive(const std::vector<std::strin
     if (params[0] == "entity")
     {
         auto node = m_scene->find<acre::EntityID>(id);
-        m_scene->unAliveEntity(node->id<acre::EntityID>());
+        m_scene->unalive_entity(node->id<acre::EntityID>());
     }
     else
     {

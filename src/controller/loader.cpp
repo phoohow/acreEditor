@@ -112,7 +112,7 @@ void Loader::loadLutSheenAlbedoScale(const std::string& fileName)
 
 void Loader::loadCamera(const std::string& fileName)
 {
-    auto node   = m_scene->getMainCamera();
+    auto node   = m_scene->main_camera();
     auto camera = node->ptr<acre::CameraID>();
     if (!camera) return;
 

@@ -21,39 +21,39 @@ class SceneWidget : public QWidget
 
     SceneMgr* m_scene = nullptr;
 
-    std::function<void()> m_renderFrameFunc;
+    std::function<void()> m_renderframe_func;
 
     QVBoxLayout*    m_layout;
     QTreeWidget*    m_selector;
-    QStackedWidget* m_editorStack;
+    QStackedWidget* m_editor_stack;
 
-    QWidget* m_cameraWidget;
-    QWidget* m_lightWidget;
-    QWidget* m_geometryWidget;
-    QWidget* m_materialWidget;
-    QWidget* m_transformWidget;
+    QWidget* m_camera_widget;
+    QWidget* m_light_widget;
+    QWidget* m_geometry_widget;
+    QWidget* m_material_widget;
+    QWidget* m_transform_widget;
 
-    QTreeWidgetItem* m_cameraRoot    = nullptr;
-    QTreeWidgetItem* m_lightRoot     = nullptr;
-    QTreeWidgetItem* m_geometryRoot  = nullptr;
-    QTreeWidgetItem* m_materialRoot  = nullptr;
-    QTreeWidgetItem* m_transformRoot = nullptr;
+    QTreeWidgetItem* m_camera_root    = nullptr;
+    QTreeWidgetItem* m_light_root     = nullptr;
+    QTreeWidgetItem* m_geometry_root  = nullptr;
+    QTreeWidgetItem* m_material_root  = nullptr;
+    QTreeWidgetItem* m_transform_root = nullptr;
 
 public:
     explicit SceneWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
-    void setRenderFrameCallBack(std::function<void()> func);
+    void set_renderframe_callback(std::function<void()> func);
 
-    void onUpdate();
+    void on_update();
 
 private:
-    void initCamera();
-    void initLight();
-    void initGeometry();
-    void initMaterial();
-    void initTransform();
+    void _init_camera();
+    void _init_light();
+    void _init_geometry();
+    void _init_material();
+    void _init_transform();
 
-    void onTreeItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* prev);
+    void _on_treeitem_selected(QTreeWidgetItem* current, QTreeWidgetItem* prev);
 
-    void updateWidget(QTreeWidgetItem* current, TabWidget tab);
+    void _update_widget(QTreeWidgetItem* current, TabWidget tab);
 };

@@ -5,7 +5,7 @@
 CameraWidget::CameraWidget(QWidget* parent) :
     QWidget(parent)
 {
-    initUI();
+    _init_ui();
 }
 
 CameraWidget::~CameraWidget()
@@ -13,7 +13,7 @@ CameraWidget::~CameraWidget()
     // Clean up if necessary
 }
 
-void CameraWidget::initUI()
+void CameraWidget::_init_ui()
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setSpacing(10);
@@ -33,9 +33,9 @@ void CameraWidget::initUI()
     hbox_eye->addWidget(m_lineEdit_eye_z);
     hbox_eye->setSpacing(5);
     m_layout->addLayout(hbox_eye);
-    connect(m_lineEdit_eye_x, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateEye);
-    connect(m_lineEdit_eye_y, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateEye);
-    connect(m_lineEdit_eye_z, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateEye);
+    connect(m_lineEdit_eye_x, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_eye);
+    connect(m_lineEdit_eye_y, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_eye);
+    connect(m_lineEdit_eye_z, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_eye);
 
     QHBoxLayout* hbox_target = new QHBoxLayout();
     m_label_target           = new QLabel("target:");
@@ -52,9 +52,9 @@ void CameraWidget::initUI()
     hbox_target->addWidget(m_lineEdit_target_z);
     hbox_target->setSpacing(5);
     m_layout->addLayout(hbox_target);
-    connect(m_lineEdit_target_x, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateTarget);
-    connect(m_lineEdit_target_y, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateTarget);
-    connect(m_lineEdit_target_z, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateTarget);
+    connect(m_lineEdit_target_x, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_target);
+    connect(m_lineEdit_target_y, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_target);
+    connect(m_lineEdit_target_z, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_target);
 
     QHBoxLayout* hbox_fov = new QHBoxLayout();
     m_label_fov           = new QLabel("fov:");
@@ -65,7 +65,7 @@ void CameraWidget::initUI()
     hbox_fov->addWidget(m_lineEdit_fov);
     hbox_fov->setSpacing(5);
     m_layout->addLayout(hbox_fov);
-    connect(m_lineEdit_fov, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateFov);
+    connect(m_lineEdit_fov, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_fov);
 
     QHBoxLayout* hbox_near = new QHBoxLayout();
     m_label_near           = new QLabel("near:");
@@ -76,7 +76,7 @@ void CameraWidget::initUI()
     hbox_near->addWidget(m_lineEdit_near);
     hbox_near->setSpacing(5);
     m_layout->addLayout(hbox_near);
-    connect(m_lineEdit_near, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateNear);
+    connect(m_lineEdit_near, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_near);
 
     QHBoxLayout* hbox_far = new QHBoxLayout();
     m_label_far           = new QLabel("far:");
@@ -87,19 +87,19 @@ void CameraWidget::initUI()
     hbox_far->addWidget(m_lineEdit_far);
     hbox_far->setSpacing(5);
     m_layout->addLayout(hbox_far);
-    connect(m_lineEdit_far, &QLineEdit::editingFinished, this, &CameraWidget::onUpdateFar);
+    connect(m_lineEdit_far, &QLineEdit::editingFinished, this, &CameraWidget::_on_update_far);
 
     // Adjust the layout to fit the widget
     m_layout->addStretch();
 }
 
-void CameraWidget::setCamera(acre::Resource* camera)
+void CameraWidget::set_camera(acre::Resource* camera)
 {
     m_cameraR = camera;
     m_camera  = m_cameraR->ptr<acre::CameraID>();
 }
 
-void CameraWidget::updateProperties()
+void CameraWidget::update_properties()
 {
     const auto& eye = m_camera->position;
     m_lineEdit_eye_x->setText(QString::number(eye.x));
@@ -120,27 +120,27 @@ void CameraWidget::updateProperties()
     }
 }
 
-void CameraWidget::onUpdateEye()
+void CameraWidget::_on_update_eye()
 {
     auto x = m_lineEdit_eye_x->text();
     auto y = m_lineEdit_eye_y->text();
     auto z = m_lineEdit_eye_z->text();
 
     m_camera->position = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void CameraWidget::onUpdateTarget()
+void CameraWidget::_on_update_target()
 {
     auto x = m_lineEdit_target_x->text();
     auto y = m_lineEdit_target_y->text();
     auto z = m_lineEdit_target_z->text();
 
     m_camera->target = acre::math::float3(x.toFloat(), y.toFloat(), z.toFloat());
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void CameraWidget::onUpdateFov()
+void CameraWidget::_on_update_fov()
 {
     auto value = m_lineEdit_fov->text();
 
@@ -150,10 +150,10 @@ void CameraWidget::onUpdateFov()
         projection.fov   = value.toFloat();
     }
 
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void CameraWidget::onUpdateNear()
+void CameraWidget::_on_update_near()
 {
     auto value = m_lineEdit_near->text();
 
@@ -163,10 +163,10 @@ void CameraWidget::onUpdateNear()
         projection.nearPlane = value.toFloat();
     }
 
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void CameraWidget::onUpdateFar()
+void CameraWidget::_on_update_far()
 {
     auto value = m_lineEdit_far->text();
 
@@ -176,5 +176,5 @@ void CameraWidget::onUpdateFar()
         projection.farPlane = value.toFloat();
     }
 
-    m_renderFrameFunc();
+    m_renderframe_func();
 }

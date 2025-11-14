@@ -9,7 +9,7 @@ MaterialWidget::MaterialWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene),
     QWidget(parent)
 {
-    initUI();
+    _init_ui();
 }
 
 MaterialWidget::~MaterialWidget()
@@ -17,7 +17,7 @@ MaterialWidget::~MaterialWidget()
     // Clean up if necessary
 }
 
-void MaterialWidget::initUI()
+void MaterialWidget::_init_ui()
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setSpacing(10);
@@ -39,7 +39,7 @@ void MaterialWidget::initUI()
 
     // Base Color
     QHBoxLayout* hbox_baseColor = new QHBoxLayout();
-    m_label_baseColor           = new QLabel("baseColor:");
+    m_label_baseColor           = new QLabel("base_color:");
     m_label_baseColor->setFixedWidth(90);
     m_lineEdit_baseColor_r = new QLineEdit("255");
     m_lineEdit_baseColor_r->setValidator(new QIntValidator());
@@ -52,9 +52,9 @@ void MaterialWidget::initUI()
     hbox_baseColor->addWidget(m_lineEdit_baseColor_g);
     hbox_baseColor->addWidget(m_lineEdit_baseColor_b);
     m_layout->addLayout(hbox_baseColor);
-    connect(m_lineEdit_baseColor_r, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateBaseColor);
-    connect(m_lineEdit_baseColor_g, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateBaseColor);
-    connect(m_lineEdit_baseColor_b, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateBaseColor);
+    connect(m_lineEdit_baseColor_r, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_basecolor);
+    connect(m_lineEdit_baseColor_g, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_basecolor);
+    connect(m_lineEdit_baseColor_b, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_basecolor);
 
     // Alpha
     QHBoxLayout* hbox_alpha = new QHBoxLayout();
@@ -65,7 +65,7 @@ void MaterialWidget::initUI()
     hbox_alpha->addWidget(m_label_alpha);
     hbox_alpha->addWidget(m_lineEdit_alpha);
     m_layout->addLayout(hbox_alpha);
-    connect(m_lineEdit_alpha, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateAlpha);
+    connect(m_lineEdit_alpha, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_alpha);
 
     // Roughness
     QHBoxLayout* hbox_roughness = new QHBoxLayout();
@@ -76,7 +76,7 @@ void MaterialWidget::initUI()
     hbox_roughness->addWidget(m_label_roughness);
     hbox_roughness->addWidget(m_lineEdit_roughness);
     m_layout->addLayout(hbox_roughness);
-    connect(m_lineEdit_roughness, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateRoughness);
+    connect(m_lineEdit_roughness, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_roughness);
 
     // Metal
     QHBoxLayout* hbox_metal = new QHBoxLayout();
@@ -87,7 +87,7 @@ void MaterialWidget::initUI()
     hbox_metal->addWidget(m_label_metal);
     hbox_metal->addWidget(m_lineEdit_metal);
     m_layout->addLayout(hbox_metal);
-    connect(m_lineEdit_metal, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateMetallic);
+    connect(m_lineEdit_metal, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_metallic);
 
     // Emissive
     QHBoxLayout* hbox_emissive = new QHBoxLayout();
@@ -104,137 +104,137 @@ void MaterialWidget::initUI()
     hbox_emissive->addWidget(m_lineEdit_emissive_g);
     hbox_emissive->addWidget(m_lineEdit_emissive_b);
     m_layout->addLayout(hbox_emissive);
-    connect(m_lineEdit_emissive_r, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateEmissive);
-    connect(m_lineEdit_emissive_g, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateEmissive);
-    connect(m_lineEdit_emissive_b, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateEmissive);
+    connect(m_lineEdit_emissive_r, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_emissive);
+    connect(m_lineEdit_emissive_g, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_emissive);
+    connect(m_lineEdit_emissive_b, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_emissive);
 
     // Base Color Map
     QHBoxLayout* hbox_baseColorMap = new QHBoxLayout();
-    m_label_baseColorMap           = new QLabel("baseColorMap:");
-    m_label_baseColorMap->setFixedWidth(90);
-    m_lineEdit_baseColorMap = new QLineEdit();
-    hbox_baseColorMap->addWidget(m_label_baseColorMap);
-    hbox_baseColorMap->addWidget(m_lineEdit_baseColorMap);
+    m_label_basecolor_map          = new QLabel("baseColorMap:");
+    m_label_basecolor_map->setFixedWidth(90);
+    m_line_edit_basecolor_map = new QLineEdit();
+    hbox_baseColorMap->addWidget(m_label_basecolor_map);
+    hbox_baseColorMap->addWidget(m_line_edit_basecolor_map);
     m_layout->addLayout(hbox_baseColorMap);
-    connect(m_lineEdit_baseColorMap, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateBaseColorMap);
+    connect(m_line_edit_basecolor_map, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_basecolor_map);
 
     // Metal Rough Map
     QHBoxLayout* hbox_metalRoughMap = new QHBoxLayout();
-    m_label_metalRoughMap           = new QLabel("metalRoughMap:");
-    m_label_metalRoughMap->setFixedWidth(90);
-    m_lineEdit_metalRoughMap = new QLineEdit();
-    hbox_metalRoughMap->addWidget(m_label_metalRoughMap);
-    hbox_metalRoughMap->addWidget(m_lineEdit_metalRoughMap);
+    m_label_metal_rough_map         = new QLabel("metalRoughMap:");
+    m_label_metal_rough_map->setFixedWidth(90);
+    m_line_edit_metal_rough_map = new QLineEdit();
+    hbox_metalRoughMap->addWidget(m_label_metal_rough_map);
+    hbox_metalRoughMap->addWidget(m_line_edit_metal_rough_map);
     m_layout->addLayout(hbox_metalRoughMap);
-    connect(m_lineEdit_metalRoughMap, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateMetalRoughMap);
+    connect(m_line_edit_metal_rough_map, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_metal_rough_map);
 
     // Emissive Map
     QHBoxLayout* hbox_emissiveMap = new QHBoxLayout();
-    m_label_emissiveMap           = new QLabel("emissiveMap:");
-    m_label_emissiveMap->setFixedWidth(90);
-    m_lineEdit_emissiveMap = new QLineEdit();
-    hbox_emissiveMap->addWidget(m_label_emissiveMap);
-    hbox_emissiveMap->addWidget(m_lineEdit_emissiveMap);
+    m_label_emissive_map          = new QLabel("emissiveMap:");
+    m_label_emissive_map->setFixedWidth(90);
+    m_line_edit_emissive_map = new QLineEdit();
+    hbox_emissiveMap->addWidget(m_label_emissive_map);
+    hbox_emissiveMap->addWidget(m_line_edit_emissive_map);
     m_layout->addLayout(hbox_emissiveMap);
-    connect(m_lineEdit_emissiveMap, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateEmissiveMap);
+    connect(m_line_edit_emissive_map, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_emissivel_map);
 
     // Normal Map
     QHBoxLayout* hbox_normalMap = new QHBoxLayout();
-    m_label_normalMap           = new QLabel("normalMap:");
-    m_label_normalMap->setFixedWidth(90);
-    m_lineEdit_normalMap = new QLineEdit();
-    hbox_normalMap->addWidget(m_label_normalMap);
-    hbox_normalMap->addWidget(m_lineEdit_normalMap);
+    m_label_normal_map          = new QLabel("normalMap:");
+    m_label_normal_map->setFixedWidth(90);
+    m_line_edit_normal_map = new QLineEdit();
+    hbox_normalMap->addWidget(m_label_normal_map);
+    hbox_normalMap->addWidget(m_line_edit_normal_map);
     m_layout->addLayout(hbox_normalMap);
-    connect(m_lineEdit_normalMap, &QLineEdit::editingFinished, this, &MaterialWidget::onUpdateNormalMap);
+    connect(m_line_edit_normal_map, &QLineEdit::editingFinished, this, &MaterialWidget::_on_update_normal_map);
 
     m_layout->addStretch();
 }
 
-void MaterialWidget::setMaterial(uint32_t uuid)
+void MaterialWidget::set_material(uint32_t uuid)
 {
     m_materialR = m_scene->find<acre::MaterialID>(uuid);
     if (!m_materialR || m_materialR->idx() == RESOURCE_ID_VALID) return;
 
     m_material = m_materialR->ptr<acre::MaterialID>();
 
-    m_scene->unhighlightMaterial(m_materialR->id<acre::MaterialID>());
+    m_scene->unhighlight_material(m_materialR->id<acre::MaterialID>());
 }
 
-void MaterialWidget::updateProperties()
+void MaterialWidget::update_properties()
 {
     if (!m_material) return;
-    updateType();
+    _update_type();
 
     auto& model = std::get<acre::StandardModel>(m_material->model);
 
     // Common
-    if (model.normalIndex.idx != -1)
-        m_lineEdit_normalMap->setText(QString::number(model.normalIndex.idx));
+    if (model.normal_idx.idx != -1)
+        m_line_edit_normal_map->setText(QString::number(model.normal_idx.idx));
     else
-        m_lineEdit_normalMap->setText("-1");
+        m_line_edit_normal_map->setText("-1");
 
     auto emission = model.emission;
     m_lineEdit_emissive_r->setText(QString::number(emission.x));
     m_lineEdit_emissive_g->setText(QString::number(emission.y));
     m_lineEdit_emissive_b->setText(QString::number(emission.z));
-    if (model.emissionIndex.idx != -1)
-        m_lineEdit_emissiveMap->setText(QString::number(model.emissionIndex.idx));
+    if (model.emission_idx.idx != -1)
+        m_line_edit_emissive_map->setText(QString::number(model.emission_idx.idx));
     else
-        m_lineEdit_emissiveMap->setText("-1");
+        m_line_edit_emissive_map->setText("-1");
 
     m_lineEdit_alpha->setText(QString::number(m_material->alpha));
 
-    acre::math::float3 baseColor;
-    uint32_t           baseColorIndex;
+    acre::math::float3 base_color;
+    uint32_t           base_color_idx;
     float              roughness;
     float              metallic;
-    uint32_t           metalRoughIndex;
+    uint32_t           metalrough_idx;
     switch (m_material->type)
     {
         case acre::MaterialModel::mStandard:
         {
-            auto& model     = std::get<acre::StandardModel>(m_material->model);
-            baseColor       = model.baseColor;
-            baseColorIndex  = model.baseColorIndex.idx;
-            roughness       = model.roughness;
-            metallic        = model.metallic;
-            metalRoughIndex = model.metalRoughIndex.idx;
+            auto& model    = std::get<acre::StandardModel>(m_material->model);
+            base_color     = model.base_color;
+            base_color_idx = model.base_color_idx.idx;
+            roughness      = model.roughness;
+            metallic       = model.metallic;
+            metalrough_idx = model.metalrough_idx.idx;
             break;
         }
     }
 
-    m_lineEdit_baseColor_r->setText(QString::number(baseColor.x));
-    m_lineEdit_baseColor_g->setText(QString::number(baseColor.y));
-    m_lineEdit_baseColor_b->setText(QString::number(baseColor.z));
+    m_lineEdit_baseColor_r->setText(QString::number(base_color.x));
+    m_lineEdit_baseColor_g->setText(QString::number(base_color.y));
+    m_lineEdit_baseColor_b->setText(QString::number(base_color.z));
 
     m_lineEdit_roughness->setText(QString::number(roughness));
     m_lineEdit_metal->setText(QString::number(metallic));
 
-    if (baseColorIndex != -1)
-        m_lineEdit_baseColorMap->setText(QString::number(baseColorIndex));
+    if (base_color_idx != -1)
+        m_line_edit_basecolor_map->setText(QString::number(base_color_idx));
     else
-        m_lineEdit_baseColorMap->setText("-1");
+        m_line_edit_basecolor_map->setText("-1");
 
-    if (metalRoughIndex != -1)
-        m_lineEdit_metalRoughMap->setText(QString::number(metalRoughIndex));
+    if (metalrough_idx != -1)
+        m_line_edit_metal_rough_map->setText(QString::number(metalrough_idx));
     else
-        m_lineEdit_metalRoughMap->setText("-1");
+        m_line_edit_metal_rough_map->setText("-1");
 }
 
-void MaterialWidget::onUpdateAlpha()
+void MaterialWidget::_on_update_alpha()
 {
     if (!m_material) return;
     auto value        = m_lineEdit_alpha->text();
     m_material->alpha = value.toFloat();
 
-    updateType();
+    _update_type();
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::onUpdateEmissive()
+void MaterialWidget::_on_update_emissive()
 {
     if (!m_material) return;
 
@@ -242,40 +242,40 @@ void MaterialWidget::onUpdateEmissive()
     auto g = m_lineEdit_emissive_g->text();
     auto b = m_lineEdit_emissive_b->text();
 
-    auto& model       = std::get<acre::StandardModel>(m_material->model);
-    model.useEmission = true;
-    model.emission.x  = r.toFloat();
-    model.emission.y  = g.toFloat();
-    model.emission.z  = b.toFloat();
+    auto& model        = std::get<acre::StandardModel>(m_material->model);
+    model.use_emission = true;
+    model.emission.x   = r.toFloat();
+    model.emission.y   = g.toFloat();
+    model.emission.z   = b.toFloat();
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::onUpdateNormalMap()
+void MaterialWidget::_on_update_normal_map()
 {
     if (!m_material) return;
-    auto  value = m_lineEdit_normalMap->text();
+    auto  value = m_line_edit_normal_map->text();
     auto& model = std::get<acre::StandardModel>(m_material->model);
-    // model.normalMapScale    = 1.0f;
-    model.normalIndex.idx = value.toFloat();
+    // model.normal_map_scale    = 1.0f;
+    model.normal_idx.idx = value.toFloat();
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::onUpdateEmissiveMap()
+void MaterialWidget::_on_update_emissivel_map()
 {
     if (!m_material) return;
-    auto  value             = m_lineEdit_emissiveMap->text();
-    auto& model             = std::get<acre::StandardModel>(m_material->model);
-    model.emissionIndex.idx = value.toFloat();
+    auto  value            = m_line_edit_emissive_map->text();
+    auto& model            = std::get<acre::StandardModel>(m_material->model);
+    model.emission_idx.idx = value.toFloat();
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::updateType()
+void MaterialWidget::_update_type()
 {
     switch (m_material->type)
     {
@@ -288,7 +288,7 @@ void MaterialWidget::updateType()
     }
 }
 
-void MaterialWidget::onUpdateBaseColor()
+void MaterialWidget::_on_update_basecolor()
 {
     if (!m_material) return;
     auto r = m_lineEdit_baseColor_r->text();
@@ -299,19 +299,19 @@ void MaterialWidget::onUpdateBaseColor()
     {
         case acre::MaterialModel::mStandard:
         {
-            auto& model       = std::get<acre::StandardModel>(m_material->model);
-            model.baseColor.x = r.toFloat();
-            model.baseColor.y = g.toFloat();
-            model.baseColor.z = b.toFloat();
+            auto& model        = std::get<acre::StandardModel>(m_material->model);
+            model.base_color.x = r.toFloat();
+            model.base_color.y = g.toFloat();
+            model.base_color.z = b.toFloat();
             break;
         }
     }
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::onUpdateRoughness()
+void MaterialWidget::_on_update_roughness()
 {
     if (!m_material) return;
     auto value = m_lineEdit_roughness->text();
@@ -326,10 +326,10 @@ void MaterialWidget::onUpdateRoughness()
     }
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::onUpdateMetallic()
+void MaterialWidget::_on_update_metallic()
 {
     if (!m_material) return;
     auto value = m_lineEdit_metal->text();
@@ -344,41 +344,41 @@ void MaterialWidget::onUpdateMetallic()
     }
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::onUpdateBaseColorMap()
+void MaterialWidget::_on_update_basecolor_map()
 {
     if (!m_material) return;
-    auto value = m_lineEdit_baseColorMap->text();
+    auto value = m_line_edit_basecolor_map->text();
     switch (m_material->type)
     {
         case acre::MaterialModel::mStandard:
         {
             auto& model              = std::get<acre::StandardModel>(m_material->model);
-            model.baseColorIndex.idx = value.toFloat();
+            model.base_color_idx.idx = value.toFloat();
             break;
         }
     }
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }
 
-void MaterialWidget::onUpdateMetalRoughMap()
+void MaterialWidget::_on_update_metal_rough_map()
 {
     if (!m_material) return;
-    auto value = m_lineEdit_metalRoughMap->text();
+    auto value = m_line_edit_metal_rough_map->text();
     switch (m_material->type)
     {
         case acre::MaterialModel::mStandard:
         {
-            auto& model               = std::get<acre::StandardModel>(m_material->model);
-            model.metalRoughIndex.idx = value.toFloat();
+            auto& model              = std::get<acre::StandardModel>(m_material->model);
+            model.metalrough_idx.idx = value.toFloat();
             break;
         }
     }
 
     m_scene->update(m_materialR);
-    m_renderFrameFunc();
+    m_renderframe_func();
 }

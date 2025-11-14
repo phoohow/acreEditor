@@ -17,24 +17,24 @@ class ShaderEditor;
 
 class MainWindow : public QMainWindow
 {
-    QWidget*     m_topBar    = nullptr;
-    QHBoxLayout* m_topLayout = nullptr;
-    MenuBar*     m_menuBar   = nullptr;
+    QWidget*     m_top_bar    = nullptr;
+    QHBoxLayout* m_top_layout = nullptr;
+    MenuBar*     m_menu_bar   = nullptr;
 
-    QWidget*        m_centerWidget = nullptr;
-    QVBoxLayout*    m_centerLayout = nullptr;
-    QTabBar*        m_pageTab      = nullptr;
-    QStackedWidget* m_pageStack    = nullptr;
+    QWidget*        m_center_widget = nullptr;
+    QVBoxLayout*    m_center_layout = nullptr;
+    QTabBar*        m_page_tab      = nullptr;
+    QStackedWidget* m_page_stack    = nullptr;
 
     // Viewport page
-    RenderWindow* m_renderWindow = nullptr;
-    QWidget*      m_renderWidget = nullptr;
-    SideBar*      m_sideBar      = nullptr;
-    BottomBar*    m_bottomBar    = nullptr;
+    RenderWindow* m_render_window = nullptr;
+    QWidget*      m_render_widget = nullptr;
+    SideBar*      m_side_bar      = nullptr;
+    BottomBar*    m_bottom_bar    = nullptr;
     // ShaderEditor page
-    ShaderEditor* m_shaderEditor = nullptr;
+    ShaderEditor* m_shader_editor = nullptr;
 
-    QStatusBar* m_statusBar = nullptr;
+    QStatusBar* m_status_bar = nullptr;
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -44,11 +44,11 @@ public:
 private:
     void _init();
 
-    void setupMainLayout();
+    void _setup_main_layout();
 
-    void setupPagesLayout();
-    void setupViewportPage();
-    void setupShaderEditorPage();
+    void _setup_pages_layout();
+    void _setup_viewport_page();
+    void _setup_shader_editor_page();
 
-    void setupCallbacks();
+    void _setup_callbacks();
 };

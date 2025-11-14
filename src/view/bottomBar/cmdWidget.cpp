@@ -5,10 +5,10 @@
 static QStringList g_cmdList = {
     // single cmd
     "",
-    "renderFrame",
+    "render_frame",
     "profiler",
-    "pickPixel",
-    "saveFrame",
+    "pick_pixel",
+    "save_frame",
     "exit",
 
     // multi cmd
@@ -41,82 +41,82 @@ static QStringList g_cmdList = {
 CmdWidget::CmdWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {
-    m_cmdController = new CmdController(scene);
+    m_cmd_ctrlr = new CmdController(scene);
 
-    m_mainLayout = new QVBoxLayout(this);
-    this->setLayout(m_mainLayout);
+    m_main_layout = new QVBoxLayout(this);
+    this->setLayout(m_main_layout);
 
     m_selector = new QTabWidget(this);
-    m_mainLayout->addWidget(m_selector);
-    connect(m_selector, &QTabWidget::currentChanged, this, &CmdWidget::onUpdateTab);
+    m_main_layout->addWidget(m_selector);
+    connect(m_selector, &QTabWidget::currentChanged, this, &CmdWidget::_on_update_tab);
 
-    initCmd();
+    _init_cmd();
 
-    m_mainLayout->addStretch();
+    m_main_layout->addStretch();
 }
 
-void CmdWidget::initCmd()
+void CmdWidget::_init_cmd()
 {
-    m_cmdTab      = new QWidget();
-    m_cmdLayout   = new QVBoxLayout(m_cmdTab);
-    m_cmdLineEdit = new QLineEdit(m_cmdTab);
+    m_cmd_tab      = new QWidget();
+    m_cmd_layout   = new QVBoxLayout(m_cmd_tab);
+    m_cmd_line_edit = new QLineEdit(m_cmd_tab);
 
     m_completer = new QCompleter(g_cmdList, this);
     m_completer->setCaseSensitivity(Qt::CaseInsensitive);
-    m_cmdLineEdit->setCompleter(m_completer);
+    m_cmd_line_edit->setCompleter(m_completer);
 
-    m_cmdLayout->addWidget(m_cmdLineEdit);
-    connect(m_cmdLineEdit, &QLineEdit::returnPressed, this, &CmdWidget::onCmdSubmitted);
+    m_cmd_layout->addWidget(m_cmd_line_edit);
+    connect(m_cmd_line_edit, &QLineEdit::returnPressed, this, &CmdWidget::_on_cmd_submit);
 
-    m_historyTextEdit = new QTextEdit(m_cmdTab);
-    m_historyTextEdit->setReadOnly(true);
-    m_cmdLayout->addWidget(m_historyTextEdit);
+    m_history_text_edit = new QTextEdit(m_cmd_tab);
+    m_history_text_edit->setReadOnly(true);
+    m_cmd_layout->addWidget(m_history_text_edit);
 
-    m_selector->addTab(m_cmdTab, "Cmd");
-    m_cmdLayout->addStretch();
+    m_selector->addTab(m_cmd_tab, "Cmd");
+    m_cmd_layout->addStretch();
 }
 
-void CmdWidget::onUpdateTab()
+void CmdWidget::_on_update_tab()
 {
-    onCmdTabChanged();
+    _on_cmd_tab_change();
 }
 
-void CmdWidget::onCmdTabChanged()
+void CmdWidget::_on_cmd_tab_change()
 {
-    updateCmdInfo();
+    _update_cmd_info();
 }
 
-void CmdWidget::updateCmdInfo()
+void CmdWidget::_update_cmd_info()
 {
 }
 
-void CmdWidget::onCmdSubmitted()
+void CmdWidget::_on_cmd_submit()
 {
-    QString command = m_cmdLineEdit->text();
+    QString command = m_cmd_line_edit->text();
 
-    auto  status  = m_cmdController->execute(command.toStdString());
-    auto& history = m_cmdController->getHistory();
-    m_historyTextEdit->setPlainText(QString::fromStdString(history));
+    auto  status  = m_cmd_ctrlr->execute(command.toStdString());
+    auto& history = m_cmd_ctrlr->getHistory();
+    m_history_text_edit->setPlainText(QString::fromStdString(history));
 
-    m_cmdLineEdit->clear();
+    m_cmd_line_edit->clear();
 }
 
-void CmdWidget::setRenderFrameCallBack(std::function<void()> func)
+void CmdWidget::set_renderframe_callback(std::function<void()> func)
 {
-    m_cmdController->setRenderFrameCallBack(func);
+    m_cmd_ctrlr->set_renderframe_callback(func);
 }
 
-void CmdWidget::setShowProfilerCallBack(std::function<void()> func)
+void CmdWidget::set_showprofiler_callback(std::function<void()> func)
 {
-    m_cmdController->setShowProfilerCallBack(func);
+    m_cmd_ctrlr->set_showprofiler_callback(func);
 }
 
-void CmdWidget::setPickPixelCallBack(std::function<void(uint32_t, uint32_t)> func)
+void CmdWidget::set_pickpixel_callback(std::function<void(uint32_t, uint32_t)> func)
 {
-    m_cmdController->setPickPixelCallBack(func);
+    m_cmd_ctrlr->set_pickpixel_callback(func);
 }
 
-void CmdWidget::setSaveFrameCallBack(std::function<void()> func)
+void CmdWidget::set_saveframe_callback(std::function<void()> func)
 {
-    m_cmdController->setSaveFrameCallBack(func);
+    m_cmd_ctrlr->set_saveframe_callback(func);
 }
