@@ -2,6 +2,7 @@
 
 #include "resource.h"
 #include <unordered_map>
+#include <vector>
 
 class SceneMgr;
 namespace acre

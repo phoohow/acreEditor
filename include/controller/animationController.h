@@ -31,4 +31,10 @@ public:
 
 private:
     void _try_play();
+
+    void _update_sampled_values();
+
+    void _update_scene();
+
+    void _update_children(acre::Resource* node);
 };

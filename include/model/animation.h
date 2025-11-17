@@ -7,9 +7,9 @@ namespace acre
 
 struct AnimationChannel
 {
-    int         targetNode;
-    std::string targetPath; // "translation", "rotation", "scale"
-    int         samplerIndex;
+    int         target_node;
+    std::string target_path; // "translation", "rotation", "scale"
+    int         sampler_idx;
 };
 
 struct AnimationSampler

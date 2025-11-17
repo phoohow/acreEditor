@@ -408,17 +408,17 @@ void GLTFLoader::_create_geometry()
 {
     g_geometry.clear();
 
-    int geometryIndex = 0;
+    int geo_idx = 0;
     for (int meshIndex = 0; meshIndex < m_model->meshes.size(); ++meshIndex)
     {
         const auto& mesh = m_model->meshes[meshIndex];
-        for (int primitiveIndex = 0; primitiveIndex < mesh.primitives.size(); ++primitiveIndex)
+        for (int prim_idx = 0; prim_idx < mesh.primitives.size(); ++prim_idx)
         {
             std::unordered_set<acre::Resource*> refs;
 
-            const auto& primitive = mesh.primitives[primitiveIndex];
-            auto        geometryR = m_scene->create<acre::GeometryID>(geometryIndex);
-            auto        geometry  = geometryR->ptr<acre::GeometryID>();
+            const auto& primitive = mesh.primitives[prim_idx];
+            auto        geo_R     = m_scene->create<acre::GeometryID>(geo_idx);
+            auto        geometry  = geo_R->ptr<acre::GeometryID>();
 
             if (primitive.indices > -1)
             {
@@ -432,7 +432,7 @@ void GLTFLoader::_create_geometry()
                     printf("We only support index with ushort or uint\n");
                 }
 
-                auto node = m_scene->create<acre::VIndexID>(geometryIndex);
+                auto node = m_scene->create<acre::VIndexID>(geo_idx);
                 refs.emplace(node);
                 auto index_buf    = node->ptr<acre::VIndexID>();
                 index_buf->count  = accessor.count;
@@ -451,7 +451,7 @@ void GLTFLoader::_create_geometry()
                     printf("We only support position with float3\n");
                 }
 
-                auto node = m_scene->create<acre::VPositionID>(geometryIndex);
+                auto node = m_scene->create<acre::VPositionID>(geo_idx);
                 refs.emplace(node);
                 auto position      = node->ptr<acre::VPositionID>();
                 position->data     = addr + bufferView.byteOffset + accessor.byteOffset;
@@ -479,7 +479,7 @@ void GLTFLoader::_create_geometry()
                     printf("We only support uv with float2\n");
                 }
 
-                auto node = m_scene->create<acre::VUVID>(geometryIndex);
+                auto node = m_scene->create<acre::VUVID>(geo_idx);
                 refs.emplace(node);
                 auto uv      = node->ptr<acre::VUVID>();
                 uv->data     = addr + bufferView.byteOffset + accessor.byteOffset;
@@ -498,7 +498,7 @@ void GLTFLoader::_create_geometry()
                     printf("We only support normal with float3\n");
                 }
 
-                auto node = m_scene->create<acre::VNormalID>(geometryIndex);
+                auto node = m_scene->create<acre::VNormalID>(geo_idx);
                 refs.emplace(node);
                 auto normal      = node->ptr<acre::VNormalID>();
                 normal->data     = addr + bufferView.byteOffset + accessor.byteOffset;
@@ -517,7 +517,7 @@ void GLTFLoader::_create_geometry()
                     printf("We only support tangent with float4\n");
                 }
 
-                auto node = m_scene->create<acre::VTangentID>(geometryIndex);
+                auto node = m_scene->create<acre::VTangentID>(geo_idx);
                 refs.emplace(node);
                 auto tangent      = node->ptr<acre::VTangentID>();
                 tangent->data     = addr + bufferView.byteOffset + accessor.byteOffset;
@@ -536,7 +536,7 @@ void GLTFLoader::_create_geometry()
                     printf("We only support joints with ushort4\n");
                 }
 
-                auto node = m_scene->create<acre::VJointID>(geometryIndex);
+                auto node = m_scene->create<acre::VJointID>(geo_idx);
                 refs.emplace(node);
                 auto joint      = node->ptr<acre::VJointID>();
                 joint->count    = accessor.count;
@@ -555,7 +555,7 @@ void GLTFLoader::_create_geometry()
                     printf("We only support weights with float4\n");
                 }
 
-                auto node = m_scene->create<acre::VWeightID>(geometryIndex);
+                auto node = m_scene->create<acre::VWeightID>(geo_idx);
                 refs.emplace(node);
                 auto weight      = node->ptr<acre::VWeightID>();
                 weight->data     = addr + bufferView.byteOffset + accessor.byteOffset;
@@ -564,9 +564,9 @@ void GLTFLoader::_create_geometry()
                 geometry->weight = node->id<acre::VWeightID>();
             }
 
-            auto key = std::to_string(meshIndex) + "_" + std::to_string(primitiveIndex);
-            g_geometry.emplace(key, geometryIndex++);
-            m_scene->update(geometryR, std::move(refs));
+            auto key = std::to_string(meshIndex) + "_" + std::to_string(prim_idx);
+            g_geometry.emplace(key, geo_idx++);
+            m_scene->update(geo_R, std::move(refs));
         }
     }
 }
@@ -575,46 +575,63 @@ void GLTFLoader::_create_transform()
 {
     for (int nodeIndex = 0; nodeIndex < m_model->nodes.size(); ++nodeIndex)
     {
-        auto node = m_model->nodes[nodeIndex];
+        auto trsR = m_scene->create<acre::TransformID>(nodeIndex);
+        auto trs  = trsR->ptr<acre::TransformID>();
 
+        auto node   = m_model->nodes[nodeIndex];
         auto affine = acre::math::affine3::identity();
         if (!node.scale.empty())
         {
-            affine *= acre::math::scaling(vec3ToFloat3(node.scale));
+            trs->scale = vec3ToFloat3(node.scale);
+            affine *= acre::math::scaling(trs->scale);
         }
         if (!node.rotation.empty())
         {
-            auto rotate = vec4ToQuat(node.rotation);
-            affine *= rotate.toAffine();
+            trs->ratation = vec4ToQuat(node.rotation);
+            affine *= trs->ratation.toAffine();
         }
         if (!node.translation.empty())
         {
-            affine *= acre::math::translation(vec3ToFloat3(node.translation));
+            trs->translation = vec3ToFloat3(node.translation);
+            affine *= acre::math::translation(trs->translation);
         }
 
-        auto transformR = m_scene->create<acre::TransformID>(nodeIndex);
-        auto transform  = transformR->ptr<acre::TransformID>();
         if (!node.matrix.empty())
         {
-            transform->matrix = vec16ToFloat4x4(node.matrix);
-            transform->affine = acre::math::homogeneousToAffine(transform->matrix);
+            trs->matrix = vec16ToFloat4x4(node.matrix);
+            trs->affine = acre::math::homogeneousToAffine(trs->matrix);
         }
         else
         {
-            transform->affine = affine;
-            transform->matrix = acre::math::affineToHomogeneous(affine);
+            trs->affine = affine;
+            trs->matrix = acre::math::affineToHomogeneous(affine);
         }
+
+        m_scene->update(trsR);
     }
 
     for (int nodeIndex = 0; nodeIndex < m_model->nodes.size(); ++nodeIndex)
     {
-        auto node      = m_model->nodes[nodeIndex];
-        auto transform = _get_transform_id(nodeIndex).ptr;
+        auto node        = m_model->nodes[nodeIndex];
+        auto trs         = _get_transform_id(nodeIndex).ptr;
+        auto parent_trsR = _get_transform(nodeIndex);
         for (auto childIndex : node.children)
         {
-            auto childTransform = _get_transform_id(childIndex).ptr;
-            childTransform->matrix *= transform->matrix;
-            childTransform->affine *= transform->affine;
+            auto child_trsR = _get_transform(childIndex);
+            if (!child_trsR) continue;
+
+            auto child_trs          = child_trsR->ptr<acre::TransformID>();
+            auto child_affine_local = acre::math::affine3::identity();
+            child_affine_local *= acre::math::scaling(child_trs->scale);
+            child_affine_local *= child_trs->ratation.toAffine();
+            child_affine_local *= acre::math::translation(child_trs->translation);
+
+            child_trs->affine = child_affine_local * trs->affine;
+            child_trs->matrix = acre::math::affineToHomogeneous(child_trs->affine);
+
+            // link parent -> child
+            parent_trsR->children.emplace(child_trsR);
+            child_trsR->parent = parent_trsR;
         }
     }
 }
@@ -660,23 +677,23 @@ void GLTFLoader::_create_component_draw()
         const auto& node = m_model->nodes[nodeIndex];
         if (node.mesh == -1) continue;
 
-        const auto& transformR = _get_transform(nodeIndex);
-        const auto& transform  = transformR->ptr<acre::TransformID>();
-        const auto& mesh       = m_model->meshes[node.mesh];
-        for (int primitiveIndex = 0; primitiveIndex < mesh.primitives.size(); ++primitiveIndex)
+        const auto& trsR = _get_transform(nodeIndex);
+        const auto& trs  = trsR->ptr<acre::TransformID>();
+        const auto& mesh = m_model->meshes[node.mesh];
+        for (int prim_idx = 0; prim_idx < mesh.primitives.size(); ++prim_idx)
         {
             std::unordered_set<acre::Resource*> refs;
 
-            auto key = std::to_string(node.mesh) + "_" + std::to_string(primitiveIndex);
+            auto key = std::to_string(node.mesh) + "_" + std::to_string(prim_idx);
 
             // auto entity   = m_scene->create<acre::EntityID>(std::hash<std::string>{}(key));
             auto entity    = m_scene->create<acre::EntityID>(entity_index++);
             auto entity_id = entity->id<acre::EntityID>();
 
-            auto geometryIndex = g_geometry[key];
-            auto geometryR     = _get_geometry(geometryIndex);
+            auto geo_idx = g_geometry[key];
+            auto geo_R   = _get_geometry(geo_idx);
 
-            const auto& primitive = mesh.primitives[primitiveIndex];
+            const auto& primitive = mesh.primitives[prim_idx];
             auto        materialR = _get_material(primitive.material);
             if (!materialR)
             {
@@ -690,17 +707,17 @@ void GLTFLoader::_create_component_draw()
             }
 
             m_scene->create(acre::component::createDraw(entity_id,
-                                                        geometryR->id<acre::GeometryID>(),
+                                                        geo_R->id<acre::GeometryID>(),
                                                         materialR->id<acre::MaterialID>(),
-                                                        transformR->id<acre::TransformID>()));
+                                                        trsR->id<acre::TransformID>()));
 
-            auto& objBox = geometryR->ptr<acre::GeometryID>()->box;
-            objBox       = objBox * transform->affine;
+            auto& objBox = geo_R->ptr<acre::GeometryID>()->box;
+            objBox       = objBox * trs->affine;
             sceneBox |= objBox;
 
-            refs.emplace(geometryR);
+            refs.emplace(geo_R);
             refs.emplace(materialR);
-            refs.emplace(transformR);
+            refs.emplace(trsR);
 
             m_scene->update(entity, std::move(refs));
         }
@@ -756,9 +773,9 @@ void GLTFLoader::_create_animation()
         for (const auto& channel : animation.channels)
         {
             acre::AnimationChannel acre_channel;
-            acre_channel.targetNode   = channel.target_node;
-            acre_channel.targetPath   = channel.target_path;
-            acre_channel.samplerIndex = channel.sampler;
+            acre_channel.target_node = channel.target_node;
+            acre_channel.target_path = channel.target_path;
+            acre_channel.sampler_idx = channel.sampler;
             acre_animation.channels.push_back(acre_channel);
         }
 
@@ -770,8 +787,8 @@ void GLTFLoader::_create_texture_transform(const tinygltf::ExtensionMap& ext, ui
 {
     if (ext.find("KHR_texture_transform") == ext.end()) return;
 
-    const auto& transform = ext.find("KHR_texture_transform")->second;
-    _create_texture_transform(transform, uuid);
+    const auto& trs = ext.find("KHR_texture_transform")->second;
+    _create_texture_transform(trs, uuid);
 }
 
 void GLTFLoader::_try_create_texture_transform(const tinygltf::Value& value, uint32_t uuid)
@@ -831,14 +848,14 @@ void GLTFLoader::_create_texture_transform(const tinygltf::Value& value, uint32_
 
     auto textureR = m_scene->find<acre::TextureID>(uuid);
 
-    auto acreTransformR   = m_scene->create<acre::TransformID>(textureR->idx() + 1 << 16);
-    auto acreTransform    = acreTransformR->ptr<acre::TransformID>();
-    acreTransform->matrix = transformMat;
-    acreTransform->affine = acre::math::homogeneousToAffine(transformMat);
+    auto acreTrsR   = m_scene->create<acre::TransformID>(textureR->idx() + 1 << 16);
+    auto acreTrs    = acreTrsR->ptr<acre::TransformID>();
+    acreTrs->matrix = transformMat;
+    acreTrs->affine = acre::math::homogeneousToAffine(transformMat);
 
-    textureR->ptr<acre::TextureID>()->transform = acreTransformR->id<acre::TransformID>();
+    textureR->ptr<acre::TextureID>()->transform = acreTrsR->id<acre::TransformID>();
 
-    refs.emplace(acreTransformR);
+    refs.emplace(acreTrsR);
     m_scene->incRefs(textureR, std::move(refs));
 }
 
