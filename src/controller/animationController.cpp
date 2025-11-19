@@ -1,4 +1,7 @@
 #include <controller/animationController.h>
+#include <unordered_set>
+#include <unordered_map>
+#include <algorithm>
 
 AnimationController::AnimationController(SceneMgr* scene) :
     m_scene(scene), m_current(nullptr), m_time(0.0f)
@@ -100,37 +103,61 @@ void AnimationController::_update_scene()
         if (value.empty()) continue;
         auto node = m_scene->find<acre::TransformID>(channel.target_node);
         if (!node) continue;
-        auto transform = node->ptr<acre::TransformID>();
-        if (!transform) continue;
+        auto trs = node->ptr<acre::TransformID>();
+        if (!trs) continue;
 
         if (channel.target_path == "scale" && value.size() >= 3)
         {
-            transform->scale = acre::math::float3(value[0], value[1], value[2]);
+            trs->scale = acre::math::float3(value[0], value[1], value[2]);
         }
         else if (channel.target_path == "rotation" && value.size() >= 4)
         {
-            transform->ratation = acre::math::quat(value[3], value[0], value[1], value[2]);
+            trs->rotation = acre::math::quat(value[3], value[0], value[1], value[2]);
         }
         else if (channel.target_path == "translation" && value.size() >= 3)
         {
-            transform->translation = acre::math::float3(value[0], value[1], value[2]);
+            trs->translation = acre::math::float3(value[0], value[1], value[2]);
         }
     }
 
-    // Second pass: for each affected node compute local affine, then world, then update skin and children
-    for (size_t idx = 0; idx < channels.size(); ++idx)
+    // Second pass: collect affected nodes, deduplicate and process from root-to-leaf
+    std::unordered_set<int> affected_nodes;
+    for (const auto& ch : channels)
+        affected_nodes.insert(ch.target_node);
+
+    std::vector<int> nodes(affected_nodes.begin(), affected_nodes.end());
+    // cache depths to avoid repeated scene lookups
+    std::unordered_map<int, int> depth_cache;
+    auto                         compute_depth = [&](int nid) -> int {
+        auto it = depth_cache.find(nid);
+        if (it != depth_cache.end()) return it->second;
+        int  d = 0;
+        auto n = m_scene->find<acre::TransformID>(nid);
+        while (n && n->parent)
+        {
+            ++d;
+            n = m_scene->find<acre::TransformID>(n->parent->uuid());
+        }
+        depth_cache[nid] = d;
+        return d;
+    };
+
+    std::sort(nodes.begin(), nodes.end(), [&](int a, int b) {
+        return compute_depth(a) < compute_depth(b);
+    });
+
+    for (int node_idx : nodes)
     {
-        auto node_idx = channels[idx].target_node;
-        auto node     = m_scene->find<acre::TransformID>(node_idx);
+        auto node = m_scene->find<acre::TransformID>(node_idx);
         if (!node) continue;
-        auto transform = node->ptr<acre::TransformID>();
-        if (!transform) continue;
+        auto trs = node->ptr<acre::TransformID>();
+        if (!trs) continue;
 
         // Compose local affine from stored local TRS
         auto local = acre::math::affine3::identity();
-        local *= acre::math::scaling(transform->scale);
-        local *= transform->ratation.toAffine();
-        local *= acre::math::translation(transform->translation);
+        local *= acre::math::scaling(trs->scale);
+        local *= trs->rotation.toAffine();
+        local *= acre::math::translation(trs->translation);
 
         auto world = local;
         if (node->parent)
@@ -143,17 +170,18 @@ void AnimationController::_update_scene()
         }
 
         // Update Transform matrix (world)
-        transform->affine = world;
-        transform->matrix = acre::math::affineToHomogeneous(world);
+        trs->affine = world;
+        trs->matrix = acre::math::affineToHomogeneous(world);
         m_scene->update(node);
 
         auto skin = m_scene->find<acre::SkinID>(node_idx);
         if (skin)
         {
-            auto inverse_node_matrix                = skin->ptr<acre::SkinID>()->inverse_node_matrix;
-            auto inverse_bind_matrix                = skin->ptr<acre::SkinID>()->inverse_bind_matrix;
-            skin->ptr<acre::SkinID>()->joint_matrix = inverse_bind_matrix * transform->matrix * inverse_node_matrix;
-            skin->ptr<acre::SkinID>()->joint_affine = acre::math::homogeneousToAffine(skin->ptr<acre::SkinID>()->joint_matrix);
+            auto skinptr             = skin->ptr<acre::SkinID>();
+            auto inverse_node_matrix = skinptr->inverse_node_matrix;
+            auto inverse_bind_matrix = skinptr->inverse_bind_matrix;
+            skinptr->joint_matrix    = inverse_bind_matrix * trs->matrix * inverse_node_matrix;
+            skinptr->joint_affine    = acre::math::homogeneousToAffine(skinptr->joint_matrix);
             m_scene->update(skin);
         }
 
@@ -179,7 +207,7 @@ void AnimationController::_update_children(acre::Resource* node)
         // Compose child's local affine from stored local TRS
         auto local = acre::math::affine3::identity();
         local *= acre::math::scaling(child_trs->scale);
-        local *= child_trs->ratation.toAffine();
+        local *= child_trs->rotation.toAffine();
         local *= acre::math::translation(child_trs->translation);
 
         // global = local * parent_global (matches loader convention)

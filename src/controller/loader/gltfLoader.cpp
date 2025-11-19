@@ -587,8 +587,8 @@ void GLTFLoader::_create_transform()
         }
         if (!node.rotation.empty())
         {
-            trs->ratation = vec4ToQuat(node.rotation);
-            affine *= trs->ratation.toAffine();
+            trs->rotation = vec4ToQuat(node.rotation);
+            affine *= trs->rotation.toAffine();
         }
         if (!node.translation.empty())
         {
@@ -623,7 +623,7 @@ void GLTFLoader::_create_transform()
             auto child_trs          = child_trsR->ptr<acre::TransformID>();
             auto child_affine_local = acre::math::affine3::identity();
             child_affine_local *= acre::math::scaling(child_trs->scale);
-            child_affine_local *= child_trs->ratation.toAffine();
+            child_affine_local *= child_trs->rotation.toAffine();
             child_affine_local *= acre::math::translation(child_trs->translation);
 
             child_trs->affine = child_affine_local * trs->affine;
