@@ -68,6 +68,7 @@ struct Resource
     template <typename ID>
     auto ptr() const { return std::get<ID>(rid).ptr; }
 
+    // relation tree
     Resource*                     parent = nullptr;
     std::unordered_set<Resource*> children;
 
