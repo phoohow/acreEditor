@@ -7,3 +7,6 @@
 [submodule "ext/acre"]
 	path = ext/acre
 	url = https://github.com/phoohow/acre.git
+[submodule "ext/codec"]
+	path = ext/codec
+	url = https://github.com/phoohow/codec.git
