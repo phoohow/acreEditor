@@ -16,6 +16,8 @@ class MenuBar : QMenuBar
     std::function<void()>                            m_flushstate_func;
     std::function<void()>                            m_resetview_func;
     std::function<void(const std::string& fileName)> m_saveframe_func;
+    std::function<void(const std::string& fileName)> m_start_record_func;
+    std::function<void()>                            m_stop_record_func;
 
     QMenu*   m_menu_file;
     QMenu*   m_menu_file_scene;
@@ -26,6 +28,8 @@ class MenuBar : QMenuBar
     QAction* m_action_add_scene;
     QAction* m_action_save_scene;
     QAction* m_action_save_frame;
+    QAction* m_action_start_record;
+    QAction* m_action_stop_record;
     QAction* m_action_open_image;
     QAction* m_action_open_hdr;
     QAction* m_action_open_lut_ggx;
@@ -62,6 +66,10 @@ public:
 
     void set_saveframe_callback(std::function<void(const std::string& fileName)> func) { m_saveframe_func = func; }
 
+    void set_start_record_callback(std::function<void(const std::string& fileName)> func) { m_start_record_func = func; }
+
+    void set_stop_record_callback(std::function<void()> func) { m_stop_record_func = func; }
+
     void save_frame() { _on_save_frame(); }
 
 private:
@@ -79,6 +87,8 @@ private:
     void _on_open_lut_sheen_albedo_scale();
     void _on_save_scene();
     void _on_save_frame();
+    void _on_start_record();
+    void _on_stop_record();
     void _on_exit();
     void _on_show_hotkey();
 };

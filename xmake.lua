@@ -1,9 +1,16 @@
 set_languages("c++20")
 add_rules("mode.debug", "mode.release")
 
-includes("ext/acre")
+if is_mode("debug") then
+    set_runtimes("MDd")
+else
+    set_runtimes("MD")
+end
 
--- Global config: 
+includes("ext/acre")
+includes("ext/codec")
+
+-- Global config:
 -- Set default target
 -- For each target, set targetdir and installdir
 on_load(function(target)
@@ -25,9 +32,11 @@ end)
 target("acreEditor", function()
     add_rules("qt.widgetapp")
     add_deps("acre")
+    add_deps("codec")
     add_includedirs("include")
     add_includedirs("ext/stb/include")
     add_includedirs("ext/tinygltf/include")
+    add_includedirs("ext/codec/include")
     add_files("src/**.cpp")
     
     before_build(function(target)

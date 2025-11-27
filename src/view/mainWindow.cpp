@@ -114,6 +114,8 @@ void MainWindow::_setup_callbacks()
 
     m_menu_bar->set_renderframe_callback(renderFrameFunc);
     m_menu_bar->set_saveframe_callback(saveFrameFunc);
+    m_menu_bar->set_start_record_callback([this](const std::string& fileName) { m_render_window->start_recording(fileName); });
+    m_menu_bar->set_stop_record_callback([this]() { m_render_window->stop_recording(); });
     m_menu_bar->set_resetview_callback([this]() { m_render_window->reset_view(); });
     m_menu_bar->set_flushstate_callback([this]() { m_bottom_bar->flush_state(); });
 

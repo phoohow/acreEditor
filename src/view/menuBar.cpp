@@ -28,7 +28,7 @@ void MenuBar::_init_file_menu()
 {
     m_menu_file = this->addMenu("&File");
 
-    m_menu_file_scene  = m_menu_file->addMenu("Scene");
+    m_menu_file_scene   = m_menu_file->addMenu("Scene");
     m_action_open_scene = m_menu_file_scene->addAction("Open");
     m_action_open_scene->setShortcut(Qt::CTRL | Qt::Key_O);
     m_action_close_scene = m_menu_file_scene->addAction("Close");
@@ -38,7 +38,7 @@ void MenuBar::_init_file_menu()
     connect(m_action_open_scene, &QAction::triggered, this, [this]() { _on_open_scene(); });
     connect(m_action_close_scene, &QAction::triggered, this, [this]() { _on_clear_scene(); });
 
-    m_menu_file_image  = m_menu_file->addMenu("Image");
+    m_menu_file_image   = m_menu_file->addMenu("Image");
     m_action_open_image = m_menu_file_image->addAction("Open Image");
     m_action_open_image->setShortcut(Qt::CTRL | Qt::Key_I);
     connect(m_action_open_image, &QAction::triggered, this, [this]() { _on_open_image(); });
@@ -54,10 +54,18 @@ void MenuBar::_init_file_menu()
     m_action_open_lut_sheen_albedo_scale = m_menu_file_image->addAction("Open LUT Sheen Albedo Scale");
     connect(m_action_open_lut_sheen_albedo_scale, &QAction::triggered, this, [this]() { _on_open_lut_sheen_albedo_scale(); });
 
-    m_menu_file_frame  = m_menu_file->addMenu("Frame");
+    m_menu_file_frame   = m_menu_file->addMenu("Frame");
     m_action_save_frame = m_menu_file_frame->addAction("Save");
     m_action_save_frame->setShortcut(Qt::CTRL | Qt::Key_F);
     connect(m_action_save_frame, &QAction::triggered, this, [this]() { _on_save_frame(); });
+
+    m_action_start_record = m_menu_file_frame->addAction("Start Recording");
+    m_action_start_record->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_R);
+    connect(m_action_start_record, &QAction::triggered, this, [this]() { _on_start_record(); });
+
+    m_action_stop_record = m_menu_file_frame->addAction("Stop Recording");
+    m_action_stop_record->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_S);
+    connect(m_action_stop_record, &QAction::triggered, this, [this]() { _on_stop_record(); });
 
     m_menu_file->addSeparator();
 
@@ -268,6 +276,22 @@ void MenuBar::_on_save_frame()
 
 void MenuBar::_on_save_scene()
 {
+}
+
+void MenuBar::_on_start_record()
+{
+    auto dirStr = QDir::currentPath() + "/recordings/";
+    QDir dir(dirStr);
+    if (!dir.exists()) dir.mkdir(dirStr);
+
+    auto qFileName = dirStr + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss-zzz") + ".h264";
+    auto fileName  = qFileName.toStdString();
+    if (!fileName.empty() && m_start_record_func) m_start_record_func(fileName);
+}
+
+void MenuBar::_on_stop_record()
+{
+    if (m_stop_record_func) m_stop_record_func();
 }
 
 void MenuBar::_on_exit()

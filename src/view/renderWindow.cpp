@@ -3,6 +3,7 @@
 #include <view/renderWindow.h>
 #include <controller/cameraController.h>
 #include <controller/animationController.h>
+#include <controller/recorderController.h>
 #include <controller/exporter.h>
 #include <model/sceneMgr.h>
 
@@ -231,6 +232,20 @@ void RenderWindow::render_frame()
     }
 
     m_swapchain->present();
+
+    // If recording, grab native render target and submit to recorder
+    if (m_recorder && m_recorder->is_recording())
+    {
+        void* nativeTarget = nullptr;
+        m_renderer->get_native_target(&nativeTarget);
+        if (nativeTarget)
+        {
+            if (m_recorder->submit_frame(nativeTarget))
+            {
+                m_record_frame_index++;
+            }
+        }
+    }
 }
 
 std::string RenderWindow::profiler_info()
@@ -342,4 +357,43 @@ void RenderWindow::_init_scene()
         case acre::RenderPath::rRayGLTF: m_ray_config->camera = m_scene->camera_id(); break;
         case acre::RenderPath::rPathGLTF: m_path_config->camera = m_scene->camera_id(); break;
     }
+}
+
+void RenderWindow::start_recording(const std::string& fileName)
+{
+    if (!m_renderer) return;
+    if (!m_recorder) m_recorder = new RecorderController();
+    if (m_recorder->is_recording()) return;
+
+    // Get native device pointer from renderer
+    void* nativeDevice = nullptr;
+    m_renderer->get_native_device(&nativeDevice);
+
+    uint32_t w = 0, h = 0;
+    if (m_swapchain)
+    {
+        w = m_swapchain->width();
+        h = m_swapchain->height();
+    }
+    else
+    {
+        w = width();
+        h = height();
+    }
+
+    if (!m_recorder->start(fileName, nativeDevice, w, h))
+    {
+        std::cout << "RenderWindow: failed to start recorder." << std::endl;
+        return;
+    }
+
+    m_record_frame_index = 0;
+}
+
+void RenderWindow::stop_recording()
+{
+    if (!m_recorder) return;
+    if (!m_recorder->is_recording()) return;
+
+    m_recorder->stop();
 }

@@ -4,6 +4,7 @@
 #include <QWindow>
 #include <QPoint>
 #include <QTimer>
+#include <memory>
 
 namespace acre
 {
@@ -23,6 +24,7 @@ struct PathTracing;
 class SceneMgr;
 class CameraController;
 class AnimationController;
+class RecorderController;
 class Exporter;
 class RenderWindow : public QWindow
 {
@@ -50,6 +52,9 @@ class RenderWindow : public QWindow
     SceneMgr*         m_scene      = nullptr;
     CameraController* m_camr_ctrlr = nullptr;
     Exporter*         m_exporter   = nullptr;
+
+    RecorderController* m_recorder           = nullptr;
+    uint64_t            m_record_frame_index = 0;
 
 protected:
     virtual void exposeEvent(QExposeEvent*) override;
@@ -80,6 +85,10 @@ public:
     void save_frame(const std::string& fileName);
 
     void reset_view();
+
+    // Recording controls
+    void start_recording(const std::string& fileName);
+    void stop_recording();
 
 private:
     void _create_renderer();
