@@ -233,19 +233,7 @@ void RenderWindow::render_frame()
 
     m_swapchain->present();
 
-    // If recording, grab native render target and submit to recorder
-    if (m_recorder && m_recorder->is_recording())
-    {
-        void* nativeTarget = nullptr;
-        m_renderer->get_native_target(&nativeTarget);
-        if (nativeTarget)
-        {
-            if (m_recorder->submit_frame(nativeTarget))
-            {
-                m_record_frame_index++;
-            }
-        }
-    }
+    record_frame();
 }
 
 std::string RenderWindow::profiler_info()
@@ -359,7 +347,7 @@ void RenderWindow::_init_scene()
     }
 }
 
-void RenderWindow::start_recording(const std::string& fileName)
+void RenderWindow::start_record(const std::string& fileName)
 {
     if (!m_renderer) return;
     if (!m_recorder) m_recorder = new RecorderController();
@@ -386,11 +374,21 @@ void RenderWindow::start_recording(const std::string& fileName)
         std::cout << "RenderWindow: failed to start recorder." << std::endl;
         return;
     }
-
-    m_record_frame_index = 0;
 }
 
-void RenderWindow::stop_recording()
+void RenderWindow::record_frame()
+{
+    if (!m_recorder) return;
+    if (!m_recorder->is_recording()) return;
+
+    void* nativeTarget = nullptr;
+    m_renderer->get_native_target(&nativeTarget);
+    if (!nativeTarget) return;
+
+    m_recorder->submit_frame(nativeTarget);
+}
+
+void RenderWindow::end_record()
 {
     if (!m_recorder) return;
     if (!m_recorder->is_recording()) return;

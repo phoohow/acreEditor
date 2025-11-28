@@ -14,7 +14,7 @@ bool RecorderController::start(const std::string& fileName, void* nativeDevice, 
     m_file.open(fileName, std::ios::binary);
     if (!m_file.is_open())
     {
-        std::cout << "RecorderController: failed to open file: " << fileName << std::endl;
+        std::cout << "[record]: failed to open file: " << fileName << std::endl;
         return false;
     }
 
@@ -30,21 +30,21 @@ bool RecorderController::start(const std::string& fileName, void* nativeDevice, 
     m_encoder = cdc::CreateEncoder(params);
     if (!m_encoder)
     {
-        std::cout << "RecorderController: failed to create encoder." << std::endl;
+        std::cout << "[record]: failed to create encoder." << std::endl;
         m_file.close();
         return false;
     }
 
     if (!m_encoder->Initialize(params))
     {
-        std::cout << "RecorderController: failed to initialize encoder." << std::endl;
-        m_encoder.reset();
+        std::cout << "[record]: failed to initialize encoder." << std::endl;
         m_file.close();
         return false;
     }
 
-    m_recording = true;
-    std::cout << "RecorderController: recording started: " << fileName << std::endl;
+    m_recording   = true;
+    m_frame_index = 0;
+    std::cout << "[record]: recording started: " << fileName << std::endl;
     return true;
 }
 
@@ -52,43 +52,39 @@ void RecorderController::stop()
 {
     if (!m_recording) return;
 
-    if (m_encoder)
-    {
-        cdc::CodecPacket packet;
-        while (m_encoder->Flush(packet))
-        {
-            if (packet.data && packet.size > 0 && m_file.is_open())
-            {
-                m_file.write(reinterpret_cast<const char*>(packet.data), packet.size);
-            }
-            if (packet.data) delete[] static_cast<uint8_t*>(packet.data);
-        }
-
-        m_encoder->Destroy();
-        m_encoder.reset();
-    }
-
-    if (m_file.is_open()) m_file.close();
-    m_recording = false;
-    std::cout << "RecorderController: recording stopped." << std::endl;
-}
-
-bool RecorderController::submit_frame(void* nativeResource)
-{
-    if (!m_recording || !m_encoder || !nativeResource) return false;
+    if (!m_encoder) return;
 
     cdc::CodecPacket packet;
-    if (m_encoder->EncodeFrame(nativeResource, packet))
+    while (m_encoder->Flush(packet))
     {
         if (packet.data && packet.size > 0 && m_file.is_open())
         {
             m_file.write(reinterpret_cast<const char*>(packet.data), packet.size);
-            m_file.flush();
         }
-
         if (packet.data) delete[] static_cast<uint8_t*>(packet.data);
-        return true;
     }
 
-    return false;
+    m_encoder->Destroy();
+
+    if (m_file.is_open()) m_file.close();
+    m_recording = false;
+    std::cout << "[record]: recording stopped. Record frames: " << m_frame_index << std::endl;
+}
+
+void RecorderController::submit_frame(void* native)
+{
+    if (!m_recording || !m_encoder || !native) return;
+
+    cdc::CodecPacket packet;
+    if (!m_encoder->EncodeFrame(native, packet)) return;
+
+    if (packet.data && packet.size > 0 && m_file.is_open())
+    {
+        m_file.write(reinterpret_cast<const char*>(packet.data), packet.size);
+        m_file.flush();
+    }
+
+    if (packet.data) delete[] static_cast<uint8_t*>(packet.data);
+
+    m_frame_index++;
 }

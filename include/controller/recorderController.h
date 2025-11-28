@@ -1,16 +1,17 @@
 #pragma once
 
+#include <codec/codec.h>
+
 #include <string>
 #include <memory>
 #include <fstream>
 
-#include <codec/codec.h>
-
 class RecorderController
 {
-    std::unique_ptr<cdc::Encoder> m_encoder;
-    std::ofstream                 m_file;
-    bool                          m_recording = false;
+    cdc::Encoder* m_encoder;
+    std::ofstream m_file;
+    bool          m_recording   = false;
+    uint32_t      m_frame_index = 0;
 
 public:
     RecorderController() = default;
@@ -23,8 +24,8 @@ public:
     // Stop recording and flush pending packets.
     void stop();
 
-    // Submit a frame. nativeResource is an opaque pointer to the native frame resource (e.g. ID3D12Resource*).
-    bool submit_frame(void* nativeResource);
+    // Submit a frame. native is an opaque pointer to the native frame resource (e.g. ID3D12Resource*).
+    void submit_frame(void* native);
 
     bool is_recording() const { return m_recording; }
 };

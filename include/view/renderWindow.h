@@ -53,8 +53,7 @@ class RenderWindow : public QWindow
     CameraController* m_camr_ctrlr = nullptr;
     Exporter*         m_exporter   = nullptr;
 
-    RecorderController* m_recorder           = nullptr;
-    uint64_t            m_record_frame_index = 0;
+    RecorderController* m_recorder = nullptr;
 
 protected:
     virtual void exposeEvent(QExposeEvent*) override;
@@ -86,9 +85,11 @@ public:
 
     void reset_view();
 
-    // Recording controls
-    void start_recording(const std::string& fileName);
-    void stop_recording();
+    void start_record(const std::string& fileName);
+
+    void record_frame();
+
+    void end_record();
 
 private:
     void _create_renderer();
