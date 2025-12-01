@@ -118,12 +118,21 @@ void ResourceTree::clear()
         remove(node);
     }
 
-    // Note: some transform maybe not atexture or a entity, but a group of entities
+    // Note: some transform maybe not a texture or a entity, but a group of entities
     // so need clear it
     auto& trans = m_mgrs[index_of_rid<TransformID>()];
     while (!trans.empty())
     {
         auto iter = trans.begin();
+        auto node = iter->second.get();
+        remove(node);
+    }
+
+    // Note: some images/textures maybe external resources,such as ao, so need clear them too
+    auto& textures = m_mgrs[index_of_rid<TextureID>()];
+    while (!textures.empty())
+    {
+        auto iter = textures.begin();
         auto node = iter->second.get();
         remove(node);
     }

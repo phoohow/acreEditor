@@ -45,6 +45,7 @@ private:
     void _create_texture_transform(const tinygltf::Value& value, uint32_t uuid);
 
     acre::Resource* _get_image(std::unordered_set<acre::Resource*>& refs, uint32_t uuid);
+    acre::Resource* _get_sampler(std::unordered_set<acre::Resource*>& refs, uint32_t uuid);
     acre::Resource* _get_texture(std::unordered_set<acre::Resource*>& refs, uint32_t uuid);
     acre::Resource* _get_transform(uint32_t uuid);
     acre::Resource* _get_geometry(uint32_t uuid);
@@ -55,5 +56,5 @@ private:
     acre::TransformID _get_transform_id(uint32_t uuid);
     acre::GeometryID  _get_geometry_id(uint32_t uuid);
     acre::MaterialID  _get_material_id(uint32_t uuid);
-    acre::SamplerID   _get_sampler_id(uint32_t uuid);
+    acre::SamplerID   _get_sampler_id(std::unordered_set<acre::Resource*>& refs, uint32_t uuid);
 };

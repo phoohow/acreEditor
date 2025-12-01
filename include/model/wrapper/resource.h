@@ -14,17 +14,17 @@ using RID = std::variant<VIndexID,
                          VUVID,
                          VNormalID,
                          VTangentID,
-                         VColorID,
+                         VColorID, // index 5
                          VJointID,
                          VWeightID,
                          GeometryID,
                          ImageID,
-                         SamplerID,
+                         SamplerID, // index 10
                          TextureID,
                          TransformID,
                          MaterialID,
                          EntityID,
-                         LightID,
+                         LightID, // index 15
                          CameraID,
                          SkinID>;
 

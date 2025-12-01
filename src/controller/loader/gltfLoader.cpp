@@ -172,36 +172,36 @@ void GLTFLoader::loadScene(const std::string& fileName)
 
 void GLTFLoader::_create_sampler()
 {
+    // {
+    //     auto sR = m_scene->create<acre::SamplerID>(0);
+    //     auto s  = sR->ptr<acre::SamplerID>();
+
+    //     s->mag_filter = false;
+    //     s->min_filter = false;
+    //     s->mip_filter = false;
+    //     s->address_u  = acre::Sampler::AddressMode::ClampToEdge;
+    //     s->address_v  = acre::Sampler::AddressMode::ClampToEdge;
+    //     s->address_w  = acre::Sampler::AddressMode::ClampToEdge;
+
+    //     m_scene->update(sR);
+    // }
+
+    // {
+    //     auto sR = m_scene->create<acre::SamplerID>(1);
+    //     auto s  = sR->ptr<acre::SamplerID>();
+
+    //     s->mag_filter = false;
+    //     s->min_filter = false;
+    //     s->mip_filter = false;
+    //     s->address_u  = acre::Sampler::AddressMode::Repeat;
+    //     s->address_v  = acre::Sampler::AddressMode::Repeat;
+    //     s->address_w  = acre::Sampler::AddressMode::Repeat;
+
+    //     m_scene->update(sR);
+    // }
+
     {
         auto sR = m_scene->create<acre::SamplerID>(0);
-        auto s  = sR->ptr<acre::SamplerID>();
-
-        s->mag_filter = false;
-        s->min_filter = false;
-        s->mip_filter = false;
-        s->address_u  = acre::Sampler::AddressMode::ClampToEdge;
-        s->address_v  = acre::Sampler::AddressMode::ClampToEdge;
-        s->address_w  = acre::Sampler::AddressMode::ClampToEdge;
-
-        m_scene->update(sR);
-    }
-
-    {
-        auto sR = m_scene->create<acre::SamplerID>(1);
-        auto s  = sR->ptr<acre::SamplerID>();
-
-        s->mag_filter = false;
-        s->min_filter = false;
-        s->mip_filter = false;
-        s->address_u  = acre::Sampler::AddressMode::Repeat;
-        s->address_v  = acre::Sampler::AddressMode::Repeat;
-        s->address_w  = acre::Sampler::AddressMode::Repeat;
-
-        m_scene->update(sR);
-    }
-
-    {
-        auto sR = m_scene->create<acre::SamplerID>(2);
         auto s  = sR->ptr<acre::SamplerID>();
 
         s->mag_filter     = true;
@@ -238,7 +238,7 @@ void GLTFLoader::_create_material()
         auto node        = m_scene->create<acre::TextureID>(uuid++);
         auto texture     = node->ptr<acre::TextureID>();
         texture->image   = _get_image_id(refs, tex.source);
-        texture->sampler = _get_sampler_id(2);
+        texture->sampler = _get_sampler_id(refs, 0);
         m_scene->update(node, std::move(refs));
     }
 
@@ -718,6 +718,8 @@ void GLTFLoader::_create_skin()
 
 void GLTFLoader::_create_component_draw()
 {
+    m_scene->reset_box();
+
     auto     sceneBox     = acre::math::box3::empty();
     uint32_t entity_index = 0;
     for (int nodeIndex = 0; nodeIndex < m_model->nodes.size(); ++nodeIndex)
@@ -916,6 +918,15 @@ acre::Resource* GLTFLoader::_get_image(std::unordered_set<acre::Resource*>& refs
     return node;
 }
 
+acre::Resource* GLTFLoader::_get_sampler(std::unordered_set<acre::Resource*>& refs, uint32_t uuid)
+{
+    if (uuid == -1) return nullptr;
+
+    auto node = m_scene->find<acre::SamplerID>(uuid);
+    refs.emplace(node);
+    return node;
+}
+
 acre::Resource* GLTFLoader::_get_texture(std::unordered_set<acre::Resource*>& refs, uint32_t uuid)
 {
     if (uuid == -1) return nullptr;
@@ -974,7 +985,7 @@ acre::MaterialID GLTFLoader::_get_material_id(uint32_t uuid)
     return _get_material(uuid)->id<acre::MaterialID>();
 }
 
-acre::SamplerID GLTFLoader::_get_sampler_id(uint32_t uuid)
+acre::SamplerID GLTFLoader::_get_sampler_id(std::unordered_set<acre::Resource*>& refs, uint32_t uuid)
 {
-    return m_scene->find<acre::SamplerID>(uuid)->id<acre::SamplerID>();
+    return _get_sampler(refs, uuid)->id<acre::SamplerID>();
 }
