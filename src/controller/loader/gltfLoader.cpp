@@ -161,12 +161,59 @@ void GLTFLoader::loadScene(const std::string& fileName)
         printf("Failed to parse glTF\n");
     }
 
+    _create_sampler();
     _create_material();
     _create_geometry();
     _create_transform();
     _create_skin();
     _create_component_draw();
     _create_animation();
+}
+
+void GLTFLoader::_create_sampler()
+{
+    {
+        auto sR = m_scene->create<acre::SamplerID>(0);
+        auto s  = sR->ptr<acre::SamplerID>();
+
+        s->mag_filter = false;
+        s->min_filter = false;
+        s->mip_filter = false;
+        s->address_u  = acre::Sampler::AddressMode::ClampToEdge;
+        s->address_v  = acre::Sampler::AddressMode::ClampToEdge;
+        s->address_w  = acre::Sampler::AddressMode::ClampToEdge;
+
+        m_scene->update(sR);
+    }
+
+    {
+        auto sR = m_scene->create<acre::SamplerID>(1);
+        auto s  = sR->ptr<acre::SamplerID>();
+
+        s->mag_filter = false;
+        s->min_filter = false;
+        s->mip_filter = false;
+        s->address_u  = acre::Sampler::AddressMode::Repeat;
+        s->address_v  = acre::Sampler::AddressMode::Repeat;
+        s->address_w  = acre::Sampler::AddressMode::Repeat;
+
+        m_scene->update(sR);
+    }
+
+    {
+        auto sR = m_scene->create<acre::SamplerID>(2);
+        auto s  = sR->ptr<acre::SamplerID>();
+
+        s->mag_filter     = true;
+        s->min_filter     = true;
+        s->mip_filter     = true;
+        s->max_anisotropy = 8;
+        s->address_u      = acre::Sampler::AddressMode::Repeat;
+        s->address_v      = acre::Sampler::AddressMode::Repeat;
+        s->address_w      = acre::Sampler::AddressMode::Repeat;
+
+        m_scene->update(sR);
+    }
 }
 
 void GLTFLoader::_create_material()
@@ -188,9 +235,10 @@ void GLTFLoader::_create_material()
     {
         std::unordered_set<acre::Resource*> refs;
 
-        auto node      = m_scene->create<acre::TextureID>(uuid++);
-        auto texture   = node->ptr<acre::TextureID>();
-        texture->image = _get_image_id(refs, tex.source);
+        auto node        = m_scene->create<acre::TextureID>(uuid++);
+        auto texture     = node->ptr<acre::TextureID>();
+        texture->image   = _get_image_id(refs, tex.source);
+        texture->sampler = _get_sampler_id(2);
         m_scene->update(node, std::move(refs));
     }
 
@@ -924,4 +972,9 @@ acre::GeometryID GLTFLoader::_get_geometry_id(uint32_t uuid)
 acre::MaterialID GLTFLoader::_get_material_id(uint32_t uuid)
 {
     return _get_material(uuid)->id<acre::MaterialID>();
+}
+
+acre::SamplerID GLTFLoader::_get_sampler_id(uint32_t uuid)
+{
+    return m_scene->find<acre::SamplerID>(uuid)->id<acre::SamplerID>();
 }

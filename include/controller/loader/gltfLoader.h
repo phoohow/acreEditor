@@ -26,6 +26,8 @@ public:
 private:
     void _create_geometry();
 
+    void _create_sampler();
+
     void _create_material();
 
     void _create_transform();
@@ -53,4 +55,5 @@ private:
     acre::TransformID _get_transform_id(uint32_t uuid);
     acre::GeometryID  _get_geometry_id(uint32_t uuid);
     acre::MaterialID  _get_material_id(uint32_t uuid);
+    acre::SamplerID   _get_sampler_id(uint32_t uuid);
 };
