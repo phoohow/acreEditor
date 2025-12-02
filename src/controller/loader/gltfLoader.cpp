@@ -341,9 +341,9 @@ void GLTFLoader::_create_material()
             const auto& anisotropyStrength = anisotropy->second.Get("anisotropyStrength");
             model.anisotropy               = anisotropyStrength.GetNumberAsDouble();
 
-            if (anisotropy->second.Has("anisotropy_rotation"))
+            if (anisotropy->second.Has("anisotropyRotation"))
             {
-                const auto& anisotropy_rotation = anisotropy->second.Get("anisotropy_rotation");
+                const auto& anisotropy_rotation = anisotropy->second.Get("anisotropyRotation");
                 model.anisotropy_rotation       = anisotropy_rotation.GetNumberAsDouble();
             }
             if (anisotropy->second.Has("anisotropyTexture"))
@@ -369,9 +369,9 @@ void GLTFLoader::_create_material()
                 model.iridescence_idx          = _get_texture_id(refs, index);
                 _try_create_texture_transform(iridescenceTexture, index);
             }
-            if (iridescence->second.Has("iridescence_ior"))
+            if (iridescence->second.Has("iridescenceIor"))
             {
-                const auto& iridescence_ior = iridescence->second.Get("iridescence_ior");
+                const auto& iridescence_ior = iridescence->second.Get("iridescenceIor");
                 model.iridescence_ior       = iridescence_ior.GetNumberAsDouble();
             }
             if (iridescence->second.Has("iridescenceThicknessMaximum"))
@@ -477,7 +477,7 @@ void GLTFLoader::_create_geometry()
                 if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ||
                     accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
                 {
-                    printf("We only support index with ushort or uint\n");
+                    printf("[gltf][loader] Only support index with ushort or uint\n");
                 }
 
                 auto node = m_scene->create<acre::VIndexID>(geo_idx);
@@ -496,7 +496,7 @@ void GLTFLoader::_create_geometry()
 
                 if (accessor.type != TINYGLTF_TYPE_VEC3 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("We only support position with float3\n");
+                    printf("[gltf][loader] Only support position with float3\n");
                 }
 
                 auto node = m_scene->create<acre::VPositionID>(geo_idx);
@@ -524,7 +524,7 @@ void GLTFLoader::_create_geometry()
 
                 if (accessor.type != TINYGLTF_TYPE_VEC2 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("We only support uv with float2\n");
+                    printf("[gltf][loader] Only support uv with float2\n");
                 }
 
                 auto node = m_scene->create<acre::VUVID>(geo_idx);
@@ -543,7 +543,7 @@ void GLTFLoader::_create_geometry()
 
                 if (accessor.type != TINYGLTF_TYPE_VEC3 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("We only support normal with float3\n");
+                    printf("[gltf][loader] Only support normal with float3\n");
                 }
 
                 auto node = m_scene->create<acre::VNormalID>(geo_idx);
@@ -562,7 +562,7 @@ void GLTFLoader::_create_geometry()
 
                 if (accessor.type != TINYGLTF_TYPE_VEC4 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("We only support tangent with float4\n");
+                    printf("[gltf][loader] Only support tangent with float4\n");
                 }
 
                 auto node = m_scene->create<acre::VTangentID>(geo_idx);
@@ -581,7 +581,7 @@ void GLTFLoader::_create_geometry()
 
                 if (accessor.type != TINYGLTF_TYPE_VEC4 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
                 {
-                    printf("We only support joints with ushort4\n");
+                    printf("[gltf][loader] Only support joints with ushort4\n");
                 }
 
                 auto node = m_scene->create<acre::VJointID>(geo_idx);
@@ -600,7 +600,7 @@ void GLTFLoader::_create_geometry()
 
                 if (accessor.type != TINYGLTF_TYPE_VEC4 && accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
                 {
-                    printf("We only support weights with float4\n");
+                    printf("[gltf][loader] Only support weights with float4\n");
                 }
 
                 auto node = m_scene->create<acre::VWeightID>(geo_idx);
