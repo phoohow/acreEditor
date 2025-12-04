@@ -39,12 +39,8 @@ target("acreEditor", function()
     add_includedirs("ext/codec/include")
     add_files("src/**.cpp")
     
-    before_build(function(target)
-        local use_vulkan = false
-        import("config")
-        config.setup_config(target, use_vulkan)
-    end)
-    
+    -- add_defines("USE_VULKAN")
+
     after_install(function(target)
         os.cp(os.scriptdir() .. "/tools/dxc/bin/x64/*", target:targetdir())
         if is_mode("release") then

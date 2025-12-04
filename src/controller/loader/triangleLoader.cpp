@@ -1,5 +1,3 @@
-#include <config.h>
-
 #include <controller/loader/triangleLoader.h>
 
 #define STB_IMAGE_IMPLEMENTATION

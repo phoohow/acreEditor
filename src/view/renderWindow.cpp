@@ -1,5 +1,3 @@
-#include <config.h>
-
 #include <view/renderWindow.h>
 #include <controller/cameraController.h>
 #include <controller/animationController.h>
@@ -22,7 +20,7 @@
 
 static constexpr float  g_pixelRatio  = 1.5f;
 static constexpr float  g_degreeRatio = 180.f;
-static acre::RenderPath g_renderPath  = acre::RenderPath::rPathGLTF;
+static acre::RenderPath g_renderPath  = acre::RenderPath::rRasterGLTF;
 
 template <uint32_t N>
 std::string toNchar(const std::string& str)
@@ -35,20 +33,13 @@ std::string toNchar(const std::string& str)
 RenderWindow::RenderWindow() :
     QWindow()
 {
-#if USE_VULKAN
+#ifdef USE_VULKAN
     m_device_mgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rVulkan);
 #else
     m_device_mgr = std::make_unique<acre::DeviceMgr>(acre::DeviceMgr::Type::rDX12);
 #endif
 
-#ifndef _DEBUG
-    m_render_scene = std::make_unique<acre::Scene>(m_device_mgr.get(), QDir::currentPath().toStdString().c_str());
-#else
-    auto src_dir   = SRC_DIR;
-    auto dst_dir   = DST_DIR;
-    m_render_scene = std::make_unique<acre::Scene>(m_device_mgr.get(), src_dir, dst_dir);
-#endif
-
+    m_render_scene  = std::make_unique<acre::Scene>(m_device_mgr.get());
     m_raster_config = std::make_unique<acre::config::Raster>();
     m_ray_config    = std::make_unique<acre::config::RayTracing>();
     m_path_config   = std::make_unique<acre::config::PathTracing>();
@@ -59,6 +50,7 @@ RenderWindow::RenderWindow() :
     m_last_frame_time = std::chrono::steady_clock::now();
     m_timer           = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, [this]() {
+        if (!m_renderer) return;
         animate_frame();
         render_frame();
     });

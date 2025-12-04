@@ -1,4 +1,5 @@
-/.vscode/
-/.xmake/
+.vscode/*
+.xmake/*
 include/config.h
-/.VSCodeCounter/
+.VSCodeCounter/*
+build/*
