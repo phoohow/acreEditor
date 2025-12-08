@@ -7,6 +7,7 @@
 namespace tinygltf
 {
 class Model;
+class Material;
 class TinyGLTF;
 class Value;
 } // namespace tinygltf
@@ -57,4 +58,7 @@ private:
     acre::GeometryID  _get_geometry_id(uint32_t uuid);
     acre::MaterialID  _get_material_id(uint32_t uuid);
     acre::SamplerID   _get_sampler_id(std::unordered_set<acre::Resource*>& refs, uint32_t uuid);
+
+    void _config_standard_model(acre::StandardModel& model, float& alpha, acre::TextureID& alpha_idx, std::unordered_set<acre::Resource*>& refs, const tinygltf::Material& mat);
+    void _config_dwafabric_model(acre::DwaFabric& model, float& alpha, acre::TextureID& alpha_idx, std::unordered_set<acre::Resource*>& refs, const tinygltf::Material& mat);
 };

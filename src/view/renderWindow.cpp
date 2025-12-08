@@ -61,13 +61,11 @@ RenderWindow::~RenderWindow() = default;
 
 void RenderWindow::exposeEvent(QExposeEvent* event)
 {
-    // TODO: there is a bug
-    // if (!m_swapchain)
-    // {
-    //     _create_renderer();
-    // }
+    if (!m_swapchain) _create_renderer();
 
-    // render_frame();
+    if (!m_swapchain) return;
+
+    render_frame();
 }
 
 void RenderWindow::resizeEvent(QResizeEvent* event)

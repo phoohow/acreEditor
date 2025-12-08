@@ -4,6 +4,8 @@
 #define TINYGLTF_IMPLEMENTATION
 #include <tinygltf/tiny_gltf.h>
 
+#define REUSE_GLTF_SHEEN_AS_DWAFABRIC 0
+
 template <typename T>
 static auto vec3ToFloat3(T& vec)
 {
@@ -249,205 +251,26 @@ void GLTFLoader::_create_material()
 
         auto materialR = m_scene->create<acre::MaterialID>(uuid++);
         auto material  = materialR->ptr<acre::MaterialID>();
-        material->type = acre::MaterialModel::mStandard;
-        acre::StandardModel model;
-        auto                base_color = vec4ToFloat4(mat.pbrMetallicRoughness.baseColorFactor);
-        model.base_color               = base_color.xyz();
-        material->alpha                = base_color.w;
-        model.base_color_idx           = _get_texture_id(refs, mat.pbrMetallicRoughness.baseColorTexture.index);
-        model.roughness                = mat.pbrMetallicRoughness.roughnessFactor;
-        model.metallic                 = mat.pbrMetallicRoughness.metallicFactor;
-        model.metalrough_idx           = _get_texture_id(refs, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
-        model.normal_idx               = _get_texture_id(refs, mat.normalTexture.index);
-        model.emission_idx             = _get_texture_id(refs, mat.emissiveTexture.index);
-        model.emission                 = vec3ToFloat3(mat.emissiveFactor);
 
-        _create_texture_transform(mat.pbrMetallicRoughness.baseColorTexture.extensions, mat.pbrMetallicRoughness.baseColorTexture.index);
-        _create_texture_transform(mat.pbrMetallicRoughness.metallicRoughnessTexture.extensions, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
-        _create_texture_transform(mat.normalTexture.extensions, mat.normalTexture.index);
-        _create_texture_transform(mat.emissiveTexture.extensions, mat.emissiveTexture.index);
-
+#if REUSE_GLTF_SHEEN_AS_DWAFABRIC
         const auto& exts = mat.extensions;
-        if (exts.find("KHR_materials_ior") != exts.end())
-        {
-            const auto& ior = exts.find("KHR_materials_ior");
-            model.ior       = ior->second.Get("ior").GetNumberAsDouble();
-        }
-
-        if (exts.find("KHR_materials_clearcoat") != exts.end())
-        {
-            model.use_clearcoat   = true;
-            const auto& clearcoat = exts.find("KHR_materials_clearcoat");
-
-            const auto& clearcoatFactor          = clearcoat->second.Get("clearcoatFactor");
-            model.clearcoat                      = clearcoatFactor.GetNumberAsDouble();
-            const auto& clearcoatRoughnessFactor = clearcoat->second.Get("clearcoatRoughnessFactor");
-            model.clearcoat_rough                = clearcoatRoughnessFactor.GetNumberAsDouble();
-            if (clearcoat->second.Has("clearcoatTexture"))
-            {
-                const auto& clearcoatTexture = clearcoat->second.Get("clearcoatTexture");
-                auto        index            = clearcoatTexture.Get("index").GetNumberAsInt();
-                model.clearcoat_idx          = _get_texture_id(refs, index);
-                _try_create_texture_transform(clearcoatTexture, index);
-            }
-            if (clearcoat->second.Has("clearcoatRoughnessTexture"))
-            {
-                const auto& clearcoatRoughnessTexture = clearcoat->second.Get("clearcoatRoughnessTexture");
-                auto        index                     = clearcoatRoughnessTexture.Get("index").GetNumberAsInt();
-                model.clearcoat_rough_idx             = _get_texture_id(refs, index);
-                _try_create_texture_transform(clearcoatRoughnessTexture, index);
-            }
-            if (clearcoat->second.Has("clearcoatNormalTexture"))
-            {
-                const auto& clearcoatNormalTexture = clearcoat->second.Get("clearcoatNormalTexture");
-                auto        index                  = clearcoatNormalTexture.Get("index").GetNumberAsInt();
-                model.clearcoat_normal_idx         = _get_texture_id(refs, index);
-                _try_create_texture_transform(clearcoatNormalTexture, index);
-            }
-        }
-
         if (exts.find("KHR_materials_sheen") != exts.end())
         {
-            model.use_sheen   = true;
-            const auto& sheen = exts.find("KHR_materials_sheen");
-
-            const auto& sheenColorFactor     = sheen->second.Get("sheenColorFactor");
-            model.sheen_color                = acre::math::float3(sheenColorFactor.Get(0).GetNumberAsDouble(),
-                                                                  sheenColorFactor.Get(1).GetNumberAsDouble(),
-                                                                  sheenColorFactor.Get(2).GetNumberAsDouble());
-            const auto& sheenRoughnessFactor = sheen->second.Get("sheenRoughnessFactor");
-            model.sheen_roughness            = sheenRoughnessFactor.GetNumberAsDouble();
-            if (sheen->second.Has("sheenColorTexture"))
-            {
-                const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
-                auto        index             = sheenColorTexture.Get("index").GetNumberAsInt();
-                model.sheen_color_idx         = _get_texture_id(refs, index);
-                _try_create_texture_transform(sheenColorTexture, index);
-            }
-            if (sheen->second.Has("sheenRoughnessTexture"))
-            {
-                const auto& sheenRoughnessTexture = sheen->second.Get("sheenRoughnessTexture");
-                auto        index                 = sheenRoughnessTexture.Get("index").GetNumberAsInt();
-                model.sheen_rough_idx             = _get_texture_id(refs, index);
-                _try_create_texture_transform(sheenRoughnessTexture, index);
-            }
+            material->type  = acre::MaterialModel::mDwaFabric;
+            material->model = acre::DwaFabric();
+            _config_dwafabric_model(std::get<acre::DwaFabric>(material->model), material->alpha, material->alpha_idx, refs, mat);
         }
-
-        if (exts.find("KHR_materials_anisotropy") != exts.end())
+        else
+#endif
         {
-            model.use_anisotropy   = true;
-            const auto& anisotropy = exts.find("KHR_materials_anisotropy");
-
-            const auto& anisotropyStrength = anisotropy->second.Get("anisotropyStrength");
-            model.anisotropy               = anisotropyStrength.GetNumberAsDouble();
-
-            if (anisotropy->second.Has("anisotropyRotation"))
-            {
-                const auto& anisotropy_rotation = anisotropy->second.Get("anisotropyRotation");
-                model.anisotropy_rotation       = anisotropy_rotation.GetNumberAsDouble();
-            }
-            if (anisotropy->second.Has("anisotropyTexture"))
-            {
-                const auto& anisotropyTexture = anisotropy->second.Get("anisotropyTexture");
-                auto        index             = anisotropyTexture.Get("index").GetNumberAsInt();
-                model.anisotropy_idx          = _get_texture_id(refs, index);
-                _try_create_texture_transform(anisotropyTexture, index);
-            }
-        }
-
-        if (exts.find("KHR_materials_iridescence") != exts.end())
-        {
-            model.use_iridescence   = true;
-            const auto& iridescence = exts.find("KHR_materials_iridescence");
-
-            const auto& iridescenceFactor = iridescence->second.Get("iridescenceFactor");
-            model.iridescence             = iridescenceFactor.GetNumberAsDouble();
-            if (iridescence->second.Has("iridescenceTexture"))
-            {
-                const auto& iridescenceTexture = iridescence->second.Get("iridescenceTexture");
-                auto        index              = iridescenceTexture.Get("index").GetNumberAsInt();
-                model.iridescence_idx          = _get_texture_id(refs, index);
-                _try_create_texture_transform(iridescenceTexture, index);
-            }
-            if (iridescence->second.Has("iridescenceIor"))
-            {
-                const auto& iridescence_ior = iridescence->second.Get("iridescenceIor");
-                model.iridescence_ior       = iridescence_ior.GetNumberAsDouble();
-            }
-            if (iridescence->second.Has("iridescenceThicknessMaximum"))
-            {
-                const auto& iridescenceThicknessMaximum = iridescence->second.Get("iridescenceThicknessMaximum");
-                model.iridescence_thick_max             = iridescenceThicknessMaximum.GetNumberAsDouble();
-            }
-            if (iridescence->second.Has("iridescenceThicknessMinimum"))
-            {
-                const auto& iridescenceThicknessMinimum = iridescence->second.Get("iridescenceThicknessMinimum");
-                model.iridescence_thick_min             = iridescenceThicknessMinimum.GetNumberAsDouble();
-            }
-            if (iridescence->second.Has("iridescenceThicknessTexture"))
-            {
-                const auto& iridescenceThicknessTexture = iridescence->second.Get("iridescenceThicknessTexture");
-                auto        index                       = iridescenceThicknessTexture.Get("index").GetNumberAsInt();
-                model.iridescence_thick_idx             = _get_texture_id(refs, index);
-                _try_create_texture_transform(iridescenceThicknessTexture, index);
-            }
-        }
-
-        const auto& transmission = exts.find("KHR_materials_transmission");
-        if (transmission != exts.end())
-        {
-            model.use_transmission         = true;
-            const auto& transmissionFactor = transmission->second.Get("transmissionFactor");
-
-            const auto& value = transmissionFactor.GetNumberAsDouble();
-            material->alpha   = value;
-            // TODO: test code, complete it later
-            material->alpha_idx = _get_texture_id(refs, mat.pbrMetallicRoughness.baseColorTexture.index);
-            model.transmission  = transmissionFactor.GetNumberAsDouble();
-            if (transmission->second.Has("transmissionTexture"))
-            {
-                const auto& transmissionTexture = transmission->second.Get("transmissionTexture");
-                auto        index               = transmissionTexture.Get("index").GetNumberAsInt();
-                model.transmission_idx          = _get_texture_id(refs, index);
-                _try_create_texture_transform(transmissionTexture, index);
-            }
-
-            const auto& volumeExt = exts.find("KHR_materials_volume");
-            if (volumeExt != exts.end())
-            {
-                const auto& thicknessFactor = volumeExt->second.Get("thicknessFactor");
-                model.thickness             = thicknessFactor.GetNumberAsDouble();
-
-                if (volumeExt->second.Has("thicknessTexture"))
-                {
-                    const auto& thicknessTexture = volumeExt->second.Get("thicknessTexture");
-                    auto        index            = thicknessTexture.Get("index").GetNumberAsInt();
-                    model.thickness_idx          = _get_texture_id(refs, index);
-                    _try_create_texture_transform(thicknessTexture, index);
-                }
-
-                if (volumeExt->second.Has("attenuationDistance"))
-                {
-                    const auto& attenuation_distance = volumeExt->second.Get("attenuationDistance");
-                    model.attenuation_distance       = attenuation_distance.GetNumberAsDouble();
-                }
-
-                if (volumeExt->second.Has("attenuationColor"))
-                {
-                    const auto& attenuation_color = volumeExt->second.Get("attenuationColor");
-                    model.attenuation_color       = acre::math::float3(attenuation_color.Get(0).GetNumberAsDouble(),
-                                                                       attenuation_color.Get(1).GetNumberAsDouble(),
-                                                                       attenuation_color.Get(2).GetNumberAsDouble());
-                }
-            }
+            material->type  = acre::MaterialModel::mStandard;
+            material->model = acre::StandardModel();
+            _config_standard_model(std::get<acre::StandardModel>(material->model), material->alpha, material->alpha_idx, refs, mat);
         }
 
         if (mat.alphaMode == "OPAQUE" || mat.alphaMode == "MASK")
-        {
             material->alpha = 1.0f;
-        }
 
-        material->model = model;
         m_scene->update(materialR, std::move(refs));
     }
 }
@@ -994,4 +817,239 @@ acre::MaterialID GLTFLoader::_get_material_id(uint32_t uuid)
 acre::SamplerID GLTFLoader::_get_sampler_id(std::unordered_set<acre::Resource*>& refs, uint32_t uuid)
 {
     return _get_sampler(refs, uuid)->id<acre::SamplerID>();
+}
+
+void GLTFLoader::_config_standard_model(acre::StandardModel& model, float& alpha, acre::TextureID& alpha_idx, std::unordered_set<acre::Resource*>& refs, const tinygltf::Material& mat)
+{
+    auto base_color      = vec4ToFloat4(mat.pbrMetallicRoughness.baseColorFactor);
+    model.base_color     = base_color.xyz();
+    alpha                = base_color.w;
+    model.base_color_idx = _get_texture_id(refs, mat.pbrMetallicRoughness.baseColorTexture.index);
+    model.roughness      = mat.pbrMetallicRoughness.roughnessFactor;
+    model.metallic       = mat.pbrMetallicRoughness.metallicFactor;
+    model.metalrough_idx = _get_texture_id(refs, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+    model.normal_idx     = _get_texture_id(refs, mat.normalTexture.index);
+    model.emission_idx   = _get_texture_id(refs, mat.emissiveTexture.index);
+    model.emission       = vec3ToFloat3(mat.emissiveFactor);
+
+    _create_texture_transform(mat.pbrMetallicRoughness.baseColorTexture.extensions, mat.pbrMetallicRoughness.baseColorTexture.index);
+    _create_texture_transform(mat.pbrMetallicRoughness.metallicRoughnessTexture.extensions, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+    _create_texture_transform(mat.normalTexture.extensions, mat.normalTexture.index);
+    _create_texture_transform(mat.emissiveTexture.extensions, mat.emissiveTexture.index);
+
+    const auto& exts = mat.extensions;
+    if (exts.find("KHR_materials_ior") != exts.end())
+    {
+        const auto& ior = exts.find("KHR_materials_ior");
+        model.ior       = ior->second.Get("ior").GetNumberAsDouble();
+    }
+
+    if (exts.find("KHR_materials_clearcoat") != exts.end())
+    {
+        model.use_clearcoat   = true;
+        const auto& clearcoat = exts.find("KHR_materials_clearcoat");
+
+        const auto& clearcoatFactor          = clearcoat->second.Get("clearcoatFactor");
+        model.clearcoat                      = clearcoatFactor.GetNumberAsDouble();
+        const auto& clearcoatRoughnessFactor = clearcoat->second.Get("clearcoatRoughnessFactor");
+        model.clearcoat_rough                = clearcoatRoughnessFactor.GetNumberAsDouble();
+        if (clearcoat->second.Has("clearcoatTexture"))
+        {
+            const auto& clearcoatTexture = clearcoat->second.Get("clearcoatTexture");
+            auto        index            = clearcoatTexture.Get("index").GetNumberAsInt();
+            model.clearcoat_idx          = _get_texture_id(refs, index);
+            _try_create_texture_transform(clearcoatTexture, index);
+        }
+        if (clearcoat->second.Has("clearcoatRoughnessTexture"))
+        {
+            const auto& clearcoatRoughnessTexture = clearcoat->second.Get("clearcoatRoughnessTexture");
+            auto        index                     = clearcoatRoughnessTexture.Get("index").GetNumberAsInt();
+            model.clearcoat_rough_idx             = _get_texture_id(refs, index);
+            _try_create_texture_transform(clearcoatRoughnessTexture, index);
+        }
+        if (clearcoat->second.Has("clearcoatNormalTexture"))
+        {
+            const auto& clearcoatNormalTexture = clearcoat->second.Get("clearcoatNormalTexture");
+            auto        index                  = clearcoatNormalTexture.Get("index").GetNumberAsInt();
+            model.clearcoat_normal_idx         = _get_texture_id(refs, index);
+            _try_create_texture_transform(clearcoatNormalTexture, index);
+        }
+    }
+
+    if (exts.find("KHR_materials_sheen") != exts.end())
+    {
+        model.use_sheen   = true;
+        const auto& sheen = exts.find("KHR_materials_sheen");
+
+        const auto& sheenColorFactor     = sheen->second.Get("sheenColorFactor");
+        model.sheen_color                = acre::math::float3(sheenColorFactor.Get(0).GetNumberAsDouble(),
+                                                              sheenColorFactor.Get(1).GetNumberAsDouble(),
+                                                              sheenColorFactor.Get(2).GetNumberAsDouble());
+        const auto& sheenRoughnessFactor = sheen->second.Get("sheenRoughnessFactor");
+        model.sheen_roughness            = sheenRoughnessFactor.GetNumberAsDouble();
+        if (sheen->second.Has("sheenColorTexture"))
+        {
+            const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
+            auto        index             = sheenColorTexture.Get("index").GetNumberAsInt();
+            model.sheen_color_idx         = _get_texture_id(refs, index);
+            _try_create_texture_transform(sheenColorTexture, index);
+        }
+        if (sheen->second.Has("sheenRoughnessTexture"))
+        {
+            const auto& sheenRoughnessTexture = sheen->second.Get("sheenRoughnessTexture");
+            auto        index                 = sheenRoughnessTexture.Get("index").GetNumberAsInt();
+            model.sheen_rough_idx             = _get_texture_id(refs, index);
+            _try_create_texture_transform(sheenRoughnessTexture, index);
+        }
+    }
+
+    if (exts.find("KHR_materials_anisotropy") != exts.end())
+    {
+        model.use_anisotropy   = true;
+        const auto& anisotropy = exts.find("KHR_materials_anisotropy");
+
+        const auto& anisotropyStrength = anisotropy->second.Get("anisotropyStrength");
+        model.anisotropy               = anisotropyStrength.GetNumberAsDouble();
+
+        if (anisotropy->second.Has("anisotropyRotation"))
+        {
+            const auto& anisotropy_rotation = anisotropy->second.Get("anisotropyRotation");
+            model.anisotropy_rotation       = anisotropy_rotation.GetNumberAsDouble();
+        }
+        if (anisotropy->second.Has("anisotropyTexture"))
+        {
+            const auto& anisotropyTexture = anisotropy->second.Get("anisotropyTexture");
+            auto        index             = anisotropyTexture.Get("index").GetNumberAsInt();
+            model.anisotropy_idx          = _get_texture_id(refs, index);
+            _try_create_texture_transform(anisotropyTexture, index);
+        }
+    }
+
+    if (exts.find("KHR_materials_iridescence") != exts.end())
+    {
+        model.use_iridescence   = true;
+        const auto& iridescence = exts.find("KHR_materials_iridescence");
+
+        const auto& iridescenceFactor = iridescence->second.Get("iridescenceFactor");
+        model.iridescence             = iridescenceFactor.GetNumberAsDouble();
+        if (iridescence->second.Has("iridescenceTexture"))
+        {
+            const auto& iridescenceTexture = iridescence->second.Get("iridescenceTexture");
+            auto        index              = iridescenceTexture.Get("index").GetNumberAsInt();
+            model.iridescence_idx          = _get_texture_id(refs, index);
+            _try_create_texture_transform(iridescenceTexture, index);
+        }
+        if (iridescence->second.Has("iridescenceIor"))
+        {
+            const auto& iridescence_ior = iridescence->second.Get("iridescenceIor");
+            model.iridescence_ior       = iridescence_ior.GetNumberAsDouble();
+        }
+        if (iridescence->second.Has("iridescenceThicknessMaximum"))
+        {
+            const auto& iridescenceThicknessMaximum = iridescence->second.Get("iridescenceThicknessMaximum");
+            model.iridescence_thick_max             = iridescenceThicknessMaximum.GetNumberAsDouble();
+        }
+        if (iridescence->second.Has("iridescenceThicknessMinimum"))
+        {
+            const auto& iridescenceThicknessMinimum = iridescence->second.Get("iridescenceThicknessMinimum");
+            model.iridescence_thick_min             = iridescenceThicknessMinimum.GetNumberAsDouble();
+        }
+        if (iridescence->second.Has("iridescenceThicknessTexture"))
+        {
+            const auto& iridescenceThicknessTexture = iridescence->second.Get("iridescenceThicknessTexture");
+            auto        index                       = iridescenceThicknessTexture.Get("index").GetNumberAsInt();
+            model.iridescence_thick_idx             = _get_texture_id(refs, index);
+            _try_create_texture_transform(iridescenceThicknessTexture, index);
+        }
+    }
+
+    const auto& transmission = exts.find("KHR_materials_transmission");
+    if (transmission != exts.end())
+    {
+        model.use_transmission         = true;
+        const auto& transmissionFactor = transmission->second.Get("transmissionFactor");
+
+        const auto& value = transmissionFactor.GetNumberAsDouble();
+        alpha             = value;
+        // TODO: test code, complete it later
+        alpha_idx          = _get_texture_id(refs, mat.pbrMetallicRoughness.baseColorTexture.index);
+        model.transmission = transmissionFactor.GetNumberAsDouble();
+        if (transmission->second.Has("transmissionTexture"))
+        {
+            const auto& transmissionTexture = transmission->second.Get("transmissionTexture");
+            auto        index               = transmissionTexture.Get("index").GetNumberAsInt();
+            model.transmission_idx          = _get_texture_id(refs, index);
+            _try_create_texture_transform(transmissionTexture, index);
+        }
+
+        const auto& volumeExt = exts.find("KHR_materials_volume");
+        if (volumeExt != exts.end())
+        {
+            const auto& thicknessFactor = volumeExt->second.Get("thicknessFactor");
+            model.thickness             = thicknessFactor.GetNumberAsDouble();
+
+            if (volumeExt->second.Has("thicknessTexture"))
+            {
+                const auto& thicknessTexture = volumeExt->second.Get("thicknessTexture");
+                auto        index            = thicknessTexture.Get("index").GetNumberAsInt();
+                model.thickness_idx          = _get_texture_id(refs, index);
+                _try_create_texture_transform(thicknessTexture, index);
+            }
+
+            if (volumeExt->second.Has("attenuationDistance"))
+            {
+                const auto& attenuation_distance = volumeExt->second.Get("attenuationDistance");
+                model.attenuation_distance       = attenuation_distance.GetNumberAsDouble();
+            }
+
+            if (volumeExt->second.Has("attenuationColor"))
+            {
+                const auto& attenuation_color = volumeExt->second.Get("attenuationColor");
+                model.attenuation_color       = acre::math::float3(attenuation_color.Get(0).GetNumberAsDouble(),
+                                                                   attenuation_color.Get(1).GetNumberAsDouble(),
+                                                                   attenuation_color.Get(2).GetNumberAsDouble());
+            }
+        }
+    }
+}
+
+void GLTFLoader::_config_dwafabric_model(acre::DwaFabric& model, float& alpha, acre::TextureID& alpha_idx, std::unordered_set<acre::Resource*>& refs, const tinygltf::Material& mat)
+{
+    auto base_color      = vec4ToFloat4(mat.pbrMetallicRoughness.baseColorFactor);
+    model.warp_color     = base_color.xyz();
+    alpha                = base_color.w;
+    model.warp_color_idx = _get_texture_id(refs, mat.pbrMetallicRoughness.baseColorTexture.index);
+    model.warp_rough     = mat.pbrMetallicRoughness.roughnessFactor;
+    model.warp_rough_idx = _get_texture_id(refs, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+
+    _create_texture_transform(mat.pbrMetallicRoughness.baseColorTexture.extensions, mat.pbrMetallicRoughness.baseColorTexture.index);
+    _create_texture_transform(mat.pbrMetallicRoughness.metallicRoughnessTexture.extensions, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+
+    const auto& exts = mat.extensions;
+    if (exts.find("KHR_materials_sheen") != exts.end())
+    {
+        model.use_independent_weft = true;
+        const auto& sheen          = exts.find("KHR_materials_sheen");
+
+        const auto& sheenColorFactor     = sheen->second.Get("sheenColorFactor");
+        model.weft_color                 = acre::math::float3(sheenColorFactor.Get(0).GetNumberAsDouble(),
+                                                              sheenColorFactor.Get(1).GetNumberAsDouble(),
+                                                              sheenColorFactor.Get(2).GetNumberAsDouble());
+        const auto& sheenRoughnessFactor = sheen->second.Get("sheenRoughnessFactor");
+        model.weft_rough                 = sheenRoughnessFactor.GetNumberAsDouble();
+        if (sheen->second.Has("sheenColorTexture"))
+        {
+            const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
+            auto        index             = sheenColorTexture.Get("index").GetNumberAsInt();
+            model.weft_color_idx          = _get_texture_id(refs, index);
+            _try_create_texture_transform(sheenColorTexture, index);
+        }
+        if (sheen->second.Has("sheenRoughnessTexture"))
+        {
+            const auto& sheenRoughnessTexture = sheen->second.Get("sheenRoughnessTexture");
+            auto        index                 = sheenRoughnessTexture.Get("index").GetNumberAsInt();
+            model.weft_rough_idx              = _get_texture_id(refs, index);
+            _try_create_texture_transform(sheenRoughnessTexture, index);
+        }
+    }
 }
