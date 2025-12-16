@@ -886,7 +886,7 @@ void GLTFLoader::_config_standard_model(acre::StandardModel& model, float& alpha
                                                               sheenColorFactor.Get(1).GetNumberAsDouble(),
                                                               sheenColorFactor.Get(2).GetNumberAsDouble());
         const auto& sheenRoughnessFactor = sheen->second.Get("sheenRoughnessFactor");
-        model.sheen_roughness            = sheenRoughnessFactor.GetNumberAsDouble();
+        model.sheen_rough                = sheenRoughnessFactor.GetNumberAsDouble();
         if (sheen->second.Has("sheenColorTexture"))
         {
             const auto& sheenColorTexture = sheen->second.Get("sheenColorTexture");
