@@ -343,10 +343,6 @@ void RenderWindow::start_record(const std::string& fileName)
     if (!m_recorder) m_recorder = new RecorderController();
     if (m_recorder->is_recording()) return;
 
-    // Get native device pointer from renderer
-    void* nativeDevice = nullptr;
-    m_renderer->get_native_device(&nativeDevice);
-
     uint32_t w = 0, h = 0;
     if (m_swapchain)
     {
@@ -359,7 +355,7 @@ void RenderWindow::start_record(const std::string& fileName)
         h = height();
     }
 
-    if (!m_recorder->start(fileName, nativeDevice, w, h))
+    if (!m_recorder->start(fileName, m_device_mgr->native_device(), w, h))
     {
         std::cout << "RenderWindow: failed to start recorder." << std::endl;
         return;
@@ -371,11 +367,7 @@ void RenderWindow::record_frame()
     if (!m_recorder) return;
     if (!m_recorder->is_recording()) return;
 
-    void* nativeTarget = nullptr;
-    m_renderer->get_native_target(&nativeTarget);
-    if (!nativeTarget) return;
-
-    m_recorder->submit_frame(nativeTarget);
+    m_recorder->submit_frame(m_renderer->native_target());
 }
 
 void RenderWindow::end_record()
