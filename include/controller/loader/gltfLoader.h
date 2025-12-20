@@ -61,4 +61,5 @@ private:
 
     void _config_standard_model(acre::StandardModel& model, float& alpha, acre::TextureID& alpha_idx, std::unordered_set<acre::Resource*>& refs, const tinygltf::Material& mat);
     void _config_dwafabric_model(acre::DwaFabric& model, float& alpha, acre::TextureID& alpha_idx, std::unordered_set<acre::Resource*>& refs, const tinygltf::Material& mat);
+    void _config_mscloth_model(acre::MSCloth& model, float& alpha, acre::TextureID& alpha_idx, std::unordered_set<acre::Resource*>& refs, const tinygltf::Material& mat);
 };

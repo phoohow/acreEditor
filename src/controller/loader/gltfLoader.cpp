@@ -5,6 +5,7 @@
 #include <tinygltf/tiny_gltf.h>
 
 #define REUSE_GLTF_SHEEN_AS_DWAFABRIC 0
+#define REUSE_GLTF_MTL_AS_MSCLOTH     0
 
 template <typename T>
 static auto vec3ToFloat3(T& vec)
@@ -262,11 +263,20 @@ void GLTFLoader::_create_material()
         }
         else
 #endif
+
+#if REUSE_GLTF_MTL_AS_MSCLOTH
+        {
+            material->type  = acre::MaterialModel::mMSCloth;
+            material->model = acre::MSCloth();
+            _config_mscloth_model(std::get<acre::MSCloth>(material->model), material->alpha, material->alpha_idx, refs, mat);
+        }
+#else
         {
             material->type  = acre::MaterialModel::mStandard;
             material->model = acre::StandardModel();
             _config_standard_model(std::get<acre::StandardModel>(material->model), material->alpha, material->alpha_idx, refs, mat);
         }
+#endif
 
         if (mat.alphaMode == "OPAQUE" || mat.alphaMode == "MASK")
             material->alpha = 1.0f;
@@ -827,7 +837,7 @@ void GLTFLoader::_config_standard_model(acre::StandardModel& model, float& alpha
     model.base_color_idx = _get_texture_id(refs, mat.pbrMetallicRoughness.baseColorTexture.index);
     model.roughness      = mat.pbrMetallicRoughness.roughnessFactor;
     model.metallic       = mat.pbrMetallicRoughness.metallicFactor;
-    model.metalrough_idx = _get_texture_id(refs, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+    model.roughness_idx  = _get_texture_id(refs, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
     model.normal_idx     = _get_texture_id(refs, mat.normalTexture.index);
     model.emission_idx   = _get_texture_id(refs, mat.emissiveTexture.index);
     model.emission       = vec3ToFloat3(mat.emissiveFactor);

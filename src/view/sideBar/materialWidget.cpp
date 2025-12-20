@@ -189,7 +189,7 @@ void MaterialWidget::update_properties()
     uint32_t           base_color_idx;
     float              roughness;
     float              metallic;
-    uint32_t           metalrough_idx;
+    uint32_t           roughness_idx;
     switch (m_material->type)
     {
         case acre::MaterialModel::mStandard:
@@ -199,7 +199,7 @@ void MaterialWidget::update_properties()
             base_color_idx = model.base_color_idx.idx;
             roughness      = model.roughness;
             metallic       = model.metallic;
-            metalrough_idx = model.metalrough_idx.idx;
+            roughness_idx = model.roughness_idx.idx;
             break;
         }
     }
@@ -216,8 +216,8 @@ void MaterialWidget::update_properties()
     else
         m_line_edit_basecolor_map->setText("-1");
 
-    if (metalrough_idx != -1)
-        m_line_edit_metal_rough_map->setText(QString::number(metalrough_idx));
+    if (roughness_idx != -1)
+        m_line_edit_metal_rough_map->setText(QString::number(roughness_idx));
     else
         m_line_edit_metal_rough_map->setText("-1");
 }
@@ -257,7 +257,7 @@ void MaterialWidget::_on_update_normal_map()
     if (!m_material) return;
     auto  value = m_line_edit_normal_map->text();
     auto& model = std::get<acre::StandardModel>(m_material->model);
-    // model.normal_map_scale    = 1.0f;
+    // model.normal_scale    = 1.0f;
     model.normal_idx.idx = value.toFloat();
 
     m_scene->update(m_materialR);
@@ -374,7 +374,7 @@ void MaterialWidget::_on_update_metal_rough_map()
         case acre::MaterialModel::mStandard:
         {
             auto& model              = std::get<acre::StandardModel>(m_material->model);
-            model.metalrough_idx.idx = value.toFloat();
+            model.roughness_idx.idx = value.toFloat();
             break;
         }
     }
