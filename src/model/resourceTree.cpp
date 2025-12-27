@@ -118,6 +118,15 @@ void ResourceTree::clear()
         remove(node);
     }
 
+    // Note: for material variants, may still have mtl not bind!
+    auto& mtl = m_mgrs[index_of_rid<MaterialID>()];
+    while (!mtl.empty())
+    {
+        auto iter = mtl.begin();
+        auto node = iter->second.get();
+        remove(node);
+    }
+
     // Note: some transform maybe not a texture or a entity, but a group of entities
     // so need clear it
     auto& trans = m_mgrs[index_of_rid<TransformID>()];
