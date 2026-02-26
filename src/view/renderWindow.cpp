@@ -20,7 +20,7 @@
 
 static constexpr float  g_pixelRatio  = 1.5f;
 static constexpr float  g_degreeRatio = 180.f;
-static acre::RenderPath g_renderPath  = acre::RenderPath::rRasterGLTF;
+static acre::RenderPath g_renderPath  = acre::RenderPath::rPathGLTF;
 
 template <uint32_t N>
 std::string toNchar(const std::string& str)

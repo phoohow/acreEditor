@@ -854,6 +854,34 @@ void GLTFLoader::_config_standard_model(acre::StandardModel& model, float& alpha
         model.ior       = ior->second.Get("ior").GetNumberAsDouble();
     }
 
+    if (exts.find("KHR_materials_specular") != exts.end())
+    {
+        model.use_specular   = true;
+        const auto& specular = exts.find("KHR_materials_specular");
+
+        const auto& specularFactor = specular->second.Get("specularFactor");
+        model.specular             = specularFactor.GetNumberAsDouble();
+        if (specular->second.Has("specularTexture"))
+        {
+            const auto& specularTexture = specular->second.Get("specularTexture");
+            auto        index           = specularTexture.Get("index").GetNumberAsInt();
+            model.specular_idx          = _get_texture_id(refs, index);
+            _try_create_texture_transform(specularTexture, index);
+        }
+
+        const auto& specularColorFactor = specular->second.Get("specularColorFactor");
+        model.specular_color            = acre::math::float3(specularColorFactor.Get(0).GetNumberAsDouble(),
+                                                             specularColorFactor.Get(1).GetNumberAsDouble(),
+                                                             specularColorFactor.Get(2).GetNumberAsDouble());
+        if (specular->second.Has("specularColorTexture"))
+        {
+            const auto& specularColorTexture = specular->second.Get("specularColorTexture");
+            auto        index                = specularColorTexture.Get("index").GetNumberAsInt();
+            model.specular_color_idx         = _get_texture_id(refs, index);
+            _try_create_texture_transform(specularColorTexture, index);
+        }
+    }
+
     if (exts.find("KHR_materials_clearcoat") != exts.end())
     {
         model.use_clearcoat   = true;
