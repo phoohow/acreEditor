@@ -1,5 +1,6 @@
 set_languages("c++20")
 add_rules("mode.debug", "mode.release")
+add_cxflags("/utf-8")
 
 if is_mode("debug") then
     set_runtimes("MDd")

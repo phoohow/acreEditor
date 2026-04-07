@@ -25,6 +25,11 @@
 #define toMaterialWidget  static_cast<MaterialWidget*>(m_material_widget)
 #define toTransformWidget static_cast<TransformWidget*>(m_transform_widget)
 
+SceneWidget::~SceneWidget()
+{
+    disconnect(m_selector, &QTreeWidget::currentItemChanged, this, &SceneWidget::_on_treeitem_selected);
+}
+
 SceneWidget::SceneWidget(SceneMgr* scene, QWidget* parent) :
     m_scene(scene)
 {

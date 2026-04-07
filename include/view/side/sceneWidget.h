@@ -42,6 +42,8 @@ class SceneWidget : public QWidget
 public:
     explicit SceneWidget(SceneMgr* scene, QWidget* parent = nullptr);
 
+    ~SceneWidget() override;
+
     void set_renderframe_callback(std::function<void()> func);
 
     void on_update();

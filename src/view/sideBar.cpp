@@ -28,9 +28,9 @@ SideBar::SideBar(SceneMgr* scene, QWidget* parent) :
 
 SideBar::~SideBar()
 {
-    delete m_sceneWidget;
-    delete m_configWidget;
-    delete m_layout;
+    // Qt children (m_sceneWidget, m_configWidget, m_selector, m_editor_stack)
+    // and layout (m_layout) are auto-deleted by QObject parent-child mechanism.
+    // Explicit delete would cause double-free since they were created with `this` as parent.
 }
 
 void SideBar::set_renderframe_callback(std::function<void()> func)
